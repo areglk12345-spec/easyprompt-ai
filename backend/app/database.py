@@ -5,8 +5,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./easyprompt.db")
+raw_db_url = os.getenv("DATABASE_URL", "sqlite:///./easyprompt.db")
 
+# Fix URL for Railway's default MySQL and PostgreSQL formats
+if raw_db_url.startswith("postgres://"):
+    raw_db_url = raw_db_url.replace("postgres://", "postgresql+pg8000://", 1)
+elif raw_db_url.startswith("postgresql://"):
+    raw_db_url = raw_db_url.replace("postgresql://", "postgresql+pg8000://", 1)
+elif raw_db_url.startswith("mysql://"):
+    raw_db_url = raw_db_url.replace("mysql://", "mysql+pymysql://", 1)
+
+SQLALCHEMY_DATABASE_URL = raw_db_url
 # สร้าง Engine สำหรับเชื่อมต่อ MySQL
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
