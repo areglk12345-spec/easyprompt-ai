@@ -380,6 +380,23 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                     New Folder
                 </button>
             )}
+
+            {isLoggedIn && (
+                <div className="mx-2 mt-4 p-3 bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/30 rounded-xl flex items-center justify-between">
+                    <div>
+                        <div className="text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 mb-0.5">
+                            My Credits
+                        </div>
+                        <div className="text-lg font-black text-indigo-600 dark:text-indigo-400 leading-none">
+                            {user?.credits ?? 0}
+                            <span className="text-xs font-semibold text-slate-400 ml-1">💎</span>
+                        </div>
+                    </div>
+                    <Link href="/pricing" className="bg-indigo-600 hover:bg-indigo-700 text-white p-1.5 rounded-lg transition-colors shadow-sm" title="Top Up">
+                        <span className="material-symbols-outlined text-sm block">add</span>
+                    </Link>
+                </div>
+            )}
             {isLoggedIn && user?.role === 'admin' && (
                 <div className="mt-4 mb-2 mx-2">
                     <Link 

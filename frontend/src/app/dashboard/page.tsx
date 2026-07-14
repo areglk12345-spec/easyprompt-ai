@@ -7,8 +7,8 @@ import UserMenu from '../../components/UserMenu';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFontSize } from '../../context/FontSizeContext';
-import { BarChart3, TrendingUp, AlertCircle, Lightbulb, Users, MessageSquare, Files } from 'lucide-react';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart3, TrendingUp, AlertCircle, Lightbulb, Users, MessageSquare, Files, CreditCard, Crown } from 'lucide-react';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
 
@@ -101,6 +101,54 @@ export default function DashboardPage() {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Credit Stats (Admin Only) */}
+                                {user?.role === 'admin' && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className={statCardStyle}>
+                                            <div className="w-14 h-14 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                                <CreditCard className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Total Credits in System</div>
+                                                <div className="text-3xl font-black text-slate-800 dark:text-white">{stats?.total_credits?.toLocaleString() || 0} 💎</div>
+                                            </div>
+                                        </div>
+                                        <div className={statCardStyle}>
+                                            <div className="w-14 h-14 rounded-full bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
+                                                <Crown className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Premium Users</div>
+                                                <div className="text-3xl font-black text-slate-800 dark:text-white">{stats?.premium_users || 0}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Daily Usage Line Chart */}
+                                {stats?.line_chart && stats.line_chart.length > 0 && (
+                                    <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6">📈 การใช้งานรายวัน (7 วันล่าสุด)</h3>
+                                        <div className="h-64 w-full">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <AreaChart data={stats.line_chart} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                                    <defs>
+                                                        <linearGradient id="colorPrompts" x1="0" y1="0" x2="0" y2="1">
+                                                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                                                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                                                        </linearGradient>
+                                                    </defs>
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                                    <XAxis dataKey="date" axisLine={false} tickLine={false} />
+                                                    <YAxis axisLine={false} tickLine={false} />
+                                                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                                    <Area type="monotone" dataKey="prompts" stroke="#6366f1" strokeWidth={3} fill="url(#colorPrompts)" name="Prompts" />
+                                                </AreaChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Charts Row */}
                                 {(stats?.pie_chart || stats?.bar_chart) && (

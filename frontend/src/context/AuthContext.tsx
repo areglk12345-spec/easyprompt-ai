@@ -12,6 +12,8 @@ type User = {
     organization?: string;
     default_tone?: string;
     is_2fa_enabled?: boolean;
+    credits?: number;
+    is_premium?: boolean;
 };
 
 type AuthContextType = {

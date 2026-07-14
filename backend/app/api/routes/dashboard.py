@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, cast, Date
 from app.database import get_db
 from app import models, auth
 from app.services.ai_service import generate_json_content, MODEL_NAME
 from app.core.config import TREND_SYSTEM_PROMPT
+from datetime import datetime, timedelta, timezone
 
 router = APIRouter()
 
@@ -36,10 +37,14 @@ def get_dashboard_trends(current_user: models.User = Depends(auth.get_required_u
 
 @router.get("/stats")
 def get_dashboard_stats(current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db)):
-    if current_user.role == "admin":
+    is_admin = current_user.role == "admin"
+    
+    if is_admin:
         total_prompts = db.query(models.ChatHistory).count()
         total_templates = db.query(models.PromptTemplate).count()
         total_users = db.query(models.User).count()
+        total_credits_in_system = db.query(func.sum(models.User.credits)).scalar() or 0
+        premium_users = db.query(models.User).filter(models.User.is_premium == True).count()
         
         # Data for Pie Chart (Templates by Category)
         templates_by_category = db.query(
@@ -53,10 +58,23 @@ def get_dashboard_stats(current_user: models.User = Depends(auth.get_required_us
             func.count(models.ChatHistory.id).label('count')
         ).group_by(models.ChatHistory.tone).all()
         
+        # Daily usage for last 7 days
+        seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
+        daily_usage = db.query(
+            cast(models.ChatHistory.created_at, Date).label('day'),
+            func.count(models.ChatHistory.id).label('count')
+        ).filter(
+            models.ChatHistory.created_at >= seven_days_ago
+        ).group_by(
+            cast(models.ChatHistory.created_at, Date)
+        ).order_by(cast(models.ChatHistory.created_at, Date)).all()
+        
     else:
         total_prompts = db.query(models.ChatHistory).filter(models.ChatHistory.user_id == current_user.id).count()
         total_templates = db.query(models.PromptTemplate).filter(models.PromptTemplate.user_id == current_user.id).count()
         total_users = 1
+        total_credits_in_system = current_user.credits or 0
+        premium_users = 0
         
         templates_by_category = db.query(
             models.PromptTemplate.category, 
@@ -68,13 +86,28 @@ def get_dashboard_stats(current_user: models.User = Depends(auth.get_required_us
             func.count(models.ChatHistory.id).label('count')
         ).filter(models.ChatHistory.user_id == current_user.id).group_by(models.ChatHistory.tone).all()
         
+        seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
+        daily_usage = db.query(
+            cast(models.ChatHistory.created_at, Date).label('day'),
+            func.count(models.ChatHistory.id).label('count')
+        ).filter(
+            models.ChatHistory.user_id == current_user.id,
+            models.ChatHistory.created_at >= seven_days_ago
+        ).group_by(
+            cast(models.ChatHistory.created_at, Date)
+        ).order_by(cast(models.ChatHistory.created_at, Date)).all()
+        
     pie_data = [{"name": t[0] or "ไม่มีหมวดหมู่", "value": t[1]} for t in templates_by_category]
     bar_data = [{"name": t[0] or "ทั่วไป", "prompts": t[1]} for t in prompts_by_tone]
+    line_data = [{"date": str(d[0]), "prompts": d[1]} for d in daily_usage]
         
     return {
         "total_prompts": total_prompts,
         "total_templates": total_templates,
         "total_users": total_users,
+        "total_credits": total_credits_in_system,
+        "premium_users": premium_users,
         "pie_chart": pie_data,
-        "bar_chart": bar_data
+        "bar_chart": bar_data,
+        "line_chart": line_data
     }

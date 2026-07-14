@@ -9,7 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 
 interface AdminSidebarProps {
-    activePage?: 'dashboard' | 'users' | 'settings' | 'audit' | 'variables';
+    activePage?: 'dashboard' | 'users' | 'settings' | 'audit' | 'variables' | 'templates';
 }
 
 export default function AdminSidebar({ activePage }: AdminSidebarProps) {
@@ -60,6 +60,12 @@ export default function AdminSidebar({ activePage }: AdminSidebarProps) {
                 <Link href="/admin?tab=audit" className={activePage === 'audit' ? activeClass : inactiveClass}>
                     <span className="material-symbols-outlined">history</span>
                     <span className="text-[15px]">Audit Logs</span>
+                </Link>
+                
+                <div className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-6 mb-4 px-2 uppercase tracking-wider">Content</div>
+                <Link href="/admin?tab=templates" className={activePage === 'templates' ? activeClass : inactiveClass}>
+                    <span className="material-symbols-outlined">auto_awesome</span>
+                    <span className="text-[15px]">จัดการ Template</span>
                 </Link>
             </nav>
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.database import get_db
 from app import models, auth, schemas
 from app.api.routes.audit import create_audit_log
@@ -179,3 +179,84 @@ def delete_prompt_variable(
                      ip_address=request.client.host if request.client else None)
 
     return {"status": "success", "message": f"ลบตัวแปร '{deleted_key}' เรียบร้อยแล้ว"}
+
+
+# --- Feature 4: Admin Credit Management ---
+
+class CreditAdjust(schemas.BaseModel):
+    amount: int
+    reason: Optional[str] = "Admin adjustment"
+
+@router.put("/users/{user_id}/credits")
+def adjust_user_credits(
+    user_id: int,
+    payload: CreditAdjust,
+    request: Request,
+    current_admin: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="ไม่พบผู้ใช้งานที่ระบุ")
+    if user.organization != current_admin.organization:
+        raise HTTPException(status_code=403, detail="ไม่สามารถแก้ไขเครดิตผู้ใช้นอกองค์กรได้")
+
+    old_credits = user.credits or 0
+    user.credits = old_credits + payload.amount
+    if user.credits < 0:
+        user.credits = 0
+    db.commit()
+    db.refresh(user)
+
+    create_audit_log(db, current_admin.id, "credit_adjust", target_user_id=user.id,
+                     details={"old_credits": old_credits, "new_credits": user.credits, "amount": payload.amount, "reason": payload.reason},
+                     ip_address=request.client.host if request.client else None)
+
+    return {"status": "success", "new_credits": user.credits, "message": f"ปรับเครดิตเรียบร้อย (เดิม {old_credits} → ใหม่ {user.credits})"}
+
+
+# --- Feature 5: Template Recommendation Toggle ---
+
+@router.put("/templates/{template_id}/recommend")
+def toggle_template_recommendation(
+    template_id: int,
+    request: Request,
+    current_admin: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    template = db.query(models.PromptTemplate).filter(models.PromptTemplate.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="ไม่พบเทมเพลตที่ระบุ")
+
+    template.is_recommended = not template.is_recommended
+    db.commit()
+    db.refresh(template)
+
+    create_audit_log(db, current_admin.id, "template_recommend_toggle",
+                     details={"template_id": template_id, "is_recommended": template.is_recommended},
+                     ip_address=request.client.host if request.client else None)
+
+    return {"status": "success", "is_recommended": template.is_recommended}
+
+@router.get("/templates", response_model=List[schemas.TemplateResponse])
+def list_all_templates_admin(
+    current_admin: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """List all templates for admin management."""
+    templates = db.query(models.PromptTemplate).order_by(models.PromptTemplate.id.desc()).all()
+    results = []
+    for tpl in templates:
+        results.append({
+            "id": tpl.id,
+            "title": tpl.title,
+            "prompt_text": tpl.prompt_text,
+            "category": tpl.category,
+            "is_public": tpl.is_public,
+            "is_recommended": tpl.is_recommended,
+            "user_id": tpl.user_id,
+            "organization": tpl.organization,
+            "is_favorite": False,
+            "likes_count": len(tpl.favorited_by)
+        })
+    return results

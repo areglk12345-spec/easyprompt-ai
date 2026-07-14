@@ -33,6 +33,7 @@ class TemplateResponse(BaseModel):
     prompt_text: str
     category: Optional[str] = "ทั่วไป"
     is_public: Optional[bool] = False
+    is_recommended: Optional[bool] = False
     user_id: Optional[int] = None
     organization: Optional[str] = "ทั่วไป"
     is_favorite: Optional[bool] = False
@@ -79,6 +80,8 @@ class UserProfile(BaseModel):
     organization: Optional[str] = "ทั่วไป"
     default_tone: Optional[str] = "ทั่วไป"
     is_2fa_enabled: Optional[bool] = False
+    credits: Optional[int] = 100
+    is_premium: Optional[bool] = False
     class Config:
         from_attributes = True
 

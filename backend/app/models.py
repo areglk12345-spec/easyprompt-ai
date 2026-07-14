@@ -22,8 +22,9 @@ class User(Base):
     default_tone = Column(String(50), default="ทั่วไป")
     totp_secret = Column(String(64), nullable=True)  # TOTP secret for 2FA
     is_2fa_enabled = Column(Boolean, default=False)   # Whether 2FA is active
+    credits = Column(Integer, default=100) # AI Credits
+    is_premium = Column(Boolean, default=False) # Subscription tier
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-
     chats = relationship("ChatHistory", back_populates="user")
     templates = relationship("PromptTemplate", back_populates="creator")
     favorite_templates = relationship("PromptTemplate", secondary=user_favorites, back_populates="favorited_by")
@@ -70,6 +71,7 @@ class PromptTemplate(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     user_id = Column(Integer, ForeignKey("app_users.id"), nullable=True)
     is_public = Column(Boolean, default=False)
+    is_recommended = Column(Boolean, default=False)
     organization = Column(String(100), default="ทั่วไป")
 
     creator = relationship("User", back_populates="templates")

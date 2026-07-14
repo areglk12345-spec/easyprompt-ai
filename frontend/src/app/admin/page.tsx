@@ -14,6 +14,8 @@ type UserProfile = {
     full_name: string | null;
     role: string;
     organization: string | null;
+    credits?: number;
+    is_premium?: boolean;
 };
 
 type AuditLogEntry = {
@@ -34,6 +36,17 @@ type PromptVariable = {
     var_key: string;
     var_value: string;
     created_at: string;
+};
+
+type AdminTemplate = {
+    id: number;
+    title: string;
+    prompt_text: string;
+    category: string;
+    is_public: boolean;
+    is_recommended: boolean;
+    organization: string;
+    likes_count: number;
 };
 
 function AdminPageContent() {
@@ -60,7 +73,14 @@ function AdminPageContent() {
     const [newVarKey, setNewVarKey] = useState('');
     const [newVarValue, setNewVarValue] = useState('');
 
+    // Admin Templates state
+    const [adminTemplates, setAdminTemplates] = useState<AdminTemplate[]>([]);
+    const [templatesLoading, setTemplatesLoading] = useState(false);
 
+    // Credit adjustment state
+    const [creditModal, setCreditModal] = useState<{userId: number; username: string} | null>(null);
+    const [creditAmount, setCreditAmount] = useState(0);
+    const [creditReason, setCreditReason] = useState('');
 
     const fetchOrgSettings = useCallback(async () => {
         setIsLoading(true);
@@ -210,6 +230,62 @@ function AdminPageContent() {
         }
     }, [authFetch]);
 
+    // --- Admin Templates ---
+    const fetchAdminTemplates = useCallback(async () => {
+        setTemplatesLoading(true);
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            const response = await authFetch(`${API_URL}/api/admin/templates`);
+            if (response.ok) {
+                const data = await response.json();
+                setAdminTemplates(data);
+            }
+        } catch (err) {
+            console.error("Admin Templates Error:", err);
+        } finally {
+            setTemplatesLoading(false);
+        }
+    }, [authFetch]);
+
+    const handleToggleRecommend = async (templateId: number) => {
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            const response = await authFetch(`${API_URL}/api/admin/templates/${templateId}/recommend`, { method: 'PUT' });
+            if (response.ok) {
+                const data = await response.json();
+                setAdminTemplates(prev => prev.map(t => t.id === templateId ? { ...t, is_recommended: data.is_recommended } : t));
+            }
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
+    // --- Credit Adjustment ---
+    const handleCreditAdjust = async () => {
+        if (!creditModal || creditAmount === 0) return;
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            const response = await authFetch(`${API_URL}/api/admin/users/${creditModal.userId}/credits`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: creditAmount, reason: creditReason || 'Admin adjustment' })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setUsers(prev => prev.map(u => u.id === creditModal.userId ? { ...u, credits: data.new_credits } : u));
+                alert(data.message);
+                setCreditModal(null);
+                setCreditAmount(0);
+                setCreditReason('');
+            } else {
+                const errData = await response.json().catch(() => ({}));
+                alert(errData.detail || 'เกิดข้อผิดพลาด');
+            }
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
     useEffect(() => {
         if (authLoading) return;
         if (!isLoggedIn || !user) {
@@ -229,8 +305,10 @@ function AdminPageContent() {
             fetchAuditLogs();
         } else if (activeTab === 'variables') {
             fetchPromptVars();
+        } else if (activeTab === 'templates') {
+            fetchAdminTemplates();
         }
-    }, [isLoggedIn, authLoading, user, router, activeTab, fetchUsers, fetchOrgSettings, fetchAuditLogs, fetchPromptVars]);
+    }, [isLoggedIn, authLoading, user, router, activeTab, fetchUsers, fetchOrgSettings, fetchAuditLogs, fetchPromptVars, fetchAdminTemplates]);
     const handleAddVariable = async () => {
         if (!newVarKey.trim() || !newVarValue.trim()) {
             alert('กรุณากรอกทั้งชื่อตัวแปรและค่า');
@@ -336,16 +414,17 @@ function AdminPageContent() {
                                         <table className="w-full text-left border-collapse">
                                             <thead>
                                                 <tr className="border-b border-slate-200 dark:border-slate-700 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                                                    <th className="pb-3 px-4">ชื่อผู้ใช้งาน (Username)</th>
-                                                    <th className="pb-3 px-4">ชื่อ-สกุล (Full Name)</th>
-                                                    <th className="pb-3 px-4">บทบาท (Role)</th>
-                                                    <th className="pb-3 px-4 text-right">การจัดการ (Actions)</th>
+                                                    <th className="pb-3 px-4">ชื่อผู้ใช้งาน</th>
+                                                    <th className="pb-3 px-4">ชื่อ-สกุล</th>
+                                                    <th className="pb-3 px-4">บทบาท</th>
+                                                    <th className="pb-3 px-4 text-center">เครดิต 💎</th>
+                                                    <th className="pb-3 px-4 text-right">การจัดการ</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="text-sm font-semibold text-slate-700 dark:text-slate-300 divide-y divide-slate-100 dark:divide-slate-700/50">
                                                 {users.length === 0 ? (
                                                     <tr>
-                                                        <td colSpan={4} className="text-center py-10 text-slate-400 dark:text-slate-500">ไม่พบข้อมูลผู้ใช้งาน</td>
+                                                        <td colSpan={5} className="text-center py-10 text-slate-400 dark:text-slate-500">ไม่พบข้อมูลผู้ใช้งาน</td>
                                                     </tr>
                                                 ) : (
                                                     users.map((u) => (
@@ -363,7 +442,15 @@ function AdminPageContent() {
                                                                     {u.role.toUpperCase()}
                                                                 </span>
                                                             </td>
-
+                                                            <td className="py-4 px-4 text-center">
+                                                                <span className="font-black text-indigo-600 dark:text-indigo-400">{u.credits ?? 0}</span>
+                                                                <button
+                                                                    onClick={() => setCreditModal({ userId: u.id, username: u.username })}
+                                                                    className="ml-2 px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-700 dark:bg-amber-900/40 dark:hover:bg-amber-800/60 dark:text-amber-300 transition-all"
+                                                                >
+                                                                    ปรับ
+                                                                </button>
+                                                            </td>
                                                             <td className="py-4 px-4 text-right space-x-2">
                                                                 {u.id !== user?.id && (
                                                                     <>
@@ -565,7 +652,67 @@ function AdminPageContent() {
                                 </div>
                             </div>
                         )}
+
+                        {/* Templates Tab */}
+                        {activeTab === 'templates' && (
+                            <div className="space-y-6 animate-slide-up">
+                                <div className="border-b border-slate-200/50 dark:border-slate-700/50 pb-6">
+                                    <h1 className="text-4xl font-extrabold text-slate-800 dark:text-white">จัดการ Template แนะนำ</h1>
+                                    <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1">เลือก Template ที่ต้องการแนะนำให้ผู้ใช้ทุกคน</p>
+                                </div>
+
+                                {templatesLoading ? (
+                                    <div className="text-center py-10 text-slate-400 animate-pulse">กำลังโหลด...</div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {adminTemplates.map(tpl => (
+                                            <div key={tpl.id} className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${tpl.is_recommended ? 'bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/50' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
+                                                <div className="flex-1 min-w-0 pr-4">
+                                                    <div className="flex items-center gap-2">
+                                                        {tpl.is_recommended && <span className="text-amber-500">⭐</span>}
+                                                        <span className="font-bold text-slate-800 dark:text-white truncate">{tpl.title}</span>
+                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">{tpl.category}</span>
+                                                        {tpl.is_public && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">Public</span>}
+                                                    </div>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">{tpl.prompt_text}</p>
+                                                </div>
+                                                <div className="flex items-center gap-3 shrink-0">
+                                                    <span className="text-xs text-slate-400">❤️ {tpl.likes_count}</span>
+                                                    <button
+                                                        onClick={() => handleToggleRecommend(tpl.id)}
+                                                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${tpl.is_recommended ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-300'}`}
+                                                    >
+                                                        {tpl.is_recommended ? '⭐ แนะนำอยู่' : 'ตั้งเป็นแนะนำ'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
+
+                    {/* Credit Adjustment Modal */}
+                    {creditModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setCreditModal(null)}>
+                            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 space-y-4 border border-slate-200 dark:border-slate-700" onClick={e => e.stopPropagation()}>
+                                <h3 className="text-xl font-bold text-slate-800 dark:text-white">💎 ปรับเครดิต: {creditModal.username}</h3>
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">จำนวน (+ เพิ่ม / - ลด)</label>
+                                    <input type="number" value={creditAmount} onChange={e => setCreditAmount(Number(e.target.value))} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white font-bold text-lg outline-none focus:border-indigo-500" />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">เหตุผล (Optional)</label>
+                                    <input type="text" value={creditReason} onChange={e => setCreditReason(e.target.value)} placeholder="เช่น Bonus, Refund" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white outline-none focus:border-indigo-500" />
+                                </div>
+                                <div className="flex gap-3">
+                                    <button onClick={() => setCreditModal(null)} className="flex-1 py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold transition-all hover:bg-slate-200 dark:hover:bg-slate-600">ยกเลิก</button>
+                                    <button onClick={handleCreditAdjust} className="flex-1 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm transition-all">บันทึก</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </main>
             </div>
         </div>

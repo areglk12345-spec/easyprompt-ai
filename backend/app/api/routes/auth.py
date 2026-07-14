@@ -31,7 +31,9 @@ def register_user(payload: UserRegister, request: Request, db: Session = Depends
         password_hash=auth.hash_password(payload.password),
         full_name=payload.full_name,
         role="user",
-        organization=payload.organization or "ทั่วไป"
+        organization=payload.organization or "ทั่วไป",
+        credits=100,
+        is_premium=False
     )
     db.add(new_user)
     db.commit()
@@ -172,7 +174,9 @@ def social_login(payload: SocialLoginRequest, request: Request, db: Session = De
                 password_hash="social_login_no_password",
                 role="user",
                 organization="ทั่วไป",
-                is_2fa_enabled=False
+                is_2fa_enabled=False,
+                credits=100,
+                is_premium=False
             )
             db.add(user)
             db.commit()

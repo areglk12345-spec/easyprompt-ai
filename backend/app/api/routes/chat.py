@@ -50,7 +50,15 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
         if not payload.model and current_user:
             model_to_use = get_org_model(db, current_user.organization)
             
+        cost = 5 if "pro" in model_to_use.lower() else 1
+        
         if current_user:
+            if current_user.credits is None:
+                current_user.credits = 100
+            
+            if current_user.credits < cost:
+                raise HTTPException(status_code=402, detail="เครดิตไม่เพียงพอ กรุณาเติมเครดิตเพื่อใช้งานต่อ")
+                
             # Replace global prompt variables (e.g. {{company_name}} -> actual value)
             org_vars = db.query(models.OrgPromptVariable).filter(
                 models.OrgPromptVariable.org_name == current_user.organization
@@ -79,6 +87,9 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
                         print(f"Error parsing file: {parse_err}")
 
         ai_result = generate_json_content(SYSTEM_PROMPT, contents, model_to_use)
+        
+        if current_user:
+            current_user.credits -= cost
 
         new_chat = models.ChatHistory(
             session_id=payload.session_id or str(uuid.uuid4()),
@@ -137,6 +148,18 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
         model_to_use = payload.model or MODEL_NAME
         if not payload.model and current_user:
             model_to_use = get_org_model(db, current_user.organization)
+            
+        cost = 5 if "pro" in model_to_use.lower() else 1
+        
+        if current_user:
+            if current_user.credits is None:
+                current_user.credits = 100
+                
+            if current_user.credits < cost:
+                raise HTTPException(status_code=402, detail="เครดิตไม่เพียงพอ กรุณาเติมเครดิตเพื่อใช้งานต่อ")
+                
+            current_user.credits -= cost
+            db.commit()
 
         if current_user:
             org_vars = db.query(models.OrgPromptVariable).filter(

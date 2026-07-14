@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.routes import auth, chat, doctor, templates, history, logs, admin, audit, two_factor, preferences, dashboard, knowledge
+from app.api.routes import auth, chat, doctor, templates, history, logs, admin, audit, two_factor, preferences, dashboard, knowledge, payment
 
 api_router = APIRouter()
 
@@ -15,3 +15,4 @@ api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 api_router.include_router(audit.router, prefix="/admin", tags=["audit"])
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
 api_router.include_router(knowledge.router, tags=["knowledge"])
+api_router.include_router(payment.router, prefix="/payment", tags=["payment"])
