@@ -61,7 +61,7 @@ function AdminPageContent() {
     const [error, setError] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const activeTab = searchParams.get('tab') || 'users';
-    const [orgModel, setOrgModel] = useState('gemini-1.5-flash');
+    const [orgModel, setOrgModel] = useState('gemini-3.1-flash-lite');
 
     // Audit Logs state
     const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
@@ -498,9 +498,9 @@ function AdminPageContent() {
                                             onChange={(e) => setOrgModel(e.target.value)}
                                             className="w-full h-12 px-4 rounded-xl bg-slate-100/60 border border-slate-200/50 focus:bg-white focus:border-primary outline-none transition-all font-body-md text-slate-800 dark:text-white"
                                         >
-                                            <option value="gemini-1.5-flash">Gemini 1.5 Flash (ความเร็วสูงสุด, ประหยัดโควต้า)</option>
-                                            <option value="gemini-2.0-flash">Gemini 2.0 Flash (ฉลาดและเร็ว)</option>
-                                            <option value="gemini-1.5-pro">Gemini 1.5 Pro (ฉลาดที่สุด, สำหรับงานซับซ้อน)</option>
+                                            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (ความเร็วสูงสุด, ประหยัดโควต้า)</option>
+                                            <option value="gemini-2.0-flash">Gemini 2.0 Flash (สมดุลความเร็ว/ความฉลาด)</option>
+                                            <option value="gemini-2.5-pro">Gemini 2.5 Pro (ฉลาดที่สุด, สำหรับงานซับซ้อน)</option>
                                         </select>
                                     </div>
                                     <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
