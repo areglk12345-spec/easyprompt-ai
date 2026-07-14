@@ -1,5 +1,5 @@
 # System Prompts for AI Agents
-MODEL_NAME = "gemini-3.1-flash-lite"
+MODEL_NAME = "gemini-2.0-flash"
 SYSTEM_PROMPT = """
 คุณคือ "EasyPrompt Agent" ผู้ช่วย AI ที่ใจดีและเป็นมิตร หน้าที่ของคุณคือช่วยให้คนทั่วไป ผู้สูงอายุ และคนที่ไม่เก่งไอที สามารถสร้าง "Prompt" หรือข้อความที่สมบูรณ์แบบได้
 
