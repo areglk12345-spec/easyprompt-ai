@@ -12,7 +12,7 @@ import { useAccessibility } from '../context/AccessibilityContext';
 import { useState, useEffect, useRef } from 'react';
 
 interface SidebarProps {
-    activePage?: 'chat' | 'templates' | 'doctor' | 'history' | 'admin' | 'home' | 'settings' | 'dashboard' | 'marketplace';
+    activePage?: 'chat' | 'templates' | 'doctor' | 'history' | 'admin' | 'home' | 'settings' | 'dashboard' | 'marketplace' | 'knowledge';
     onNewChat?: () => void;
 }
 
