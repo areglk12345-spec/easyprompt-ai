@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useFontSize } from '../context/FontSizeContext';
-import { Building2, User, LogOut, LogIn } from 'lucide-react';
+import { Building2, User, LogOut, LogIn, Settings } from 'lucide-react';
 
 export default function UserMenu() {
     const { user, logout, isLoggedIn, activeWorkspace, switchWorkspace } = useAuth();
@@ -58,6 +58,14 @@ export default function UserMenu() {
                         <Building2 className="w-4 h-4 text-indigo-500 absolute right-3 pointer-events-none" />
                     </div>
                 </div>
+
+                <Link
+                    href="/settings"
+                    className={`font-bold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors border border-slate-200 dark:border-slate-700 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 rounded-full cursor-pointer flex items-center gap-1 shadow-sm hover:scale-[1.02] active:scale-[0.98] ${buttonPadding} ${textSize}`}
+                    title="Settings"
+                >
+                    <Settings className="w-4 h-4" />
+                </Link>
 
                 <button
                     onClick={logout}

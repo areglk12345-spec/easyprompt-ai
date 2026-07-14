@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import logging
 from fastapi import HTTPException
 from dotenv import load_dotenv
 
@@ -18,6 +19,8 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("❌ ไม่พบ GEMINI_API_KEY ในไฟล์ .env กรุณาตั้งค่าก่อเริ่มต้นเซิร์ฟเวอร์")
 
+logger = logging.getLogger("easyprompt.ai")
+
 # สร้าง Gemini client
 client = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -26,6 +29,22 @@ def get_org_model(db: Session, organization_name: str) -> str:
     if setting and setting.ai_model:
         return setting.ai_model
     return MODEL_NAME
+
+def generate_stream_content(system_instruction: str, contents: str, model_name: str):
+    """Helper method to call Gemini and stream response"""
+    try:
+        response = client.models.generate_content_stream(
+            model=model_name,
+            config=types.GenerateContentConfig(system_instruction=system_instruction),
+            contents=contents
+        )
+        for chunk in response:
+            if chunk.text:
+                yield chunk.text
+    except Exception as e:
+        err_str = str(e)
+        logger.error(f"Gemini API Stream Error: {err_str}")
+        yield f"[ERROR] เกิดข้อผิดพลาด: {err_str}"
 
 def generate_json_content(system_instruction: str, contents: str, model_name: str) -> dict:
     """Helper method to call Gemini and parse JSON response reliably"""
@@ -46,7 +65,7 @@ def generate_json_content(system_instruction: str, contents: str, model_name: st
         
     except Exception as e:
         err_str = str(e)
-        print(f"Gemini API Error: {err_str}")
+        logger.error(f"Gemini API Error: {err_str}")
         if "429" in err_str or "quota" in err_str.lower() or "limit" in err_str.lower():
             raise HTTPException(status_code=429, detail="ขณะนี้ความต้องการใช้ AI สูงเกินกำหนดชั่วคราว (ฟรีโควตา 15 ครั้งต่อนาที) กรุณารอสักครู่แล้วลองอีกครั้ง ⏳")
         raise HTTPException(status_code=500, detail="เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI")

@@ -7,7 +7,8 @@ from app.database import get_db
 from app import models, auth
 from app.schemas import UserMessage, AgentResponse
 from app.core.config import SYSTEM_PROMPT, MODEL_NAME
-from app.services.ai_service import generate_json_content, get_org_model
+from fastapi.responses import StreamingResponse
+from app.services.ai_service import generate_json_content, get_org_model, generate_stream_content
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -20,8 +21,17 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
     try:
         past_chats = db.query(models.ChatHistory).filter(models.ChatHistory.session_id == payload.session_id).order_by(models.ChatHistory.id.desc()).limit(10).all()
         past_chats.reverse()
-        
         history_context = ""
+        document_context = ""
+
+        if payload.document_id and current_user:
+            doc = db.query(models.KnowledgeDocument).filter(
+                models.KnowledgeDocument.id == payload.document_id,
+                models.KnowledgeDocument.user_id == current_user.id
+            ).first()
+            if doc:
+                document_context = f"--- ข้อมูลอ้างอิงจากผู้ใช้ (ใช้เพื่อประกอบการตอบคำถาม/แต่ง Prompt) ---\nชื่อเอกสาร: {doc.filename}\nเนื้อหาเอกสาร: {doc.content}\n-----------------------------------\n\n"
+
         if past_chats:
             history_context = "ประวัติการสนทนาก่อนหน้า (ใช้อ้างอิงบริบท):\n"
             for chat in past_chats:
@@ -30,6 +40,7 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
 
         prompt_to_send = f"โหมดภาษาง่ายสำหรับพูดคุย (Easy Language Mode): {payload.easy_language}\n" \
                          f"โทนภาษาที่ต้องการสำหรับ Prompt: {payload.tone or 'ทั่วไป'}\n\n" \
+                         f"{document_context}" \
                          f"{history_context}" \
                          f"ข้อความจากผู้ใช้ล่าสุด: {payload.message}\n\n" \
                          f"**สำคัญมาก:** ตอบกลับเป็นรูปแบบ JSON ตามโครงสร้างที่กำหนดเท่านั้น ห้ามพิมพ์ข้อความอธิบายใดๆ นอกเหนือจาก JSON"
@@ -78,6 +89,51 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
     except HTTPException as e:
         db.rollback()
         raise e
+        raise HTTPException(status_code=500, detail=f"เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI: {str(e)}")
+
+@router.post("/stream")
+@limiter.limit("20/minute")
+def stream_chat_with_agent(request: Request, payload: UserMessage, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+    try:
+        past_chats = db.query(models.ChatHistory).filter(models.ChatHistory.session_id == payload.session_id).order_by(models.ChatHistory.id.desc()).limit(10).all()
+        past_chats.reverse()
+        
+        history_context = ""
+        if past_chats:
+            history_context = "ประวัติการสนทนาก่อนหน้า:\n"
+            for chat in past_chats:
+                history_context += f"ผู้ใช้: {chat.user_message}\nAI: {chat.agent_response}\n"
+            history_context += "\n"
+
+        prompt_to_send = f"โหมดภาษาง่าย: {payload.easy_language}\n" \
+                         f"โทนภาษา: {payload.tone or 'ทั่วไป'}\n\n" \
+                         f"{history_context}" \
+                         f"ผู้ใช้: {payload.message}\n\n" \
+                         f"ตอบกลับข้อความถัดไปที่คุณจะคุยกับผู้ใช้แบบสั้นๆ กระชับ เป็นมิตร (ไม่ต้องมี JSON)"
+        
+        model_to_use = MODEL_NAME
+        if current_user:
+            model_to_use = get_org_model(db, current_user.organization)
+            org_vars = db.query(models.OrgPromptVariable).filter(
+                models.OrgPromptVariable.org_name == current_user.organization
+            ).all()
+            for var in org_vars:
+                prompt_to_send = prompt_to_send.replace("{{" + var.var_key + "}}", var.var_value)
+
+        stream_system_prompt = (
+            "คุณคือ AI ผู้ช่วยอัจฉริยะ (EasyPrompt Agent) ช่วยผู้ใช้เขียนหรือปรับแต่ง Prompt/ข้อความให้ดีที่สุด\n"
+            "กฎสำคัญ:\n"
+            "1. หากคำถามผู้ใช้ยังไม่ชัดเจนหรือกว้างเกินไป ให้ถามกลับสั้นๆ 1 คำถามเพื่อขอข้อมูลเพิ่ม\n"
+            "2. หากข้อมูลชัดเจนพอแล้ว หรือผู้ใช้แค่ต้องการคำแนะนำสั้นๆ (เช่น ปรับคำสุภาพ, แปลภาษา, แก้ประโยค) ให้ตอบผลลัพธ์ให้ทันที ห้ามถามคำถามต่อ"
+        )
+
+        def event_generator():
+            for chunk in generate_stream_content(stream_system_prompt, prompt_to_send, model_to_use):
+                # ใช้ replace newline ชั่วคราวเพื่อไม่ให้ SSE แตก (SSE แตกที่ \n\n)
+                clean_chunk = chunk.replace('\n', '\\n')
+                yield f"data: {clean_chunk}\n\n"
+            yield "data: [DONE]\n\n"
+
+        return StreamingResponse(event_generator(), media_type="text/event-stream")
     except Exception as e:
-        db.rollback()
         raise HTTPException(status_code=500, detail=f"เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI: {str(e)}")

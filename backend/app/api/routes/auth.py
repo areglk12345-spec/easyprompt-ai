@@ -5,14 +5,20 @@ from app import models, auth
 from app.schemas import (
     UserProfile, UserRegister, UserLogin, TokenResponse,
     UserUpdateProfile, UserUpdatePassword,
-    TwoFactorLoginRequest, TwoFactorLoginResponse
+    TwoFactorLoginRequest, TwoFactorLoginResponse,
+    SocialLoginRequest
 )
+from firebase_admin import auth as firebase_auth
 from datetime import datetime, timezone
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
+limiter = Limiter(key_func=get_remote_address)
 router = APIRouter()
 
 @router.post("/register", response_model=UserProfile)
-def register_user(payload: UserRegister, db: Session = Depends(get_db)):
+@limiter.limit("3/minute")
+def register_user(payload: UserRegister, request: Request, db: Session = Depends(get_db)):
     if len(payload.password) < 8 or not any(char.isdigit() for char in payload.password) or not any(char.isalpha() for char in payload.password):
         raise HTTPException(status_code=400, detail="รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร ประกอบด้วยตัวอักษรและตัวเลขอย่างน้อย 1 ตัว")
 
@@ -33,6 +39,7 @@ def register_user(payload: UserRegister, db: Session = Depends(get_db)):
     return new_user
 
 @router.post("/login")
+@limiter.limit("5/minute")
 def login_user(payload: UserLogin, request: Request, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.username == payload.username).first()
     if not user or not auth.verify_password(payload.password, user.password_hash):
@@ -135,3 +142,60 @@ def update_password(
     return {"detail": "อัปเดตรหัสผ่านเรียบร้อยแล้ว"}
 
 
+@router.post("/social-login", response_model=TokenResponse)
+def social_login(payload: SocialLoginRequest, request: Request, db: Session = Depends(get_db)):
+    """เข้าสู่ระบบด้วย Google, Apple, Phone ผ่าน Firebase"""
+    try:
+        # Verify the Firebase ID token
+        decoded_token = firebase_auth.verify_id_token(payload.id_token)
+        uid = decoded_token.get("uid")
+        email = decoded_token.get("email")
+        name = decoded_token.get("name")
+        phone_number = decoded_token.get("phone_number")
+        
+        # Determine username or identifier
+        identifier = email or phone_number or uid
+        if not identifier:
+            raise HTTPException(status_code=400, detail="ไม่พบข้อมูล Email หรือ Phone number จาก Firebase")
+        
+        # Check if user exists
+        user = db.query(models.User).filter(
+            (models.User.email == email) | (models.User.username == identifier)
+        ).first()
+
+        if not user:
+            # Auto-register new user from social login
+            user = models.User(
+                username=identifier,
+                email=email,
+                full_name=name or "Social User",
+                password_hash="social_login_no_password",
+                role="user",
+                organization="ทั่วไป",
+                is_2fa_enabled=False
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        
+        # Generate our own system JWT access token
+        token = auth.create_access_token({"sub": user.username})
+
+        # Audit log for social login
+        try:
+            from app.api.routes.audit import create_audit_log
+            create_audit_log(db, user.id, "social_login",
+                             ip_address=request.client.host if request.client else None)
+        except Exception:
+            pass
+
+        return {
+            "access_token": token,
+            "token_type": "bearer",
+            "user": UserProfile.model_validate(user)
+        }
+
+    except Exception as e:
+        import logging
+        logging.error(f"Firebase token verification failed: {e}")
+        raise HTTPException(status_code=401, detail="การยืนยันตัวตนผ่าน Social Login ล้มเหลว")

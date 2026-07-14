@@ -68,9 +68,55 @@ def get_templates(category: Optional[str] = None, current_user: Optional[models.
             "is_public": tpl.is_public,
             "user_id": tpl.user_id,
             "organization": tpl.organization,
-            "is_favorite": is_favorite
+            "is_favorite": is_favorite,
+            "likes_count": len(tpl.favorited_by)
         })
     return results
+
+@router.get("/marketplace", response_model=List[TemplateResponse])
+def get_marketplace_templates(category: Optional[str] = None, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+    query = db.query(models.PromptTemplate).filter(models.PromptTemplate.is_public == True)
+    if category and category != "ทั้งหมด":
+        query = query.filter(models.PromptTemplate.category == category)
+        
+    templates = query.order_by(models.PromptTemplate.id.desc()).all()
+    results = []
+    for tpl in templates:
+        is_favorite = False
+        if current_user and current_user in tpl.favorited_by:
+            is_favorite = True
+            
+        results.append({
+            "id": tpl.id,
+            "title": tpl.title,
+            "prompt_text": tpl.prompt_text,
+            "category": tpl.category,
+            "is_public": tpl.is_public,
+            "user_id": tpl.user_id,
+            "organization": tpl.organization,
+            "is_favorite": is_favorite,
+            "likes_count": len(tpl.favorited_by)
+        })
+    return results
+
+@router.post("/{template_id}/copy")
+def copy_template(template_id: int, current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db)):
+    template = db.query(models.PromptTemplate).filter(models.PromptTemplate.id == template_id).first()
+    if not template or not template.is_public:
+        raise HTTPException(status_code=404, detail="ไม่พบเทมเพลตสาธารณะที่ระบุ")
+        
+    new_template = models.PromptTemplate(
+        title=f"{template.title} (คัดลอก)",
+        prompt_text=template.prompt_text,
+        category=template.category,
+        user_id=current_user.id,
+        is_public=False,
+        organization=current_user.organization
+    )
+    db.add(new_template)
+    db.commit()
+    db.refresh(new_template)
+    return {"status": "success", "message": "คัดลอกสำเร็จ!", "template_id": new_template.id}
 
 @router.delete("/{template_id}")
 def delete_template(template_id: int, current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db)):

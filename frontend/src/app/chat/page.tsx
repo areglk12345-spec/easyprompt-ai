@@ -57,6 +57,10 @@ export default function ChatPage() {
     const [sessionId, setSessionId] = useState<string>('');
     const [templates, setTemplates] = useState<Template[]>([]);
     const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+    const [documents, setDocuments] = useState<any[]>([]);
+    const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
+    const [isUploadingDocument, setIsUploadingDocument] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleAnalyzeReadingLevel = async () => {
         if (!inputText.trim()) {
@@ -171,22 +175,71 @@ export default function ChatPage() {
         }
     };
 
-    // Fetch Templates
+    // Fetch Templates and Documents
     useEffect(() => {
-        const fetchTemplates = async () => {
+        const fetchTemplatesAndDocs = async () => {
             try {
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-                const response = await authFetch(`${API_URL}/api/templates`);
-                if (response.ok) {
-                    const data = await response.json();
+                const [tplRes, docRes] = await Promise.all([
+                    authFetch(`${API_URL}/api/templates`),
+                    authFetch(`${API_URL}/api/knowledge`)
+                ]);
+                
+                if (tplRes.ok) {
+                    const data = await tplRes.json();
                     setTemplates(data);
                 }
+                if (docRes.ok) {
+                    const data = await docRes.json();
+                    setDocuments(data);
+                }
             } catch (error) {
-                console.error("Error fetching templates:", error);
+                console.error("Error fetching data:", error);
             }
         };
-        fetchTemplates();
+        fetchTemplatesAndDocs();
     }, [authFetch]);
+
+    const handleQuickUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const ext = file.name.split('.').pop()?.toLowerCase();
+        if (ext !== 'txt' && ext !== 'pdf') {
+            alert('รองรับเฉพาะไฟล์ .txt และ .pdf เท่านั้น');
+            return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            alert('ขนาดไฟล์ต้องไม่เกิน 10MB');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            setIsUploadingDocument(true);
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            const res = await authFetch(`${API_URL}/api/knowledge/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                const newDoc = await res.json();
+                setDocuments(prev => [newDoc, ...prev]);
+                setSelectedDocument(newDoc.id); // เลือกไฟล์นี้ให้อัตโนมัติ
+                if (fileInputRef.current) fileInputRef.current.value = '';
+            } else {
+                const err = await res.json().catch(() => ({}));
+                alert(err.detail || 'การอัปโหลดล้มเหลว');
+            }
+        } catch (error) {
+            alert('การอัปโหลดล้มเหลว: ' + error);
+        } finally {
+            setIsUploadingDocument(false);
+        }
+    };
 
     const textSize = isLarge ? 'text-2xl' : 'text-base';
     const buttonSize = isLarge ? 'px-8 py-4 text-xl' : 'px-4 py-2 text-base';
@@ -233,12 +286,25 @@ export default function ChatPage() {
         setIsLoading(true);
 
         try {
-            // เรียก API ไปที่ FastAPI ที่รันอยู่บนพอร์ต 8000
+            // เรียก API ไปที่ FastAPI endpoint แบบ stream
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-            const response = await authFetch(`${API_URL}/api/chat`, {
+            
+            // เตรียมที่นั่ง (placeholder) สำหรับคำตอบของ AI
+            setMessages((prev) => [
+                ...prev,
+                { role: 'agent', text: '' },
+            ]);
+
+            const response = await authFetch(`${API_URL}/api/chat/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: messageToSend, session_id: sessionId, tone: selectedTone, easy_language: easyLanguage }),
+                body: JSON.stringify({ 
+                    message: messageToSend, 
+                    session_id: sessionId, 
+                    tone: selectedTone, 
+                    easy_language: easyLanguage,
+                    document_id: selectedDocument 
+                }),
             });
 
             if (!response.ok) {
@@ -248,18 +314,18 @@ export default function ChatPage() {
 
             const data = await response.json();
 
-            // นำข้อมูลที่ได้จาก API (JSON) มาแสดงผลเป็นข้อความของ Agent
-            setMessages((prev) => [
-                ...prev,
-                {
+            setMessages((prev) => {
+                const newMessages = [...prev];
+                newMessages[newMessages.length - 1] = {
                     role: 'agent',
-                    text: data.next_question || "สร้าง Prompt สำเร็จแล้ว!",
+                    text: data.agent_response || data.next_question,
                     fittedPrompt: data.fitted_prompt,
                     score: data.prompt_fit_score,
                     explanation: data.score_explanation,
-                    suggestedOptions: data.suggested_options || []
-                },
-            ]);
+                    suggestedOptions: data.suggested_options
+                };
+                return newMessages;
+            });
             
             // Trigger an event to let Sidebar know to update recent chats
             if (typeof window !== 'undefined') {
@@ -268,7 +334,15 @@ export default function ChatPage() {
         } catch (error: any) {
             console.error("Error sending message:", error);
             const errMsg = error.message || 'ขออภัยครับ เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์';
-            setMessages((prev) => [...prev, { role: 'agent', text: errMsg }]);
+            setMessages((prev) => {
+                const newMessages = [...prev];
+                if (newMessages[newMessages.length - 1].role === 'agent' && newMessages[newMessages.length - 1].text === '') {
+                    newMessages[newMessages.length - 1].text = errMsg;
+                } else {
+                    newMessages.push({ role: 'agent', text: errMsg });
+                }
+                return newMessages;
+            });
         } finally {
             setIsLoading(false);
         }
@@ -295,7 +369,7 @@ export default function ChatPage() {
 
                 <main className="flex-1 flex flex-col bg-white dark:bg-slate-900 overflow-hidden h-screen relative transition-colors duration-300">
                     {/* Top AppBar */}
-                    <header className="sticky top-0 z-30 flex justify-between items-center px-6 md:px-12 w-full h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-700/30 shrink-0">
+                    <header className="sticky top-0 z-30 flex justify-between items-center pl-16 pr-4 md:px-12 w-full h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-700/30 shrink-0">
                         <div className="flex items-center gap-4">
                             <Link href="/" className="font-bold text-primary dark:text-indigo-400 hover:text-primary-dark transition-colors flex items-center gap-1">
                                 &larr; {t('menu.home')}
@@ -322,6 +396,24 @@ export default function ChatPage() {
                                     <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${easyLanguage ? 'translate-x-6' : 'translate-x-1'}`} />
                                 </button>
                             </div>
+                            
+                            {/* Document Selector */}
+                            {documents.length > 0 && (
+                                <div className="flex items-center gap-2 mr-2">
+                                    <span className="material-symbols-outlined text-slate-400 text-sm">folder_special</span>
+                                    <select
+                                        value={selectedDocument || ''}
+                                        onChange={(e) => setSelectedDocument(e.target.value ? Number(e.target.value) : null)}
+                                        className="text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 outline-none focus:border-primary text-slate-600 dark:text-slate-300 max-w-[150px] truncate"
+                                    >
+                                        <option value="">-- ไม่แนบเอกสาร --</option>
+                                        {documents.map(doc => (
+                                            <option key={doc.id} value={doc.id}>{doc.filename}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
                             <UserMenu />
                         </div>
                     </header>
@@ -383,8 +475,8 @@ export default function ChatPage() {
                     </main>
 
                     {/* Bottom Input Bar */}
-                    <footer className="p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 shrink-0">
-                        <div className="max-w-4xl mx-auto mb-3 flex flex-wrap items-center gap-2">
+                    <footer className="p-4 md:p-6 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/90 to-transparent dark:from-[#020617] dark:via-[#020617]/90 shrink-0 sticky bottom-0 z-20 pointer-events-none">
+                        <div className="max-w-4xl mx-auto mb-3 flex flex-wrap items-center gap-2 pointer-events-auto">
                             <span className="text-slate-500 dark:text-slate-400 font-semibold text-xs md:text-sm">{t('chat.tone')}</span>
                             {[
                                 { key: 'ทั่วไป', label: t('chat.tone.general') },
@@ -407,7 +499,7 @@ export default function ChatPage() {
                                 </button>
                             ))}
                         </div>
-                        <form onSubmit={sendMessage} className="max-w-4xl mx-auto flex gap-2 items-center">
+                        <form onSubmit={sendMessage} className="max-w-4xl mx-auto flex gap-2 items-center bg-white/60 dark:bg-slate-800/40 backdrop-blur-xl p-2 rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 shadow-lg shadow-slate-200/20 dark:shadow-slate-900/50 pointer-events-auto">
                             <input
                                 id="chat-input"
                                 type="text"
@@ -417,12 +509,35 @@ export default function ChatPage() {
                                 placeholder={isListening ? t('chat.placeholder_listening') : t('chat.placeholder')}
                                 aria-label={t('chat.placeholder')}
                                 aria-invalid={false}
-                                className={`flex-1 border bg-white/70 dark:bg-slate-800/70 rounded-full px-5 focus:outline-none focus:ring-2 focus:border-primary disabled:bg-gray-100/50 dark:disabled:bg-slate-800 transition-all text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 ${
-                                    isListening
-                                        ? 'border-rose-400 ring-2 ring-rose-400/30 bg-rose-50/50 dark:bg-rose-950/30 placeholder:text-rose-400'
-                                        : 'border-slate-200 dark:border-slate-600 focus:ring-primary/20'
-                                } ${isLarge ? 'py-4 text-xl' : 'py-3'}`}
+                                className={`flex-1 bg-transparent border-none rounded-full px-4 focus:outline-none focus:ring-0 disabled:opacity-50 transition-all text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 ${isLarge ? 'py-4 text-xl' : 'py-3'}`}
                             />
+                            
+                            <input 
+                                type="file" 
+                                accept=".txt,.pdf" 
+                                className="hidden" 
+                                ref={fileInputRef} 
+                                onChange={handleQuickUpload}
+                            />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isUploadingDocument}
+                                title="แนบเอกสาร (อัปโหลดเข้า Knowledge Base)"
+                                aria-label="แนบเอกสาร"
+                                className={`rounded-full transition-all shrink-0 cursor-pointer bg-transparent hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover-spring ${isLarge ? 'w-14 h-14' : 'w-10 h-10'}`}
+                            >
+                                {isUploadingDocument ? (
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-600"></div>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={isLarge ? 'w-7 h-7' : 'w-5 h-5'}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
+                                    </svg>
+                                )}
+                            </Button>
+
                             <Button
                                 type="button"
                                 variant="ghost"
@@ -430,7 +545,7 @@ export default function ChatPage() {
                                 onClick={() => setIsTemplateModalOpen(true)}
                                 title="เลือกจากเทมเพลต (Templates)"
                                 aria-label="เลือกเทมเพลต"
-                                className={`rounded-full transition-all shadow-md shrink-0 cursor-pointer bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-indigo-950/40 hover:border-blue-300 dark:hover:border-indigo-600 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-indigo-400 ${isLarge ? 'w-16 h-16' : 'w-11 h-11'}`}
+                                className={`rounded-full transition-all shrink-0 cursor-pointer bg-transparent hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover-spring ${isLarge ? 'w-14 h-14' : 'w-10 h-10'}`}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={isLarge ? 'w-8 h-8' : 'w-5 h-5'}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
@@ -444,7 +559,7 @@ export default function ChatPage() {
                                 disabled={isAnalyzing || !inputText.trim()}
                                 title="วิเคราะห์ความยากง่าย (Reading Level)"
                                 aria-label="วิเคราะห์ความยากง่าย"
-                                className={`rounded-full transition-all shadow-md shrink-0 cursor-pointer bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:border-indigo-300 dark:hover:border-indigo-600 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 ${isLarge ? 'w-16 h-16' : 'w-11 h-11'}`}
+                                className={`rounded-full transition-all shrink-0 cursor-pointer bg-transparent hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover-spring ${isLarge ? 'w-14 h-14' : 'w-10 h-10'}`}
                             >
                                 {isAnalyzing && isReadingLevelModalOpen ? (
                                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
@@ -466,12 +581,10 @@ export default function ChatPage() {
                                     title={isListening ? 'หยุดฟัง' : 'กดพูดแทนพิมพ์ (ภาษาไทย)'}
                                     aria-label={isListening ? 'หยุดฟัง' : 'พูดด้วยเสียง'}
                                     aria-pressed={isListening}
-                                    className={`rounded-full transition-all shadow-md shrink-0 disabled:opacity-60 cursor-pointer ${
-                                        isLarge ? 'w-16 h-16' : 'w-11 h-11'
-                                    } ${
+                                    className={`rounded-full transition-all shrink-0 cursor-pointer hover-spring ${isLarge ? 'w-14 h-14' : 'w-10 h-10'} ${
                                         isListening
-                                            ? 'bg-rose-500 text-white animate-pulse shadow-rose-200'
-                                            : 'bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:border-rose-300 dark:hover:border-rose-600 text-slate-600 dark:text-slate-400 hover:text-rose-500'
+                                            ? 'bg-rose-500 text-white animate-pulse shadow-md shadow-rose-200 dark:shadow-rose-900/50'
+                                            : 'bg-transparent hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                                     }`}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={isLarge ? 'w-8 h-8' : 'w-5 h-5'}>
@@ -484,9 +597,11 @@ export default function ChatPage() {
                                 type="submit"
                                 variant="primary"
                                 disabled={isLoading || !inputText.trim()}
-                                className={`bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-full font-bold shadow-md shadow-blue-100 disabled:opacity-50 !border-none ${buttonSize}`}
+                                className={`bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold shadow-md shadow-indigo-100 dark:shadow-indigo-900/30 disabled:opacity-50 !border-none hover-spring ${isLarge ? 'w-14 h-14 px-4' : 'w-10 h-10 px-2'}`}
                             >
-                                {t('chat.send')}
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 mx-auto">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
+                                </svg>
                             </Button>
                         </form>
                     </footer>

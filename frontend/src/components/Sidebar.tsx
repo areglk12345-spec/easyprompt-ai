@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Moon, Sun, Monitor } from 'lucide-react';
+import { Moon, Sun, Monitor, Menu, X } from 'lucide-react';
 import FontSizeToggle from './FontSizeToggle';
 import { useLanguage } from '../context/LanguageContext';
 import { useFontSize } from '../context/FontSizeContext';
@@ -12,7 +12,7 @@ import { useAccessibility } from '../context/AccessibilityContext';
 import { useState, useEffect, useRef } from 'react';
 
 interface SidebarProps {
-    activePage?: 'chat' | 'templates' | 'doctor' | 'history' | 'admin' | 'home' | 'settings' | 'dashboard';
+    activePage?: 'chat' | 'templates' | 'doctor' | 'history' | 'admin' | 'home' | 'settings' | 'dashboard' | 'marketplace';
     onNewChat?: () => void;
 }
 
@@ -25,12 +25,13 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
     const { isDarkMode, themeMode, setThemeMode } = useTheme();
     const { authFetch, isLoggedIn, user } = useAuth();
     const { isSimplifiedUI } = useAccessibility();
-    const activeClass = "flex items-center gap-4 py-3 px-4 bg-primary/5 dark:bg-primary/10 text-primary dark:text-indigo-400 rounded-xl font-bold transition-all";
-    const inactiveClass = "flex items-center gap-4 py-3 px-4 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl font-semibold transition-all";
+    const activeClass = "flex items-center gap-4 py-3 px-4 bg-primary/5 dark:bg-primary/10 text-primary dark:text-indigo-400 rounded-xl font-bold transition-all hover-spring";
+    const inactiveClass = "flex items-center gap-4 py-3 px-4 text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 rounded-xl font-semibold transition-all hover-spring";
 
     const [recentChats, setRecentChats] = useState<ChatItem[]>([]);
     const [pinnedChats, setPinnedChats] = useState<ChatItem[]>([]);
     const [folders, setFolders] = useState<FolderItem[]>([]);
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [contextMenu, setContextMenu] = useState<{x: number; y: number; chatId: string; isPinned: boolean} | null>(null);
     const [showNewFolder, setShowNewFolder] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
@@ -177,7 +178,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
     };
 
     const renderChatItem = (chat: ChatItem, showPin = false) => (
-        <div key={chat.id} className="group relative flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+        <div key={chat.id} className="group relative flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-all hover-spring"
             onContextMenu={(e) => handleContextMenu(e, chat)}
         >
             <Link 
@@ -202,8 +203,26 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
     const themeLabel = themeMode === 'system' ? 'Auto' : isDarkMode ? 'Dark' : 'Light';
 
     return (
-        <aside className={`hidden md:flex flex-col h-screen py-8 px-6 bg-white dark:bg-slate-900 border-r border-outline-variant/40 dark:border-slate-700/50 sticky top-0 ${fontSize === 'large' ? 'w-80' : 'w-72'} shrink-0 z-40 transition-all duration-300 ease-in-out`}>
-            <div className="flex items-center space-x-3 px-2 mb-10">
+        <>
+            {/* Mobile Hamburger Toggle */}
+            <button
+                onClick={() => setIsMobileOpen(!isMobileOpen)}
+                className="md:hidden fixed top-5 left-4 z-50 p-2.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-xl shadow-sm border border-slate-200/50 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-indigo-400 transition-colors hover-spring"
+                aria-label="Toggle Menu"
+            >
+                {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+
+            {/* Mobile Backdrop Overlay */}
+            {isMobileOpen && (
+                <div 
+                    className="md:hidden fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+                    onClick={() => setIsMobileOpen(false)}
+                />
+            )}
+
+            <aside className={`fixed md:sticky top-0 h-screen py-8 px-6 bg-white/95 dark:bg-slate-900/95 md:bg-white/60 md:dark:bg-slate-900/40 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/50 ${fontSize === 'large' ? 'w-80' : 'w-72'} shrink-0 z-40 transition-transform duration-300 ease-in-out ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} flex flex-col`}>
+                <div className="flex items-center space-x-3 px-2 mb-10 mt-6 md:mt-0">
                 <Link href="/" className="flex items-center space-x-3">
                     <div className="w-9 h-9 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary dark:text-indigo-400">
                         <span className="material-symbols-outlined !font-bold text-2xl">bolt</span>
@@ -216,12 +235,12 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
             </div>
             
             {onNewChat ? (
-                <button onClick={onNewChat} className="w-full py-3.5 px-4 bg-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98] cursor-pointer">
+                <button onClick={onNewChat} className="w-full py-3.5 px-4 bg-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all hover-spring cursor-pointer">
                     <span className="material-symbols-outlined !wght-500">add</span>
                     New Chat
                 </button>
             ) : (
-                <Link href="/chat" onClick={() => { if(typeof window !== 'undefined') localStorage.removeItem('ep_session_id'); }} className="w-full py-3.5 px-4 bg-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98] cursor-pointer">
+                <Link href="/chat" onClick={() => { if(typeof window !== 'undefined') localStorage.removeItem('ep_session_id'); }} className="w-full py-3.5 px-4 bg-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all hover-spring cursor-pointer">
                     <span className="material-symbols-outlined !wght-500">add</span>
                     New Chat
                 </Link>
@@ -236,9 +255,17 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                     <span className="material-symbols-outlined">grid_view</span>
                     <span className="text-[15px]">{t('sidebar.templates')}</span>
                 </Link>
+                <Link href="/marketplace" className={activePage === 'marketplace' ? activeClass : inactiveClass}>
+                    <span className="material-symbols-outlined">storefront</span>
+                    <span className="text-[15px]">Marketplace</span>
+                </Link>
                 <Link href="/doctor" className={activePage === 'doctor' ? activeClass : inactiveClass}>
                     <span className="material-symbols-outlined">health_and_safety</span>
                     <span className="text-[15px]">{t('menu.doctor')}</span>
+                </Link>
+                <Link href="/knowledge" className={activePage === 'knowledge' as any ? activeClass : inactiveClass}>
+                    <span className="material-symbols-outlined">folder_special</span>
+                    <span className="text-[15px]">Knowledge Base</span>
                 </Link>
                 <Link href="/history" className={activePage === 'history' ? activeClass : inactiveClass}>
                     <span className="material-symbols-outlined">history</span>
@@ -406,5 +433,6 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                 </div>
             </div>
         </aside>
+        </>
     );
 }

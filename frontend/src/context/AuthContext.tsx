@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../services/api';
 
 type User = {
     id: number;
@@ -22,6 +23,7 @@ type AuthContextType = {
     switchWorkspace: (workspace: string) => void;
     login: (username: string, password: string) => Promise<void>;
     login2fa: (username: string, totpCode: string) => Promise<void>;
+    socialLogin: (idToken: string) => Promise<void>;
     register: (username: string, password: string, fullName: string, organization?: string) => Promise<void>;
     logout: () => void;
     refreshUser: () => Promise<void>;
@@ -55,19 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const login = async (username: string, password: string) => {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-        const response = await fetch(`${API_URL}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }),
-        });
-
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.detail || 'เข้าสู่ระบบล้มเหลว กรุณาตรวจสอบชื่อผู้ใช้หรือรหัสผ่าน');
-        }
-
-        const data = await response.json();
+        const data = await api.post<any>('/api/auth/login', { username, password });
 
         // Check if 2FA is required
         if (data.requires_2fa) {
@@ -84,19 +74,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const login2fa = async (username: string, totpCode: string) => {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-        const response = await fetch(`${API_URL}/api/auth/login/2fa`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, totp_code: totpCode }),
-        });
+        const data = await api.post<any>('/api/auth/login/2fa', { username, totp_code: totpCode });
+        setToken(data.access_token);
+        setUser(data.user);
+        setActiveWorkspace(data.user.organization || 'ทั่วไป');
+        localStorage.setItem('ep_token', data.access_token);
+        localStorage.setItem('ep_user', JSON.stringify(data.user));
+    };
 
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.detail || 'รหัสยืนยัน 2FA ไม่ถูกต้อง');
-        }
-
-        const data = await response.json();
+    const socialLogin = async (idToken: string) => {
+        const data = await api.post<any>('/api/auth/social-login', { id_token: idToken });
         setToken(data.access_token);
         setUser(data.user);
         setActiveWorkspace(data.user.organization || 'ทั่วไป');
@@ -105,17 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const register = async (username: string, password: string, fullName: string, organization: string = 'ทั่วไป') => {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-        const response = await fetch(`${API_URL}/api/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password, full_name: fullName, organization }),
-        });
-
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.detail || 'ลงทะเบียนล้มเหลว กรุณาลองใหม่อีกครั้ง');
-        }
+        await api.post('/api/auth/register', { username, password, full_name: fullName, organization });
     };
 
     const logout = () => {
@@ -147,14 +124,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [token]);
 
     const refreshUser = async () => {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
         try {
-            const response = await authFetch(`${API_URL}/api/auth/me`);
-            if (response.ok) {
-                const data = await response.json();
-                setUser(data);
-                localStorage.setItem('ep_user', JSON.stringify(data));
-            }
+            const data = await api.get<any>('/api/auth/me');
+            setUser(data);
+            localStorage.setItem('ep_user', JSON.stringify(data));
         } catch (e) {
             console.error("Failed to refresh user", e);
         }
@@ -170,6 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             switchWorkspace,
             login,
             login2fa,
+            socialLogin,
             register,
             logout,
             refreshUser,

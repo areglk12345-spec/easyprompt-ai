@@ -41,8 +41,8 @@ def delete_session(session_id: str, current_user: models.User = Depends(auth.get
     if not records:
         raise HTTPException(status_code=404, detail="ไม่พบประวัติแชทที่ระบุ")
         
-    # Check permissions (assuming all records in a session belong to the same user)
-    if any(record.user_id != current_user.id for record in records) and current_user.role != "admin":
+    # Check permissions (assuming all records in a session belong to the same user or are anonymous)
+    if any((record.user_id is not None and record.user_id != current_user.id) for record in records) and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="คุณไม่มีสิทธิ์ลบประวัติแชทนี้")
         
     for record in records:

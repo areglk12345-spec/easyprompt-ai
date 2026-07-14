@@ -14,7 +14,7 @@ limiter = Limiter(key_func=get_remote_address)
 router = APIRouter()
 
 @router.post("/", response_model=DoctorResponse)
-@limiter.limit("20/minute")
+@limiter.limit("10/minute")
 def diagnose_prompt(request: Request, payload: DoctorRequest, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db)):
     try:
         prompt_to_send = f"โหมดภาษาง่ายสำหรับวิเคราะห์ (Easy Language Mode): {payload.easy_language}\n" \

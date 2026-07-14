@@ -8,6 +8,9 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFontSize } from '../../context/FontSizeContext';
 import { BarChart3, TrendingUp, AlertCircle, Lightbulb, Users, MessageSquare, Files } from 'lucide-react';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
 
 export default function DashboardPage() {
     const { authFetch, user } = useAuth();
@@ -98,6 +101,62 @@ export default function DashboardPage() {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Charts Row */}
+                                {(stats?.pie_chart || stats?.bar_chart) && (
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                                        {/* Pie Chart */}
+                                        <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                                            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6">สัดส่วนเทมเพลตตามหมวดหมู่</h3>
+                                            <div className="h-64 w-full">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <PieChart>
+                                                        <Pie
+                                                            data={stats.pie_chart}
+                                                            cx="50%"
+                                                            cy="50%"
+                                                            innerRadius={60}
+                                                            outerRadius={90}
+                                                            paddingAngle={5}
+                                                            dataKey="value"
+                                                            nameKey="name"
+                                                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                                        >
+                                                            {stats.pie_chart?.map((entry: any, index: number) => (
+                                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                            ))}
+                                                        </Pie>
+                                                        <Tooltip 
+                                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                                        />
+                                                    </PieChart>
+                                                </ResponsiveContainer>
+                                            </div>
+                                        </div>
+
+                                        {/* Bar Chart */}
+                                        <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                                            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6">ความนิยมของโหมด (Tone) ในการสร้าง Prompt</h3>
+                                            <div className="h-64 w-full">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <BarChart
+                                                        data={stats.bar_chart}
+                                                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                                                    >
+                                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                                        <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                                                        <YAxis axisLine={false} tickLine={false} />
+                                                        <Tooltip 
+                                                            cursor={{ fill: 'transparent' }}
+                                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                                        />
+                                                        <Bar dataKey="prompts" fill="#6366f1" radius={[4, 4, 0, 0]} name="จำนวน (ครั้ง)" barSize={40} />
+                                                    </BarChart>
+                                                </ResponsiveContainer>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Trends Section */}
                                 {trends && (

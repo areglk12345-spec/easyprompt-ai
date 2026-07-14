@@ -286,7 +286,7 @@ export default function SettingsPage() {
 
                 <main className="flex-1 flex flex-col bg-slate-50/50 dark:bg-slate-900 overflow-y-auto h-screen relative custom-scrollbar transition-colors duration-300">
                     {/* Top AppBar */}
-                    <header className="sticky top-0 z-30 flex justify-between items-center px-6 md:px-12 w-full h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-700/30 shrink-0">
+                    <header className="sticky top-0 z-30 flex justify-between items-center pl-16 pr-4 md:px-12 w-full h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-700/30 shrink-0">
                         <div className="flex items-center space-x-4">
                             <span className="font-headline-md text-xl md:text-2xl font-bold text-primary dark:text-indigo-400 flex items-center gap-2">
                                 <span className="material-symbols-outlined text-primary dark:text-indigo-400 text-3xl">settings</span>
@@ -313,7 +313,7 @@ export default function SettingsPage() {
                                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
                                 <h3 className={`${headingSize} text-slate-800 dark:text-white`}>Profile</h3>
                             </div>
-                            <div className="glass-panel-heavy p-8 rounded-3xl space-y-8 border border-white/40 dark:border-slate-700 bg-white/70 dark:bg-slate-800/70 shadow-sm">
+                            <div className="glass-panel-heavy p-8 rounded-3xl space-y-8 shadow-sm">
                                 <div className="flex flex-col md:flex-row items-center gap-8">
                                     <div className="relative group shrink-0">
                                         <Image 
@@ -373,7 +373,7 @@ export default function SettingsPage() {
                                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
                                 <h3 className={`${headingSize} text-slate-800 dark:text-white`}>Change Password</h3>
                             </div>
-                            <div className="glass-panel-heavy p-8 rounded-3xl space-y-6 border border-white/40 dark:border-slate-700 bg-white/70 dark:bg-slate-800/70 shadow-sm">
+                            <div className="glass-panel-heavy p-8 rounded-3xl space-y-6 shadow-sm">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-1.5 md:col-span-2">
                                         <label className="font-label-sm text-xs font-bold text-slate-500 uppercase tracking-wider">Current Password</label>
@@ -407,7 +407,7 @@ export default function SettingsPage() {
                                     <button
                                         onClick={handlePasswordSave}
                                         disabled={isUpdatingPassword || !currentPassword || !newPassword || !confirmPassword}
-                                        className="px-6 py-2 bg-primary text-white font-bold rounded-xl hover:brightness-110 disabled:opacity-50 transition-all shadow-md"
+                                        className="px-6 py-2 bg-primary text-white font-bold rounded-xl hover:brightness-110 hover-spring disabled:opacity-50 transition-all shadow-md"
                                     >
                                         {isUpdatingPassword ? 'Updating...' : 'Update Password'}
                                     </button>
@@ -421,7 +421,7 @@ export default function SettingsPage() {
                                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>visibility</span>
                                 <h3 className={`${headingSize} text-slate-800 dark:text-white`}>Accessibility</h3>
                             </div>
-                            <div className="glass-panel-heavy p-8 rounded-3xl space-y-8 border border-white/40 dark:border-slate-700 bg-white/70 dark:bg-slate-800/70 shadow-sm">
+                            <div className="glass-panel-heavy p-8 rounded-3xl space-y-8 shadow-sm">
                                 
                                 {/* Font Size Toggle */}
                                 <div className="flex items-center justify-between p-6 bg-primary/5 rounded-2xl border border-primary/10">
@@ -442,7 +442,7 @@ export default function SettingsPage() {
                                         type="button"
                                         onClick={() => handleTogglePreference('voice_control', setVoiceControl, voiceControl)}
                                         role="switch" aria-checked={voiceControl}
-                                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${voiceControl ? 'bg-primary' : 'bg-slate-300'}`}
+                                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none hover-spring ${voiceControl ? 'bg-primary' : 'bg-slate-300'}`}
                                     >
                                         <span className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${voiceControl ? 'translate-x-6' : 'translate-x-0'}`} />
                                     </button>
@@ -511,7 +511,7 @@ export default function SettingsPage() {
                                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>security</span>
                                 <h3 className={`${headingSize} text-slate-800 dark:text-white`}>Security</h3>
                             </div>
-                            <div className="glass-panel-heavy p-8 rounded-3xl space-y-6 border border-white/40 dark:border-slate-700 bg-white/70 dark:bg-slate-800/70 shadow-sm">
+                            <div className="glass-panel-heavy p-8 rounded-3xl space-y-6 shadow-sm">
                                 
                                 {/* 2FA Messages */}
                                 {twoFAMessage && (
@@ -555,7 +555,7 @@ export default function SettingsPage() {
                                                 type="button"
                                                 onClick={handleSetup2FA}
                                                 disabled={twoFALoading}
-                                                className="px-5 py-2 rounded-xl transition-all font-bold text-sm border bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 cursor-pointer"
+                                                className="px-5 py-2 rounded-xl transition-all font-bold text-sm border bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 cursor-pointer hover-spring"
                                             >
                                                 {twoFALoading ? 'Loading...' : 'เปิดใช้งาน'}
                                             </button>
@@ -564,7 +564,7 @@ export default function SettingsPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => setShowDisable2FA(true)}
-                                                className="px-5 py-2 rounded-xl transition-all font-bold text-sm border bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100 cursor-pointer"
+                                                className="px-5 py-2 rounded-xl transition-all font-bold text-sm border bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100 cursor-pointer hover-spring"
                                             >
                                                 ปิดการใช้งาน
                                             </button>
@@ -614,7 +614,7 @@ export default function SettingsPage() {
                                                     <button
                                                         onClick={handleVerify2FA}
                                                         disabled={twoFALoading || verifyCode.length !== 6}
-                                                        className="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:brightness-110 disabled:opacity-50 transition-all shadow-md cursor-pointer"
+                                                        className="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:brightness-110 disabled:opacity-50 transition-all shadow-md cursor-pointer hover-spring"
                                                     >
                                                         {twoFALoading ? '...' : 'ยืนยัน'}
                                                     </button>
@@ -646,7 +646,7 @@ export default function SettingsPage() {
                                                 <button
                                                     onClick={handleDisable2FA}
                                                     disabled={twoFALoading || disableCode.length !== 6}
-                                                    className="px-6 py-3 bg-rose-500 text-white font-bold rounded-xl hover:bg-rose-600 disabled:opacity-50 transition-all shadow-md cursor-pointer"
+                                                    className="px-6 py-3 bg-rose-500 text-white font-bold rounded-xl hover:bg-rose-600 disabled:opacity-50 transition-all shadow-md cursor-pointer hover-spring"
                                                 >
                                                     {twoFALoading ? '...' : 'ปิด 2FA'}
                                                 </button>
@@ -690,14 +690,14 @@ export default function SettingsPage() {
                                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>notifications_active</span>
                                 <h3 className={`${headingSize} text-slate-800 dark:text-white`}>Notifications</h3>
                             </div>
-                            <div className="glass-panel-heavy p-8 rounded-3xl space-y-6 border border-white/40 dark:border-slate-700 bg-white/70 dark:bg-slate-800/70 shadow-sm">
+                            <div className="glass-panel-heavy p-8 rounded-3xl space-y-6 shadow-sm">
                                 <div className="flex items-center justify-between">
                                     <p className="font-semibold text-slate-700 dark:text-slate-300">Email updates for new AI models</p>
                                     <button
                                         type="button"
                                         onClick={() => handleTogglePreference('email_notifications', setEmailNotifications, emailNotifications)}
                                         role="switch" aria-checked={emailNotifications}
-                                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${emailNotifications ? 'bg-primary' : 'bg-slate-300'}`}
+                                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none hover-spring ${emailNotifications ? 'bg-primary' : 'bg-slate-300'}`}
                                     >
                                         <span className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${emailNotifications ? 'translate-x-6' : 'translate-x-0'}`} />
                                     </button>
@@ -708,7 +708,7 @@ export default function SettingsPage() {
                                         type="button"
                                         onClick={() => handleTogglePreference('push_notifications', setPushNotifications, pushNotifications)}
                                         role="switch" aria-checked={pushNotifications}
-                                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${pushNotifications ? 'bg-primary' : 'bg-slate-300'}`}
+                                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none hover-spring ${pushNotifications ? 'bg-primary' : 'bg-slate-300'}`}
                                     >
                                         <span className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${pushNotifications ? 'translate-x-6' : 'translate-x-0'}`} />
                                     </button>
@@ -719,7 +719,7 @@ export default function SettingsPage() {
                                         type="button"
                                         onClick={() => handleTogglePreference('weekly_reports', setWeeklyReports, weeklyReports)}
                                         role="switch" aria-checked={weeklyReports}
-                                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${weeklyReports ? 'bg-primary' : 'bg-slate-300'}`}
+                                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none hover-spring ${weeklyReports ? 'bg-primary' : 'bg-slate-300'}`}
                                     >
                                         <span className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${weeklyReports ? 'translate-x-6' : 'translate-x-0'}`} />
                                     </button>

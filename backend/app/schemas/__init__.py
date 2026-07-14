@@ -1,12 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import Optional, List
 from datetime import datetime
+import re
 
 class UserMessage(BaseModel):
     message: str
     session_id: Optional[str] = None
     tone: Optional[str] = "ทั่วไป"
     easy_language: Optional[bool] = False
+    document_id: Optional[int] = None
 
 class AgentResponse(BaseModel):
     status: str
@@ -32,6 +34,7 @@ class TemplateResponse(BaseModel):
     user_id: Optional[int] = None
     organization: Optional[str] = "ทั่วไป"
     is_favorite: Optional[bool] = False
+    likes_count: int = 0
     class Config:
         from_attributes = True
 
@@ -39,7 +42,7 @@ class HistoryResponse(BaseModel):
     id: int
     session_id: str
     user_message: str
-    agent_response: str
+    agent_response: Optional[str] = None
     fitted_prompt: Optional[str] = None
     tone: Optional[str] = None
     easy_language: Optional[bool] = False
@@ -49,10 +52,17 @@ class HistoryResponse(BaseModel):
         from_attributes = True
 
 class UserRegister(BaseModel):
-    username: str
-    password: str
-    full_name: Optional[str] = None
-    organization: Optional[str] = "ทั่วไป"
+    username: str = Field(..., min_length=3, max_length=50, pattern=r'^[a-zA-Z0-9_]+$')
+    password: str = Field(..., min_length=8, max_length=128)
+    full_name: Optional[str] = Field(None, max_length=100)
+    organization: Optional[str] = Field("ทั่วไป", max_length=100)
+    
+    @field_validator('password')
+    @classmethod
+    def password_strength(cls, v):
+        if len(v) < 8:
+            raise ValueError('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร')
+        return v
 
 class UserLogin(BaseModel):
     username: str
@@ -71,8 +81,8 @@ class UserProfile(BaseModel):
         from_attributes = True
 
 class UserUpdateProfile(BaseModel):
-    full_name: Optional[str] = None
-    email: Optional[str] = None
+    full_name: Optional[str] = Field(None, max_length=100)
+    email: Optional[EmailStr] = None
     default_tone: Optional[str] = "ทั่วไป"
 
 class UserUpdatePassword(BaseModel):
@@ -125,6 +135,7 @@ class DashboardStatsResponse(BaseModel):
 class DoctorRequest(BaseModel):
     prompt_text: str
     easy_language: Optional[bool] = False
+    document_id: Optional[int] = None
 
 class DoctorResponse(BaseModel):
     prompt_fit_score: int
@@ -259,5 +270,18 @@ class UserPreferenceResponse(BaseModel):
     email_notifications: bool = True
     push_notifications: bool = False
     weekly_reports: bool = True
+    class Config:
+        from_attributes = True
+
+# --- Feature 8: Social Login ---
+class SocialLoginRequest(BaseModel):
+    id_token: str
+
+# --- Feature 9: Knowledge Base ---
+class DocumentResponse(BaseModel):
+    id: int
+    filename: str
+    created_at: datetime
+
     class Config:
         from_attributes = True
