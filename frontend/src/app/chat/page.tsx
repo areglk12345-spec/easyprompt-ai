@@ -63,7 +63,7 @@ export default function ChatPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const attachFileInputRef = useRef<HTMLInputElement>(null);
 
-    const [selectedModel, setSelectedModel] = useState<string>('gemini-1.5-flash');
+    const [selectedModel, setSelectedModel] = useState<string>('gemini-3.1-flash-lite');
     const [attachedFiles, setAttachedFiles] = useState<{mime_type: string, data: string, name: string}[]>([]);
 
     const handleAttachFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -517,8 +517,8 @@ export default function ChatPage() {
                                 onChange={(e) => setSelectedModel(e.target.value)}
                                 className={`bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 outline-none focus:border-primary text-slate-600 dark:text-slate-300 font-bold ${isLarge ? 'text-base' : 'text-xs'}`}
                             >
-                                <option value="gemini-1.5-flash">Gemini 1.5 Flash (เร็ว)</option>
-                                <option value="gemini-1.5-pro">Gemini 1.5 Pro (ฉลาด)</option>
+                                <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (เร็ว)</option>
+                                <option value="gemini-3.1-pro">Gemini 3.1 Pro (ฉลาด)</option>
                             </select>
 
                             <span className="text-slate-500 dark:text-slate-400 font-semibold text-xs md:text-sm ml-2">{t('chat.tone')}</span>
