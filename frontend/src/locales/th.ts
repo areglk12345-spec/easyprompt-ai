@@ -1,4 +1,4 @@
-export default {
+const th = {
     "menu.home": "หน้าหลัก",
     "menu.chat": "แชท",
     "menu.history": "ประวัติ",
@@ -103,3 +103,5 @@ export default {
     "templates.filter.mine": "ส่วนตัวของฉัน",
     "templates.loading": "กำลังโหลดข้อมูล..."
   };
+
+export default th;

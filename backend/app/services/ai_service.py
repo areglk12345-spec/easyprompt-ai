@@ -30,7 +30,7 @@ def get_org_model(db: Session, organization_name: str) -> str:
         return setting.ai_model
     return MODEL_NAME
 
-def generate_stream_content(system_instruction: str, contents: str, model_name: str):
+def generate_stream_content(system_instruction: str, contents: any, model_name: str):
     """Helper method to call Gemini and stream response"""
     try:
         response = client.models.generate_content_stream(
@@ -46,7 +46,7 @@ def generate_stream_content(system_instruction: str, contents: str, model_name: 
         logger.error(f"Gemini API Stream Error: {err_str}")
         yield f"[ERROR] เกิดข้อผิดพลาด: {err_str}"
 
-def generate_json_content(system_instruction: str, contents: str, model_name: str) -> dict:
+def generate_json_content(system_instruction: str, contents: any, model_name: str) -> dict:
     """Helper method to call Gemini and parse JSON response reliably"""
     try:
         response = client.models.generate_content(

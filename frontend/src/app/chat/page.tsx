@@ -61,7 +61,34 @@ export default function ChatPage() {
     const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
     const [isUploadingDocument, setIsUploadingDocument] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const attachFileInputRef = useRef<HTMLInputElement>(null);
 
+    const [selectedModel, setSelectedModel] = useState<string>('gemini-1.5-flash');
+    const [attachedFiles, setAttachedFiles] = useState<{mime_type: string, data: string, name: string}[]>([]);
+
+    const handleAttachFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files) return;
+
+        Array.from(files).forEach(file => {
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`ไฟล์ ${file.name} มีขนาดใหญ่เกิน 5MB`);
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                if (event.target && typeof event.target.result === 'string') {
+                    setAttachedFiles(prev => [...prev, {
+                        name: file.name,
+                        mime_type: file.type,
+                        data: event.target!.result as string
+                    }]);
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+        if (attachFileInputRef.current) attachFileInputRef.current.value = '';
+    };
     const handleAnalyzeReadingLevel = async () => {
         if (!inputText.trim()) {
             alert("กรุณาพิมพ์ข้อความก่อนวิเคราะห์ครับ");
@@ -295,16 +322,22 @@ export default function ChatPage() {
                 { role: 'agent', text: '' },
             ]);
 
+            const payloadData: any = { 
+                message: messageToSend, 
+                session_id: sessionId, 
+                tone: selectedTone, 
+                easy_language: easyLanguage,
+                document_id: selectedDocument,
+                model: selectedModel
+            };
+            if (attachedFiles.length > 0) {
+                payloadData.files = attachedFiles.map(f => ({ mime_type: f.mime_type, data: f.data }));
+            }
+
             const response = await authFetch(`${API_URL}/api/chat/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    message: messageToSend, 
-                    session_id: sessionId, 
-                    tone: selectedTone, 
-                    easy_language: easyLanguage,
-                    document_id: selectedDocument 
-                }),
+                body: JSON.stringify(payloadData),
             });
 
             if (!response.ok) {
@@ -326,6 +359,7 @@ export default function ChatPage() {
                 };
                 return newMessages;
             });
+            setAttachedFiles([]); // Clear after sending
             
             // Trigger an event to let Sidebar know to update recent chats
             if (typeof window !== 'undefined') {
@@ -346,7 +380,7 @@ export default function ChatPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [inputText, isLoading, sessionId, selectedTone, easyLanguage, authFetch]);
+    }, [inputText, isLoading, sessionId, selectedTone, easyLanguage, authFetch, attachedFiles, selectedDocument, selectedModel]);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && sessionId && !hasSentQuery.current) {
@@ -477,7 +511,17 @@ export default function ChatPage() {
                     {/* Bottom Input Bar */}
                     <footer className="p-4 md:p-6 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/90 to-transparent dark:from-[#020617] dark:via-[#020617]/90 shrink-0 sticky bottom-0 z-20 pointer-events-none">
                         <div className="max-w-4xl mx-auto mb-3 flex flex-wrap items-center gap-2 pointer-events-auto">
-                            <span className="text-slate-500 dark:text-slate-400 font-semibold text-xs md:text-sm">{t('chat.tone')}</span>
+                            {/* Model Selector */}
+                            <select
+                                value={selectedModel}
+                                onChange={(e) => setSelectedModel(e.target.value)}
+                                className={`bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 outline-none focus:border-primary text-slate-600 dark:text-slate-300 font-bold ${isLarge ? 'text-base' : 'text-xs'}`}
+                            >
+                                <option value="gemini-1.5-flash">Gemini 1.5 Flash (เร็ว)</option>
+                                <option value="gemini-1.5-pro">Gemini 1.5 Pro (ฉลาด)</option>
+                            </select>
+
+                            <span className="text-slate-500 dark:text-slate-400 font-semibold text-xs md:text-sm ml-2">{t('chat.tone')}</span>
                             {[
                                 { key: 'ทั่วไป', label: t('chat.tone.general') },
                                 { key: 'ทางการ', label: t('chat.tone.formal') },
@@ -499,6 +543,27 @@ export default function ChatPage() {
                                 </button>
                             ))}
                         </div>
+
+                        {/* Attached Files Preview */}
+                        {attachedFiles.length > 0 && (
+                            <div className="max-w-4xl mx-auto mb-2 flex flex-wrap gap-2 pointer-events-auto">
+                                {attachedFiles.map((f, i) => (
+                                    <div key={i} className="flex items-center gap-1 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm text-xs">
+                                        <span className="text-slate-600 dark:text-slate-300 truncate max-w-[150px]">{f.name}</span>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setAttachedFiles(prev => prev.filter((_, idx) => idx !== i))}
+                                            className="text-rose-500 hover:text-rose-700"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3">
+                                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
                         <form onSubmit={sendMessage} className="max-w-4xl mx-auto flex gap-2 items-center bg-white/60 dark:bg-slate-800/40 backdrop-blur-xl p-2 rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 shadow-lg shadow-slate-200/20 dark:shadow-slate-900/50 pointer-events-auto">
                             <input
                                 id="chat-input"
@@ -519,23 +584,28 @@ export default function ChatPage() {
                                 ref={fileInputRef} 
                                 onChange={handleQuickUpload}
                             />
+                            <input 
+                                type="file" 
+                                multiple
+                                className="hidden" 
+                                ref={attachFileInputRef} 
+                                onChange={handleAttachFile}
+                            />
+
+                            {/* Attach File Button for Chat */}
                             <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => fileInputRef.current?.click()}
-                                disabled={isUploadingDocument}
-                                title="แนบเอกสาร (อัปโหลดเข้า Knowledge Base)"
-                                aria-label="แนบเอกสาร"
+                                onClick={() => attachFileInputRef.current?.click()}
+                                disabled={isLoading}
+                                title="แนบไฟล์รูปภาพ/เอกสารเข้าแชท"
+                                aria-label="แนบไฟล์เข้าแชท"
                                 className={`rounded-full transition-all shrink-0 cursor-pointer bg-transparent hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover-spring ${isLarge ? 'w-14 h-14' : 'w-10 h-10'}`}
                             >
-                                {isUploadingDocument ? (
-                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-600"></div>
-                                ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={isLarge ? 'w-7 h-7' : 'w-5 h-5'}>
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
-                                    </svg>
-                                )}
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={isLarge ? 'w-7 h-7' : 'w-5 h-5'}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
+                                </svg>
                             </Button>
 
                             <Button
@@ -551,6 +621,7 @@ export default function ChatPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
                                 </svg>
                             </Button>
+                            
                             <Button
                                 type="button"
                                 variant="ghost"
@@ -596,7 +667,7 @@ export default function ChatPage() {
                                 id="send-btn"
                                 type="submit"
                                 variant="primary"
-                                disabled={isLoading || !inputText.trim()}
+                                disabled={isLoading || (!inputText.trim() && attachedFiles.length === 0)}
                                 className={`bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold shadow-md shadow-indigo-100 dark:shadow-indigo-900/30 disabled:opacity-50 !border-none hover-spring ${isLarge ? 'w-14 h-14 px-4' : 'w-10 h-10 px-2'}`}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 mx-auto">

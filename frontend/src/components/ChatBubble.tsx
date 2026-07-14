@@ -72,45 +72,46 @@ export default function ChatBubble({
                     <div className="flex items-start justify-between gap-4 w-full">
                         <div className="leading-relaxed w-full overflow-x-auto min-w-0">
                             {role === 'agent' ? (
-                                <ReactMarkdown
-                                    remarkPlugins={[remarkGfm]}
-                                    components={{
-                                        code({node, inline, className, children, ...props}: any) {
-                                            const match = /language-(\w+)/.exec(className || '')
-                                            return !inline && match ? (
-                                                <div className="rounded-md overflow-hidden my-4 border border-slate-700/50">
-                                                    <div className="flex items-center justify-between px-4 py-1.5 bg-slate-800 text-slate-300 text-xs">
-                                                        <span>{match[1]}</span>
-                                                        <button
-                                                            onClick={() => {
-                                                                navigator.clipboard.writeText(String(children).replace(/\n$/, ''));
-                                                            }}
-                                                            className="hover:text-white flex items-center gap-1 transition-colors"
+                                <div className="prose dark:prose-invert prose-sm md:prose-base max-w-none break-words">
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
+                                        components={{
+                                            code({node, inline, className, children, ...props}: any) {
+                                                const match = /language-(\w+)/.exec(className || '')
+                                                return !inline && match ? (
+                                                    <div className="rounded-md overflow-hidden my-4 border border-slate-700/50">
+                                                        <div className="flex items-center justify-between px-4 py-1.5 bg-slate-800 text-slate-300 text-xs">
+                                                            <span>{match[1]}</span>
+                                                            <button
+                                                                onClick={() => {
+                                                                    navigator.clipboard.writeText(String(children).replace(/\n$/, ''));
+                                                                }}
+                                                                className="hover:text-white flex items-center gap-1 transition-colors"
+                                                            >
+                                                                <Copy className="w-3 h-3" /> Copy
+                                                            </button>
+                                                        </div>
+                                                        <SyntaxHighlighter
+                                                            {...props}
+                                                            style={vscDarkPlus as any}
+                                                            language={match[1]}
+                                                            PreTag="div"
+                                                            customStyle={{ margin: 0, border: 'none', borderRadius: 0, backgroundColor: '#0f172a' }}
                                                         >
-                                                            <Copy className="w-3 h-3" /> Copy
-                                                        </button>
+                                                            {String(children).replace(/\n$/, '')}
+                                                        </SyntaxHighlighter>
                                                     </div>
-                                                    <SyntaxHighlighter
-                                                        {...props}
-                                                        style={vscDarkPlus as any}
-                                                        language={match[1]}
-                                                        PreTag="div"
-                                                        customStyle={{ margin: 0, border: 'none', borderRadius: 0, backgroundColor: '#0f172a' }}
-                                                    >
-                                                        {String(children).replace(/\n$/, '')}
-                                                    </SyntaxHighlighter>
-                                                </div>
-                                            ) : (
-                                                <code {...props} className={`${className} bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-sm text-pink-600 dark:text-pink-400 font-mono`}>
-                                                    {children}
-                                                </code>
-                                            )
-                                        }
-                                    }}
-                                    className="prose dark:prose-invert prose-sm md:prose-base max-w-none break-words"
-                                >
-                                    {text}
-                                </ReactMarkdown>
+                                                ) : (
+                                                    <code {...props} className={`${className} bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-sm text-pink-600 dark:text-pink-400 font-mono`}>
+                                                        {children}
+                                                    </code>
+                                                )
+                                            }
+                                        }}
+                                    >
+                                        {text}
+                                    </ReactMarkdown>
+                                </div>
                             ) : (
                                 <div className="whitespace-pre-wrap">{text}</div>
                             )}

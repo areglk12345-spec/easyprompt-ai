@@ -1,4 +1,4 @@
-export default {
+const en = {
     "menu.home": "Home",
     "menu.chat": "Chat Assist",
     "menu.history": "History",
@@ -103,3 +103,5 @@ export default {
     "templates.filter.mine": "My Private",
     "templates.loading": "Loading data..."
   };
+  
+export default en;

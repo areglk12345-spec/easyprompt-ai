@@ -45,10 +45,12 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
                          f"ข้อความจากผู้ใช้ล่าสุด: {payload.message}\n\n" \
                          f"**สำคัญมาก:** ตอบกลับเป็นรูปแบบ JSON ตามโครงสร้างที่กำหนดเท่านั้น ห้ามพิมพ์ข้อความอธิบายใดๆ นอกเหนือจาก JSON"
         
-        model_to_use = MODEL_NAME
-        if current_user:
+        # 1. Model Selection
+        model_to_use = payload.model or MODEL_NAME
+        if not payload.model and current_user:
             model_to_use = get_org_model(db, current_user.organization)
             
+        if current_user:
             # Replace global prompt variables (e.g. {{company_name}} -> actual value)
             org_vars = db.query(models.OrgPromptVariable).filter(
                 models.OrgPromptVariable.org_name == current_user.organization
@@ -56,7 +58,27 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
             for var in org_vars:
                 prompt_to_send = prompt_to_send.replace("{{" + var.var_key + "}}", var.var_value)
 
-        ai_result = generate_json_content(SYSTEM_PROMPT, prompt_to_send, model_to_use)
+        # 2. File Upload Handling
+        contents = [prompt_to_send]
+        if payload.files:
+            import base64
+            from google.genai import types
+            for file_obj in payload.files:
+                if 'data' in file_obj and 'mime_type' in file_obj:
+                    try:
+                        # Extract base64 part if it contains data:image/png;base64,
+                        b64_data = file_obj['data']
+                        if "," in b64_data:
+                            b64_data = b64_data.split(",")[1]
+                        
+                        decoded_bytes = base64.b64decode(b64_data)
+                        contents.append(
+                            types.Part.from_bytes(data=decoded_bytes, mime_type=file_obj['mime_type'])
+                        )
+                    except Exception as parse_err:
+                        print(f"Error parsing file: {parse_err}")
+
+        ai_result = generate_json_content(SYSTEM_PROMPT, contents, model_to_use)
 
         new_chat = models.ChatHistory(
             session_id=payload.session_id or str(uuid.uuid4()),
@@ -111,14 +133,35 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
                          f"ผู้ใช้: {payload.message}\n\n" \
                          f"ตอบกลับข้อความถัดไปที่คุณจะคุยกับผู้ใช้แบบสั้นๆ กระชับ เป็นมิตร (ไม่ต้องมี JSON)"
         
-        model_to_use = MODEL_NAME
-        if current_user:
+        # 1. Model Selection
+        model_to_use = payload.model or MODEL_NAME
+        if not payload.model and current_user:
             model_to_use = get_org_model(db, current_user.organization)
+
+        if current_user:
             org_vars = db.query(models.OrgPromptVariable).filter(
                 models.OrgPromptVariable.org_name == current_user.organization
             ).all()
             for var in org_vars:
                 prompt_to_send = prompt_to_send.replace("{{" + var.var_key + "}}", var.var_value)
+
+        # 2. File Upload Handling
+        contents = [prompt_to_send]
+        if payload.files:
+            import base64
+            from google.genai import types
+            for file_obj in payload.files:
+                if 'data' in file_obj and 'mime_type' in file_obj:
+                    try:
+                        b64_data = file_obj['data']
+                        if "," in b64_data:
+                            b64_data = b64_data.split(",")[1]
+                        decoded_bytes = base64.b64decode(b64_data)
+                        contents.append(
+                            types.Part.from_bytes(data=decoded_bytes, mime_type=file_obj['mime_type'])
+                        )
+                    except Exception as parse_err:
+                        print(f"Error parsing file: {parse_err}")
 
         stream_system_prompt = (
             "คุณคือ AI ผู้ช่วยอัจฉริยะ (EasyPrompt Agent) ช่วยผู้ใช้เขียนหรือปรับแต่ง Prompt/ข้อความให้ดีที่สุด\n"
@@ -128,7 +171,7 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
         )
 
         def event_generator():
-            for chunk in generate_stream_content(stream_system_prompt, prompt_to_send, model_to_use):
+            for chunk in generate_stream_content(stream_system_prompt, contents, model_to_use):
                 # ใช้ replace newline ชั่วคราวเพื่อไม่ให้ SSE แตก (SSE แตกที่ \n\n)
                 clean_chunk = chunk.replace('\n', '\\n')
                 yield f"data: {clean_chunk}\n\n"
