@@ -24,7 +24,14 @@ logger = logging.getLogger("easyprompt")
 
 # Initialize Firebase Admin
 try:
-    cred = credentials.Certificate("firebase-service-account.json")
+    firebase_base64 = os.getenv("FIREBASE_SERVICE_ACCOUNT_BASE64")
+    if firebase_base64:
+        import base64
+        import json
+        decoded = base64.b64decode(firebase_base64).decode('utf-8')
+        cred = credentials.Certificate(json.loads(decoded))
+    else:
+        cred = credentials.Certificate("firebase-service-account.json")
     firebase_admin.initialize_app(cred)
     logger.info("Firebase Admin initialized successfully.")
 except Exception as e:
