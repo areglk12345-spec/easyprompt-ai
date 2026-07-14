@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AdminSidebar from '../../components/AdminSidebar';
 import UserMenu from '../../components/UserMenu';
@@ -36,7 +36,7 @@ type PromptVariable = {
     created_at: string;
 };
 
-export default function AdminPage() {
+function AdminPageContent() {
     const router = useRouter();
     const { authFetch, user, isLoggedIn, isLoading: authLoading } = useAuth();
     const { t } = useLanguage();
@@ -569,5 +569,17 @@ export default function AdminPage() {
                 </main>
             </div>
         </div>
+    );
+}
+
+export default function AdminPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
+                <div className="text-center font-semibold text-slate-500 animate-pulse">Loading Admin Panel...</div>
+            </div>
+        }>
+            <AdminPageContent />
+        </Suspense>
     );
 }
