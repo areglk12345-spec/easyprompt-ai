@@ -15,3 +15,4 @@ PyJWT==2.10.1
 PyPDF2==3.0.1
 python-multipart==0.0.9
 pg8000==1.31.2
+firebase-admin==6.5.0
