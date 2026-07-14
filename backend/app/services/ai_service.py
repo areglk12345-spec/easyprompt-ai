@@ -68,7 +68,7 @@ def generate_json_content(system_instruction: str, contents: any, model_name: st
         logger.error(f"Gemini API Error: {err_str}")
         if "429" in err_str or "quota" in err_str.lower() or "limit" in err_str.lower():
             raise HTTPException(status_code=429, detail="ขณะนี้ความต้องการใช้ AI สูงเกินกำหนดชั่วคราว (ฟรีโควตา 15 ครั้งต่อนาที) กรุณารอสักครู่แล้วลองอีกครั้ง ⏳")
-        raise HTTPException(status_code=500, detail="เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI")
+        raise HTTPException(status_code=500, detail=f"เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI: {err_str}")
 
 async def analyze_reading_level(text: str) -> dict:
     system_instruction = """

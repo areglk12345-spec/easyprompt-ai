@@ -46,6 +46,22 @@ async def lifespan(app: FastAPI):
     try:
         models.Base.metadata.create_all(bind=engine)
         logger.info("Database connected and tables created.")
+        
+        from sqlalchemy import text
+        with engine.begin() as conn:
+            try:
+                conn.execute(text("ALTER TABLE prompt_templates ADD COLUMN is_recommended BOOLEAN DEFAULT FALSE;"))
+            except Exception:
+                pass
+            try:
+                conn.execute(text("ALTER TABLE app_users ADD COLUMN credits INTEGER DEFAULT 100;"))
+            except Exception:
+                pass
+            try:
+                conn.execute(text("ALTER TABLE app_users ADD COLUMN is_premium BOOLEAN DEFAULT FALSE;"))
+            except Exception:
+                pass
+                
     except Exception as e:
         logger.warning(f"Cannot connect to Database: {e}")
         logger.warning("Running without DB - History/Templates features will not work.")
