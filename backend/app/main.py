@@ -70,13 +70,19 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": f"เกิดข้อผิดพลาดภายในระบบ: {str(exc)}"}
     )
 
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001").split(",")
+raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001")
+ALLOWED_ORIGINS = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+
+# Hardcode the new custom domain to guarantee it works regardless of Railway env vars
+if "https://easyprompt.piravat.space" not in ALLOWED_ORIGINS:
+    ALLOWED_ORIGINS.append("https://easyprompt.piravat.space")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=["*"],
 )
 
 @app.get("/health")
