@@ -7,6 +7,8 @@ import { FontSizeProvider } from '../context/FontSizeContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import { AccessibilityProvider } from '../context/AccessibilityContext';
 
+import { Toaster } from 'react-hot-toast';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
@@ -50,6 +52,7 @@ export default function RootLayout({
               <ThemeProvider>
                 <AccessibilityProvider>
                   {children}
+                  <Toaster position="bottom-right" />
                 </AccessibilityProvider>
               </ThemeProvider>
             </FontSizeProvider>

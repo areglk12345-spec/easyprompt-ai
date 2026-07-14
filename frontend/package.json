@@ -10,15 +10,19 @@
     },
     "dependencies": {
         "firebase": "^12.16.0",
+        "framer-motion": "^12.42.2",
         "lucide-react": "^1.21.0",
         "next": "^14.2.3",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
+        "react-hot-toast": "^2.6.0",
         "react-markdown": "^10.1.0",
+        "react-syntax-highlighter": "^16.1.1",
         "recharts": "^3.9.2",
         "remark-gfm": "^4.0.1"
     },
     "devDependencies": {
+        "@tailwindcss/typography": "^0.5.20",
         "@types/node": "^20",
         "@types/react": "^18",
         "@types/react-dom": "^18",

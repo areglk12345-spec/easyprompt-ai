@@ -1,4 +1,5 @@
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 export function usePromptActions() {
     const { authFetch, user } = useAuth();
@@ -50,7 +51,7 @@ export function usePromptActions() {
 
     const copyToClipboard = (text: string, source: string = 'chat') => {
         navigator.clipboard.writeText(text);
-        alert("📋 คัดลอก Prompt แล้ว!");
+        toast.success("คัดลอก Prompt แล้ว!", { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
         logActivity('copy_prompt', source);
     };
 
@@ -62,6 +63,7 @@ export function usePromptActions() {
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
+        toast.success("ดาวน์โหลดไฟล์ .txt แล้ว", { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
     };
 
     const downloadAsMarkdown = (text: string, title: string = "easyprompt") => {
@@ -72,6 +74,7 @@ export function usePromptActions() {
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
+        toast.success("ดาวน์โหลดไฟล์ .md แล้ว", { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
     };
 
     const saveToTemplate = async (promptText: string, defaultTitle: string = "Prompt แบบฟอร์มของฉัน", source: string = 'chat') => {
@@ -102,11 +105,11 @@ export function usePromptActions() {
 
             if (!response.ok) throw new Error('Failed to save template');
 
-            alert("✅ บันทึก Template สำเร็จแล้ว!");
+            toast.success("บันทึก Template สำเร็จแล้ว!", { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
             logActivity('save_template', source, category || 'ทั่วไป');
         } catch (error) {
             console.error("Error saving template:", error);
-            alert("❌ เกิดข้อผิดพลาด ไม่สามารถบันทึกได้");
+            toast.error("เกิดข้อผิดพลาด ไม่สามารถบันทึกได้", { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
         }
     };
 

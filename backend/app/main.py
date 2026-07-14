@@ -67,7 +67,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     logging.error(f"Global Exception on {request.url}: {exc}")
     return JSONResponse(
         status_code=500,
-        content={"detail": "เกิดข้อผิดพลาดภายในระบบ กรุณาลองใหม่อีกครั้ง"}
+        content={"detail": f"เกิดข้อผิดพลาดภายในระบบ: {str(exc)}"}
     )
 
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001").split(",")

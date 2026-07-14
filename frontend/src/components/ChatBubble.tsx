@@ -4,6 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { Zap, Save, Copy, Download, MessageSquare, Brain, Sparkles, Code, Activity, RefreshCw } from 'lucide-react';
 import { usePromptActions } from '../hooks/usePromptActions';
 import TTSButton from './TTSButton';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { motion } from 'framer-motion';
 
 interface ChatBubbleProps {
     index: number;
@@ -48,7 +53,12 @@ export default function ChatBubble({
     }, [fittedPrompt]);
 
     return (
-        <div className="flex flex-col gap-2 animate-slide-up">
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="flex flex-col gap-2"
+        >
             <div className={`flex ${role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
                     className={`max-w-[85%] md:max-w-[75%] flex flex-col gap-3 ${
@@ -59,8 +69,52 @@ export default function ChatBubble({
                             : 'bg-transparent text-slate-800 dark:text-slate-200 rounded-3xl rounded-tl-sm'
                     }`}
                 >
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="leading-relaxed">{text}</div>
+                    <div className="flex items-start justify-between gap-4 w-full">
+                        <div className="leading-relaxed w-full overflow-x-auto min-w-0">
+                            {role === 'agent' ? (
+                                <ReactMarkdown
+                                    remarkPlugins={[remarkGfm]}
+                                    components={{
+                                        code({node, inline, className, children, ...props}: any) {
+                                            const match = /language-(\w+)/.exec(className || '')
+                                            return !inline && match ? (
+                                                <div className="rounded-md overflow-hidden my-4 border border-slate-700/50">
+                                                    <div className="flex items-center justify-between px-4 py-1.5 bg-slate-800 text-slate-300 text-xs">
+                                                        <span>{match[1]}</span>
+                                                        <button
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText(String(children).replace(/\n$/, ''));
+                                                            }}
+                                                            className="hover:text-white flex items-center gap-1 transition-colors"
+                                                        >
+                                                            <Copy className="w-3 h-3" /> Copy
+                                                        </button>
+                                                    </div>
+                                                    <SyntaxHighlighter
+                                                        {...props}
+                                                        style={vscDarkPlus as any}
+                                                        language={match[1]}
+                                                        PreTag="div"
+                                                        customStyle={{ margin: 0, border: 'none', borderRadius: 0, backgroundColor: '#0f172a' }}
+                                                    >
+                                                        {String(children).replace(/\n$/, '')}
+                                                    </SyntaxHighlighter>
+                                                </div>
+                                            ) : (
+                                                <code {...props} className={`${className} bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-sm text-pink-600 dark:text-pink-400 font-mono`}>
+                                                    {children}
+                                                </code>
+                                            )
+                                        }
+                                    }}
+                                    className="prose dark:prose-invert prose-sm md:prose-base max-w-none break-words"
+                                >
+                                    {text}
+                                </ReactMarkdown>
+                            ) : (
+                                <div className="whitespace-pre-wrap">{text}</div>
+                            )}
+                        </div>
                         {role === 'agent' && (
                             <TTSButton text={displayPrompt ? `${text} ${displayPrompt}` : text} className="shrink-0 mt-1" />
                         )}
@@ -197,6 +251,6 @@ export default function ChatBubble({
                     ))}
                 </div>
             )}
-        </div>
+        </motion.div>
     );
 }

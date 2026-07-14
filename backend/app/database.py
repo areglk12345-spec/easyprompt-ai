@@ -13,6 +13,15 @@ if raw_db_url.startswith("postgres://") or raw_db_url.startswith("postgresql"):
     if "://" in raw_db_url:
         parts = raw_db_url.split("://", 1)
         raw_db_url = "postgresql://" + parts[1]
+    
+    # psycopg2 does not support the ?pgbouncer=true option from Supabase
+    if "?pgbouncer=true" in raw_db_url:
+        raw_db_url = raw_db_url.replace("?pgbouncer=true", "")
+        # Clean up dangling ? or &
+        if raw_db_url.endswith("?"):
+            raw_db_url = raw_db_url[:-1]
+        raw_db_url = raw_db_url.replace("?&", "?").replace("&&", "&")
+
 elif raw_db_url.startswith("mysql://"):
     raw_db_url = raw_db_url.replace("mysql://", "mysql+pymysql://", 1)
 
