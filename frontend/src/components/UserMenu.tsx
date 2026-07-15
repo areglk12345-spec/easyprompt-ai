@@ -77,7 +77,7 @@ export default function UserMenu() {
                     title={t('menu.logout')}
                 >
                     <LogOut className="w-4 h-4 shrink-0" />
-                    <span className="hidden 2xl:inline">{t('menu.logout')}</span>
+                    <span className="hidden">{t('menu.logout')}</span>
                 </button>
             </div>
         );
