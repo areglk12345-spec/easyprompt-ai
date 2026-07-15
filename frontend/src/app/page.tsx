@@ -90,7 +90,7 @@ export default function Home() {
                                 <span className="material-symbols-outlined text-2xl">menu</span>
                             </button>
                         </div>
-                        <div className="hidden md:flex items-center space-x-8">
+                        <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
                             <span className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest whitespace-nowrap">Workspace</span>
                             <span className="h-4 w-px bg-slate-200 dark:bg-slate-700"></span>
                             <Link href="/chat" className="text-primary dark:text-indigo-400 font-semibold text-sm hover:text-primary-dark transition-colors whitespace-nowrap">Chat Mode</Link>
