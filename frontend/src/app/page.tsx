@@ -18,7 +18,7 @@ export default function Home() {
     const [searchQuery, setSearchQuery] = useState('');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-    const isLarge = fontSize === 'large';
+    const isLarge = false; // Forced normal size
     const textSize = isLarge ? 'text-xl md:text-2xl' : 'text-sm md:text-base';
     const titleSize = isLarge ? 'text-4xl md:text-5xl' : 'text-3xl md:text-[40px]';
     const subtitleSize = isLarge ? 'text-lg md:text-xl' : 'text-sm md:text-md';

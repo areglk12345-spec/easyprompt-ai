@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Globe, Building2, User, Library, Briefcase, BookOpen, Palette, Pin, Star } from 'lucide-react';
 import UserMenu from '../../components/UserMenu';
@@ -40,7 +40,7 @@ export default function TemplatesPage() {
     const { authFetch, isLoggedIn, user } = useAuth();
     const { t } = useLanguage();
     const { fontSize } = useFontSize();
-    const isLarge = fontSize === 'large';
+    const isLarge = false; // Forced normal size
     const [templates, setTemplates] = useState<Template[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('ทั้งหมด');
@@ -54,28 +54,27 @@ export default function TemplatesPage() {
     const textSize = isLarge ? 'text-2xl' : 'text-base';
     const cardPadding = isLarge ? 'p-8' : 'p-6';
 
-    // ดึงข้อมูลเมื่อ activeCategory เปลี่ยน
-    useEffect(() => {
-        const fetchTemplates = async () => {
-            setIsLoading(true);
-            try {
-                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-                const url = activeCategory === 'ทั้งหมด'
-                    ? `${API_URL}/api/templates`
-                    : `${API_URL}/api/templates?category=${encodeURIComponent(activeCategory)}`;
-                const response = await authFetch(url);
-                if (!response.ok) throw new Error('Failed to fetch');
-                const data = await response.json();
-                setTemplates(data);
-            } catch (error) {
-                console.error("Error fetching templates:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchTemplates();
+    const fetchTemplates = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            const url = activeCategory === 'ทั้งหมด'
+                ? `${API_URL}/api/templates`
+                : `${API_URL}/api/templates?category=${encodeURIComponent(activeCategory)}`;
+            const response = await authFetch(url);
+            if (!response.ok) throw new Error('Failed to fetch');
+            const data = await response.json();
+            setTemplates(data);
+        } catch (error) {
+            console.error("Error fetching templates:", error);
+        } finally {
+            setIsLoading(false);
+        }
     }, [activeCategory, authFetch]);
+
+    useEffect(() => {
+        fetchTemplates();
+    }, [fetchTemplates]);
 
     const handleCreateTemplate = async (e: React.FormEvent) => {
         e.preventDefault();

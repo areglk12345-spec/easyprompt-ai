@@ -32,7 +32,7 @@ export default function ChatPage() {
     const { authFetch, user, refreshUser } = useAuth();
     const { t } = useLanguage();
     const { fontSize } = useFontSize();
-    const isLarge = fontSize === 'large';
+    const isLarge = false; // Forced normal size to match homepage scale
     const { logActivity, copyToClipboard, downloadAsTxt, downloadAsMarkdown, saveToTemplate, exportToPlatform, analyzeTextAccessibility } = usePromptActions();
 
     const [isReadingLevelModalOpen, setIsReadingLevelModalOpen] = useState(false);
@@ -452,32 +452,32 @@ export default function ChatPage() {
     }, [sessionId, sendMessage]);
 
     return (
-        <div className={`min-h-screen bg-transparent transition-all duration-300 ${isLarge ? 'text-lg' : 'text-sm'}`}>
+        <div className={`min-h-screen bg-transparent transition-all duration-300 ${isLarge ? 'text-base' : 'text-sm'}`}>
             <div className="flex min-h-screen">
                 <Sidebar activePage="chat" onNewChat={startNewChat} />
 
                 <main className="flex-1 flex flex-col bg-white dark:bg-slate-900 overflow-hidden h-screen relative transition-colors duration-300">
                     {/* Top AppBar */}
-                    <header className="sticky top-0 z-30 flex justify-between items-center pl-16 pr-4 md:px-12 w-full h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-700/30 shrink-0">
+                    <header className="sticky top-0 z-30 flex justify-between items-center pl-16 pr-4 md:px-12 w-full h-auto min-h-[5rem] py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-700/30 shrink-0 gap-2 flex-wrap">
                         <div className="flex items-center gap-4">
                             <Link href="/" className="font-bold text-primary dark:text-indigo-400 hover:text-primary-dark transition-colors flex items-center gap-1">
-                                &larr; {t('menu.home')}
+                                &larr; <span className="hidden sm:inline">{t('menu.home')}</span>
                             </Link>
                             <span className="h-4 w-px bg-slate-200 dark:bg-slate-700"></span>
-                            <span className="text-sm font-bold text-slate-800 dark:text-white">{t('chat.title')}</span>
+                            <span className="text-sm font-bold text-slate-800 dark:text-white hidden md:inline">{t('chat.title')}</span>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 ml-auto">
                             {sessionId && messages.length > 0 && (
                                 <button
                                     onClick={handleShareLink}
-                                    className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800/50"
+                                    className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800/50"
                                 >
                                     <span className="material-symbols-outlined text-sm">share</span>
                                     Share
                                 </button>
                             )}
                             <div className="flex items-center gap-2 mr-2">
-                                <span className={`text-slate-600 dark:text-slate-400 font-semibold ${isLarge ? 'text-lg' : 'text-sm'}`}>{t('home.easy_mode')}</span>
+                                <span className={`hidden xl:inline text-slate-600 dark:text-slate-400 font-semibold ${isLarge ? 'text-lg' : 'text-sm'}`}>{t('home.easy_mode')}</span>
                                 <button
                                     onClick={() => setEasyLanguage(!easyLanguage)}
                                     className={`w-12 h-6 rounded-full flex items-center transition-colors shadow-inner ${easyLanguage ? 'bg-primary' : 'bg-slate-300'}`}

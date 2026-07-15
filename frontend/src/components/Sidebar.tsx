@@ -22,6 +22,7 @@ type FolderItem = { id: number; name: string; color: string };
 export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
     const { t } = useLanguage();
     const { fontSize, toggleFontSize } = useFontSize();
+    const isLarge = false; // Forced normal size
     const { isDarkMode, themeMode, setThemeMode } = useTheme();
     const { authFetch, isLoggedIn, user } = useAuth();
     const { isSimplifiedUI } = useAccessibility();
@@ -221,7 +222,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                 />
             )}
 
-            <aside className={`fixed md:sticky top-0 h-screen py-8 px-6 bg-white/95 dark:bg-slate-900/95 md:bg-white/60 md:dark:bg-slate-900/40 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/50 ${fontSize === 'large' ? 'w-80' : 'w-72'} shrink-0 z-40 transition-transform duration-300 ease-in-out ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} flex flex-col`}>
+            <aside className={`fixed md:sticky top-0 h-screen py-8 px-6 bg-white/95 dark:bg-slate-900/95 md:bg-white/60 md:dark:bg-slate-900/40 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/50 w-64 shrink-0 z-40 transition-transform duration-300 ease-in-out ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} flex flex-col`}>
                 <div className="flex items-center space-x-3 px-2 mb-10 mt-6 md:mt-0">
                 <Link href="/" className="flex items-center space-x-3">
                     <div className="w-9 h-9 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary dark:text-indigo-400">

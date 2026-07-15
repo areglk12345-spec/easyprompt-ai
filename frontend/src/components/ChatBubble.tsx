@@ -62,7 +62,7 @@ export default function ChatBubble({
             <div className={`flex ${role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
                     className={`max-w-[85%] md:max-w-[75%] flex flex-col gap-3 ${
-                        isLarge ? 'p-6' : 'p-4'
+                        isLarge ? 'p-5' : 'p-4'
                     } ${
                         role === 'user'
                             ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-3xl rounded-tr-sm shadow-sm border border-slate-200/50 dark:border-slate-700/50'

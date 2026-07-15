@@ -12,9 +12,9 @@ export default function UserMenu() {
     const { language, toggleLanguage, t } = useLanguage();
     const { fontSize } = useFontSize();
 
-    const isLarge = fontSize === 'large';
-    const textSize = isLarge ? 'text-lg' : 'text-sm';
-    const buttonPadding = isLarge ? 'px-4 py-2' : 'px-3 py-1.5';
+    const isLarge = false; // Forced normal size as per user preference
+    const textSize = 'text-sm';
+    const buttonPadding = 'px-3 py-1.5';
 
     useEffect(() => {
         if (activeWorkspace) {
@@ -74,9 +74,10 @@ export default function UserMenu() {
                 <button
                     onClick={logout}
                     className={`font-bold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors border border-rose-200 dark:border-rose-700 hover:bg-rose-50/50 dark:hover:bg-rose-950/40 rounded-full cursor-pointer flex items-center gap-1 shadow-sm hover:scale-[1.02] active:scale-[0.98] ${buttonPadding} ${textSize}`}
+                    title={t('menu.logout')}
                 >
                     <LogOut className="w-4 h-4" />
-                    <span>{t('menu.logout')}</span>
+                    <span className="hidden 2xl:inline">{t('menu.logout')}</span>
                 </button>
             </div>
         );
