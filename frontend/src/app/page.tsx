@@ -91,11 +91,11 @@ export default function Home() {
                             </button>
                         </div>
                         <div className="hidden md:flex items-center space-x-8">
-                            <span className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Workspace</span>
+                            <span className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest whitespace-nowrap">Workspace</span>
                             <span className="h-4 w-px bg-slate-200 dark:bg-slate-700"></span>
-                            <Link href="/chat" className="text-primary dark:text-indigo-400 font-semibold text-sm hover:text-primary-dark transition-colors">Chat Mode</Link>
-                            <Link href="/doctor" className="text-slate-500 dark:text-slate-400 font-medium text-sm hover:text-primary dark:hover:text-indigo-400 transition-colors">Diagnostic</Link>
-                            <Link href="/templates" className="text-slate-500 dark:text-slate-400 font-medium text-sm hover:text-primary dark:hover:text-indigo-400 transition-colors">Shared Library</Link>
+                            <Link href="/chat" className="text-primary dark:text-indigo-400 font-semibold text-sm hover:text-primary-dark transition-colors whitespace-nowrap">Chat Mode</Link>
+                            <Link href="/doctor" className="text-slate-500 dark:text-slate-400 font-medium text-sm hover:text-primary dark:hover:text-indigo-400 transition-colors whitespace-nowrap">Diagnostic</Link>
+                            <Link href="/templates" className="text-slate-500 dark:text-slate-400 font-medium text-sm hover:text-primary dark:hover:text-indigo-400 transition-colors whitespace-nowrap">Shared Library</Link>
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-1">
