@@ -29,7 +29,7 @@ type Message = {
 };
 
 export default function ChatPage() {
-    const { authFetch, user } = useAuth();
+    const { authFetch, user, refreshUser } = useAuth();
     const { t } = useLanguage();
     const { fontSize } = useFontSize();
     const isLarge = fontSize === 'large';
@@ -334,7 +334,7 @@ export default function ChatPage() {
                 payloadData.files = attachedFiles.map(f => ({ mime_type: f.mime_type, data: f.data }));
             }
 
-            const response = await authFetch(`${API_URL}/api/chat/`, {
+            const response = await authFetch(`${API_URL}/api/chat/stream`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payloadData),
@@ -345,25 +345,80 @@ export default function ChatPage() {
                 throw new Error(errData.detail || 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
             }
 
-            const data = await response.json();
-
-            setMessages((prev) => {
-                const newMessages = [...prev];
-                newMessages[newMessages.length - 1] = {
-                    role: 'agent',
-                    text: data.agent_response || data.next_question,
-                    fittedPrompt: data.fitted_prompt,
-                    score: data.prompt_fit_score,
-                    explanation: data.score_explanation,
-                    suggestedOptions: data.suggested_options
-                };
-                return newMessages;
-            });
-            setAttachedFiles([]); // Clear after sending
+            if (!response.body) throw new Error("No response body");
             
-            // Trigger an event to let Sidebar know to update recent chats
-            if (typeof window !== 'undefined') {
-                window.dispatchEvent(new Event('chat_updated'));
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulatedText = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const dataStr = line.slice(6);
+                        if (dataStr.trim() === '[DONE]') {
+                            // Trigger an event to let Sidebar know to update recent chats
+                            if (typeof window !== 'undefined') {
+                                window.dispatchEvent(new Event('chat_updated'));
+                            }
+                            setAttachedFiles([]); // Clear after sending
+                            
+                            // Call refine endpoint to get fitted prompt
+                            try {
+                                const refinePayload = {
+                                    session_id: payloadData.session_id,
+                                    tone: payloadData.tone,
+                                    easy_language: payloadData.easy_language,
+                                    document_id: payloadData.document_id,
+                                    model: payloadData.model
+                                };
+                                const refineRes = await authFetch(`${API_URL}/api/chat/refine`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(refinePayload),
+                                });
+                                if (refineRes.ok) {
+                                    const refineData = await refineRes.json();
+                                    setMessages((prev) => {
+                                        const newMessages = [...prev];
+                                        newMessages[newMessages.length - 1] = {
+                                            ...newMessages[newMessages.length - 1],
+                                            fittedPrompt: refineData.fitted_prompt,
+                                            score: refineData.prompt_fit_score,
+                                            explanation: refineData.score_explanation,
+                                            suggestedOptions: refineData.suggested_options
+                                        };
+                                        return newMessages;
+                                    });
+                                }
+                            } catch (e) {
+                                console.error("Error refining prompt:", e);
+                            }
+                            
+                            // อัปเดตข้อมูล User (เพื่อดึงยอดเครดิตล่าสุด)
+                            await refreshUser();
+                            return;
+                        } else {
+                            // Restore newline
+                            const actualText = dataStr.replace(/\\n/g, '\n');
+                            accumulatedText += actualText;
+                            
+                            setMessages((prev) => {
+                                const newMessages = [...prev];
+                                newMessages[newMessages.length - 1] = {
+                                    role: 'agent',
+                                    text: accumulatedText
+                                };
+                                return newMessages;
+                            });
+                        }
+                    }
+                }
             }
         } catch (error: any) {
             console.error("Error sending message:", error);
@@ -380,7 +435,7 @@ export default function ChatPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [inputText, isLoading, sessionId, selectedTone, easyLanguage, authFetch, attachedFiles, selectedDocument, selectedModel]);
+    }, [inputText, isLoading, sessionId, selectedTone, easyLanguage, authFetch, attachedFiles, selectedDocument, selectedModel, refreshUser]);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && sessionId && !hasSentQuery.current) {

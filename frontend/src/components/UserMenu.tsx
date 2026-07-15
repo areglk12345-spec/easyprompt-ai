@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useFontSize } from '../context/FontSizeContext';
-import { Building2, User, LogOut, LogIn, Settings } from 'lucide-react';
+import { Building2, User, LogOut, LogIn, Settings, Zap } from 'lucide-react';
 
 export default function UserMenu() {
     const { user, logout, isLoggedIn, activeWorkspace, switchWorkspace } = useAuth();
@@ -42,7 +42,11 @@ export default function UserMenu() {
                         <User className="w-4 h-4" />
                         <span>{user.full_name || user.username}</span>
                     </div>
-                    
+
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 bg-amber-50/70 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-800 rounded-full font-bold text-amber-600 dark:text-amber-400 shadow-sm cursor-pointer hover:bg-amber-100/70 transition-colors ${textSize}`} title="ยอดเครดิตคงเหลือ (คลิกเพื่อเติมเงิน)">
+                        <Zap className="w-4 h-4 fill-amber-500" />
+                        <span>{user.credits ?? 0}</span>
+                    </div>
                     <div className="relative flex items-center hidden md:flex">
                         <select
                             aria-label="เลือก Workspace"

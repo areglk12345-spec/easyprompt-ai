@@ -99,7 +99,7 @@ export default function Home() {
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-1">
-                                <span className="text-xs font-bold text-primary dark:text-indigo-400 px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-800">Version 4.0 Pro</span>
+                                <span className="text-xs font-bold text-primary dark:text-indigo-400 px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-800">Version 1.0</span>
                             </div>
                             <UserMenu />
                         </div>

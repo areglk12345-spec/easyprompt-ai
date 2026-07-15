@@ -12,6 +12,13 @@ class UserMessage(BaseModel):
     model: Optional[str] = None
     files: Optional[List[dict]] = None
 
+class RefineMessage(BaseModel):
+    session_id: str
+    tone: Optional[str] = "ทั่วไป"
+    easy_language: Optional[bool] = False
+    document_id: Optional[int] = None
+    model: Optional[str] = None
+
 class AgentResponse(BaseModel):
     status: str
     next_question: Optional[str]
