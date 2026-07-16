@@ -118,12 +118,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (activeToken) {
             headers.set('Authorization', `Bearer ${activeToken}`);
         }
+
+        // Add X-Workspace header for Multi-tenant isolation
+        if (activeWorkspace) {
+            headers.set('X-Workspace', encodeURIComponent(activeWorkspace));
+        }
         
         return fetch(url, {
             ...options,
             headers
         });
-    }, [token]);
+    }, [token, activeWorkspace]);
 
     const refreshUser = async () => {
         try {

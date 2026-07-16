@@ -4,12 +4,16 @@ import json
 import hmac
 import hashlib
 import base64
+import urllib.parse
 from typing import Optional
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from .database import get_db
 from . import models
+
+def get_workspace(x_workspace: str = Header(default="ทั่วไป")) -> str:
+    return urllib.parse.unquote(x_workspace)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:

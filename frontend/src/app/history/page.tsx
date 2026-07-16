@@ -40,8 +40,8 @@ export default function HistoryPage() {
                 const sid = localStorage.getItem('ep_session_id');
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
                 const url = sid 
-                    ? `${API_URL}/api/history?session_id=${sid}` 
-                    : `${API_URL}/api/history`;
+                    ? `${API_URL}/api/history/?session_id=${sid}` 
+                    : `${API_URL}/api/history/`;
                 const response = await authFetch(url);
                 if (!response.ok) throw new Error('Failed to fetch history');
                 const data = await response.json();
@@ -167,7 +167,7 @@ export default function HistoryPage() {
                             <div className="glass-panel-heavy border border-amber-200 bg-amber-50/60 rounded-3xl p-5 text-slate-700 flex items-center gap-3 shadow-sm">
                                 <span className="shrink-0"><AlertTriangle className="w-8 h-8 text-amber-500" /></span>
                                 <div className="text-sm">
-                                    <span className="font-bold">คุณกำลังใช้งานในโหมดไม่แสดงตัวตน:</span> ประวัติการใช้งานย้อนหลังจะไม่ถูกเก็บบันทึกแบบถาวร เพื่อเข้าถึงได้จากทุกอุปกรณ์ กรุณา <Link href="/login" className="text-blue-600 hover:text-blue-700 font-extrabold underline">เข้าสู่ระบบที่นี่</Link>
+                                    <span className="font-bold">{t('history.incognito_warning_1')}</span>{t('history.incognito_warning_2')}<Link href="/login" className="text-blue-600 hover:text-blue-700 font-extrabold underline">{t('history.incognito_login')}</Link>
                                 </div>
                             </div>
                         )}
@@ -216,7 +216,7 @@ export default function HistoryPage() {
                                                                         </span>
                                                                         {item.easy_language && (
                                                                             <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 font-label-sm text-[10px] rounded uppercase tracking-tighter">
-                                                                                ภาษาง่าย
+                                                                                {t('history.easy_mode_badge')}
                                                                             </span>
                                                                         )}
                                                                     </div>

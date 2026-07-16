@@ -11,6 +11,7 @@ class UserMessage(BaseModel):
     document_id: Optional[int] = None
     model: Optional[str] = None
     files: Optional[List[dict]] = None
+    is_direct_run: Optional[bool] = False
 
 class RefineMessage(BaseModel):
     session_id: str
@@ -21,10 +22,10 @@ class RefineMessage(BaseModel):
 
 class AgentResponse(BaseModel):
     status: str
-    next_question: Optional[str]
+    next_question: Optional[str] = None
     fitted_prompt: Optional[str] = ""
-    prompt_fit_score: int
-    score_explanation: str
+    prompt_fit_score: Optional[int] = 0
+    score_explanation: Optional[str] = ""
     suggested_options: Optional[List[str]] = []
 
 class TemplateCreate(BaseModel):

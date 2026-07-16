@@ -7,6 +7,7 @@ import UserMenu from '../../components/UserMenu';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFontSize } from '../../context/FontSizeContext';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 
 type UserProfile = {
     id: number;
@@ -81,6 +82,10 @@ function AdminPageContent() {
     const [creditModal, setCreditModal] = useState<{userId: number; username: string} | null>(null);
     const [creditAmount, setCreditAmount] = useState(0);
     const [creditReason, setCreditReason] = useState('');
+
+    // Analytics state
+    const [analyticsData, setAnalyticsData] = useState<any>(null);
+    const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
     const fetchOrgSettings = useCallback(async () => {
         setIsLoading(true);
@@ -286,6 +291,23 @@ function AdminPageContent() {
         }
     };
 
+    // --- Analytics ---
+    const fetchAnalytics = useCallback(async () => {
+        setAnalyticsLoading(true);
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            const response = await authFetch(`${API_URL}/api/admin/analytics`);
+            if (response.ok) {
+                const data = await response.json();
+                setAnalyticsData(data);
+            }
+        } catch (err) {
+            console.error("Analytics Error:", err);
+        } finally {
+            setAnalyticsLoading(false);
+        }
+    }, [authFetch]);
+
     useEffect(() => {
         if (authLoading) return;
         if (!isLoggedIn || !user) {
@@ -307,8 +329,11 @@ function AdminPageContent() {
             fetchPromptVars();
         } else if (activeTab === 'templates') {
             fetchAdminTemplates();
+        } else if (activeTab === 'analytics') {
+            fetchAnalytics();
         }
-    }, [isLoggedIn, authLoading, user, router, activeTab, fetchUsers, fetchOrgSettings, fetchAuditLogs, fetchPromptVars, fetchAdminTemplates]);
+    }, [isLoggedIn, user, authLoading, router, activeTab, fetchUsers, fetchOrgSettings, fetchAuditLogs, fetchPromptVars, fetchAdminTemplates, fetchAnalytics]);
+
     const handleAddVariable = async () => {
         if (!newVarKey.trim() || !newVarValue.trim()) {
             alert('กรุณากรอกทั้งชื่อตัวแปรและค่า');
@@ -687,6 +712,77 @@ function AdminPageContent() {
                                                 </div>
                                             </div>
                                         ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Analytics Tab */}
+                        {activeTab === 'analytics' && (
+                            <div className="space-y-6 animate-slide-up">
+                                <div>
+                                    <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>📊 Analytics Report</h2>
+                                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">สถิติการใช้งาน AI ในองค์กร <strong className="text-indigo-600 dark:text-indigo-400">{user?.organization}</strong> (7 วันล่าสุด)</p>
+                                </div>
+                                
+                                {analyticsLoading || !analyticsData ? (
+                                    <div className="flex justify-center items-center h-40">
+                                        <div className="dot-flashing"></div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-8">
+                                        {/* Summary Cards */}
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                                                <div className="w-14 h-14 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                                    <span className="material-symbols-outlined text-3xl">chat</span>
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Prompts Generated</div>
+                                                    <div className="text-3xl font-black text-slate-800 dark:text-white">{analyticsData.summary?.total_prompts || 0}</div>
+                                                </div>
+                                            </div>
+                                            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                                                <div className="w-14 h-14 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                                    <span className="material-symbols-outlined text-3xl">target</span>
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Avg Fit Score</div>
+                                                    <div className="text-3xl font-black text-slate-800 dark:text-white">{analyticsData.summary?.avg_score || 0}<span className="text-lg text-slate-400">/100</span></div>
+                                                </div>
+                                            </div>
+                                            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                                                <div className="w-14 h-14 rounded-full bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                                    <span className="material-symbols-outlined text-3xl">group</span>
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Active Users (30d)</div>
+                                                    <div className="text-3xl font-black text-slate-800 dark:text-white">{analyticsData.summary?.active_users || 0}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Bar Chart */}
+                                        <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                                            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6">📈 การสร้าง Prompt รายวัน (7 วันล่าสุด)</h3>
+                                            <div className="h-72 w-full">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <BarChart
+                                                        data={analyticsData.chart_data || []}
+                                                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                                                    >
+                                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                                        <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />
+                                                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />
+                                                        <RechartsTooltip 
+                                                            cursor={{ fill: 'transparent' }}
+                                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: 'var(--tw-prose-body)' }}
+                                                        />
+                                                        <Bar dataKey="prompts" fill="#6366f1" radius={[6, 6, 0, 0]} name="Prompts" />
+                                                    </BarChart>
+                                                </ResponsiveContainer>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>

@@ -6,6 +6,7 @@ import { LanguageProvider } from '../context/LanguageContext';
 import { FontSizeProvider } from '../context/FontSizeContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import { AccessibilityProvider } from '../context/AccessibilityContext';
+import OnboardingModal from '../components/OnboardingModal';
 
 import { Toaster } from 'react-hot-toast';
 
@@ -53,6 +54,7 @@ export default function RootLayout({
                 <AccessibilityProvider>
                   {children}
                   <Toaster position="bottom-right" />
+                  <OnboardingModal />
                 </AccessibilityProvider>
               </ThemeProvider>
             </FontSizeProvider>

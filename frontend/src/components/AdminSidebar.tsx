@@ -3,13 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { Moon, Sun, Monitor } from 'lucide-react';
-import FontSizeToggle from './FontSizeToggle';
 import { useFontSize } from '../context/FontSizeContext';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 
 interface AdminSidebarProps {
-    activePage?: 'dashboard' | 'users' | 'settings' | 'audit' | 'variables' | 'templates';
+    activePage?: 'dashboard' | 'users' | 'settings' | 'audit' | 'variables' | 'templates' | 'analytics';
 }
 
 export default function AdminSidebar({ activePage }: AdminSidebarProps) {
@@ -42,6 +41,10 @@ export default function AdminSidebar({ activePage }: AdminSidebarProps) {
                 <Link href="/dashboard" className={activePage === 'dashboard' ? activeClass : inactiveClass}>
                     <span className="material-symbols-outlined">dashboard</span>
                     <span className="text-[15px]">แดชบอร์ดสถิติ</span>
+                </Link>
+                <Link href="/admin?tab=analytics" className={activePage === 'analytics' ? activeClass : inactiveClass}>
+                    <span className="material-symbols-outlined">analytics</span>
+                    <span className="text-[15px]">Analytics Report</span>
                 </Link>
                 
                 <div className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-6 mb-4 px-2 uppercase tracking-wider">Organization</div>
@@ -105,11 +108,6 @@ export default function AdminSidebar({ activePage }: AdminSidebarProps) {
                                 <Moon className="w-3.5 h-3.5 text-indigo-500" />
                             </button>
                         </div>
-                    </div>
-                    {/* Font Size Toggle */}
-                    <div className="flex items-center justify-between px-2 py-2">
-                        <span className="text-slate-500 dark:text-slate-400 font-semibold text-sm">Text Size</span>
-                        <FontSizeToggle isLarge={fontSize === 'large'} onToggle={toggleFontSize} />
                     </div>
                 </div>
             </div>

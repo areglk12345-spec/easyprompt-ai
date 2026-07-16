@@ -260,3 +260,66 @@ def list_all_templates_admin(
             "likes_count": len(tpl.favorited_by)
         })
     return results
+
+@router.get("/analytics")
+def get_analytics(current_admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    from sqlalchemy import func
+    from datetime import datetime, timedelta, timezone
+    
+    # Calculate last 7 days range
+    end_date = datetime.now(timezone.utc)
+    start_date = end_date - timedelta(days=7)
+    
+    # Total prompts generated
+    total_prompts = db.query(models.PromptActivityLog).filter(
+        models.PromptActivityLog.action.like("generate%")
+    ).count()
+    
+    # Average score
+    avg_score_result = db.query(func.avg(models.PromptActivityLog.score)).filter(
+        models.PromptActivityLog.score.isnot(None)
+    ).scalar()
+    avg_score = round(avg_score_result, 1) if avg_score_result else 0
+    
+    # Active users (who generated prompt in last 30 days)
+    active_users = db.query(models.PromptActivityLog.user_id).filter(
+        models.PromptActivityLog.created_at >= (end_date - timedelta(days=30))
+    ).distinct().count()
+    
+    # Chart Data (Last 7 days)
+    # Using python to group to avoid dialect-specific date formatting issues
+    recent_logs = db.query(models.PromptActivityLog).filter(
+        models.PromptActivityLog.created_at >= start_date,
+        models.PromptActivityLog.action.like("generate%")
+    ).all()
+    
+    from collections import defaultdict
+    daily_stats = defaultdict(lambda: {"count": 0, "total_score": 0, "score_count": 0})
+    
+    for log in recent_logs:
+        date_str = log.created_at.strftime("%Y-%m-%d")
+        daily_stats[date_str]["count"] += 1
+        if log.score:
+            daily_stats[date_str]["total_score"] += log.score
+            daily_stats[date_str]["score_count"] += 1
+            
+    # Format for recharts
+    chart_data = []
+    for i in range(6, -1, -1):
+        d = (end_date - timedelta(days=i)).strftime("%Y-%m-%d")
+        stats = daily_stats.get(d, {"count": 0, "total_score": 0, "score_count": 0})
+        avg_s = round(stats["total_score"] / stats["score_count"], 1) if stats["score_count"] > 0 else 0
+        chart_data.append({
+            "date": d[-5:], # Show MM-DD
+            "prompts": stats["count"],
+            "score": avg_s
+        })
+        
+    return {
+        "summary": {
+            "total_prompts": total_prompts,
+            "avg_score": avg_score,
+            "active_users": active_users
+        },
+        "chart_data": chart_data
+    }

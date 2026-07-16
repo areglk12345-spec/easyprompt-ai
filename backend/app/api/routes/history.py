@@ -1,6 +1,6 @@
 import uuid
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, auth
@@ -13,15 +13,17 @@ from app.schemas import (
 router = APIRouter()
 
 @router.get("/", response_model=List[HistoryResponse])
-def get_history(session_id: Optional[str] = None, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db)):
-    if session_id and current_user:
-        return db.query(models.ChatHistory).filter(models.ChatHistory.session_id == session_id, models.ChatHistory.user_id == current_user.id).order_by(models.ChatHistory.id.desc()).all()
-    elif session_id:
-        return db.query(models.ChatHistory).filter(models.ChatHistory.session_id == session_id).order_by(models.ChatHistory.id.desc()).all()
-    elif current_user:
-        return db.query(models.ChatHistory).filter(models.ChatHistory.user_id == current_user.id).order_by(models.ChatHistory.id.desc()).all()
+def get_history(session_id: Optional[str] = None, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db), x_workspace: str = Depends(auth.get_workspace)):
+    query = db.query(models.ChatHistory)
+    if current_user:
+        query = query.filter(models.ChatHistory.user_id == current_user.id)
+    if session_id:
+        query = query.filter(models.ChatHistory.session_id == session_id)
     else:
-        return []
+        # Only filter by workspace if we are fetching all history, not a specific session
+        query = query.filter(models.ChatHistory.workspace == x_workspace)
+        
+    return query.order_by(models.ChatHistory.id.desc()).all()
 
 @router.delete("/{history_id}")
 def delete_history(history_id: int, current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db)):
@@ -53,17 +55,19 @@ def delete_session(session_id: str, current_user: models.User = Depends(auth.get
 # --- Feature 4: Chat Folders ---
 
 @router.get("/folders", response_model=List[ChatFolderResponse])
-def get_folders(current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db)):
+def get_folders(current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db), x_workspace: str = Depends(auth.get_workspace)):
     return db.query(models.ChatFolder).filter(
-        models.ChatFolder.user_id == current_user.id
+        models.ChatFolder.user_id == current_user.id,
+        models.ChatFolder.workspace == x_workspace
     ).order_by(models.ChatFolder.id.desc()).all()
 
 @router.post("/folders", response_model=ChatFolderResponse)
-def create_folder(payload: ChatFolderCreate, current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db)):
+def create_folder(payload: ChatFolderCreate, current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db), x_workspace: str = Depends(auth.get_workspace)):
     folder = models.ChatFolder(
         user_id=current_user.id,
         name=payload.name,
-        color=payload.color or "#6366f1"
+        color=payload.color or "#6366f1",
+        workspace=x_workspace
     )
     db.add(folder)
     db.commit()

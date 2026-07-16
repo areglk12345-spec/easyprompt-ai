@@ -1,5 +1,5 @@
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, auth
@@ -8,15 +8,16 @@ from app.schemas import TemplateCreate, TemplateResponse
 router = APIRouter()
 
 @router.post("/", response_model=dict)
-def save_template(payload: TemplateCreate, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+def save_template(payload: TemplateCreate, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db), x_workspace: str = Depends(auth.get_workspace)):
     try:
         new_template = models.PromptTemplate(
             title=payload.title,
             prompt_text=payload.prompt_text,
             category=payload.category or "ทั่วไป",
             user_id=current_user.id if current_user else None,
-            is_public=payload.is_public if current_user and current_user.role == "admin" else False,
-            organization=payload.organization or (current_user.organization if current_user else "ทั่วไป")
+            is_public=payload.is_public if current_user else False,
+            organization=payload.organization or (current_user.organization if current_user else "ทั่วไป"),
+            workspace=x_workspace
         )
         db.add(new_template)
         db.commit()
@@ -27,28 +28,27 @@ def save_template(payload: TemplateCreate, current_user: Optional[models.User] =
         raise HTTPException(status_code=500, detail="ไม่สามารถบันทึก Template ได้")
 
 @router.get("/", response_model=List[TemplateResponse])
-def get_templates(category: Optional[str] = None, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+def get_templates(category: Optional[str] = None, type: Optional[str] = "all", current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db), x_workspace: str = Depends(auth.get_workspace)):
     query = db.query(models.PromptTemplate)
     if current_user:
-        org = current_user.organization
-        if current_user.role == "admin":
+        # Base filter by workspace for multi-tenant isolation
+        query = query.filter(models.PromptTemplate.workspace == x_workspace)
+        
+        if type == "personal":
+            query = query.filter(models.PromptTemplate.user_id == current_user.id)
+        elif type == "shared":
+            query = query.filter(models.PromptTemplate.is_public == True)
+        else: # "all"
             query = query.filter(
-                (models.PromptTemplate.organization == org) |
                 (models.PromptTemplate.user_id == current_user.id) |
                 (models.PromptTemplate.is_public == True)
             )
-        else:
-            query = query.filter(
-                (models.PromptTemplate.user_id == current_user.id) |
-                ((models.PromptTemplate.is_public == True) & (
-                    (models.PromptTemplate.organization == org) |
-                    (models.PromptTemplate.organization == "ทั่วไป") |
-                    (models.PromptTemplate.organization.is_(None))
-                ))
-            )
     else:
-        # Anonymous users only see public templates
-        query = query.filter(models.PromptTemplate.is_public == True)
+        # Anonymous users only see public templates in general workspace
+        query = query.filter(
+            models.PromptTemplate.is_public == True,
+            models.PromptTemplate.workspace == "ทั่วไป"
+        )
         
     if category and category != "ทั้งหมด":
         query = query.filter(models.PromptTemplate.category == category)

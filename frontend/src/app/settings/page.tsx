@@ -6,14 +6,17 @@ import Image from 'next/image';
 import UserMenu from '../../components/UserMenu';
 import Sidebar from '../../components/Sidebar';
 import { useAuth } from '../../context/AuthContext';
-import FontSizeToggle from '../../components/FontSizeToggle';
+import TextSizeSlider from '../../components/TextSizeSlider';
 import { useFontSize } from '../../context/FontSizeContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
+import { useTheme } from '../../context/ThemeContext';
+import { Sun, Moon, Monitor } from 'lucide-react';
 
 export default function SettingsPage() {
     const { user, authFetch, refreshUser } = useAuth();
     const { fontSize, toggleFontSize } = useFontSize();
     const { isHighContrast, isSimplifiedUI, toggleHighContrast, toggleSimplifiedUI } = useAccessibility();
+    const { themeMode, setThemeMode } = useTheme();
     const isLarge = fontSize === 'large';
     
     const [fullName, setFullName] = useState('');
@@ -423,13 +426,15 @@ export default function SettingsPage() {
                             </div>
                             <div className="glass-panel-heavy p-8 rounded-3xl space-y-8 shadow-sm">
                                 
-                                {/* Font Size Toggle */}
-                                <div className="flex items-center justify-between p-6 bg-primary/5 rounded-2xl border border-primary/10">
+                                {/* Font Size Slider */}
+                                <div className="flex flex-col p-6 bg-primary/5 rounded-2xl border border-primary/10 gap-6">
                                     <div className="space-y-1">
-                                        <p className="font-body-lg font-bold text-primary dark:text-indigo-400">Large Text (ขนาดตัวอักษรใหญ่)</p>
-                                        <p className="text-slate-500 dark:text-slate-400 text-sm">ปรับขนาดตัวอักษรทั้งหมดในระบบให้มีขนาดใหญ่ขึ้นเพื่อให้อ่านง่าย</p>
+                                        <p className="font-body-lg font-bold text-primary dark:text-indigo-400">Text Size (ขนาดตัวอักษร)</p>
+                                        <p className="text-slate-500 dark:text-slate-400 text-sm">เลื่อนเพื่อปรับขนาดตัวอักษรและหน้าต่างทั้งหมดในระบบให้เหมาะกับการอ่านของคุณ</p>
                                     </div>
-                                    <FontSizeToggle isLarge={isLarge} onToggle={toggleFontSize} size="md" />
+                                    <div className="w-full max-w-lg mx-auto">
+                                        <TextSizeSlider />
+                                    </div>
                                 </div>
 
                                 {/* Voice Navigation */}

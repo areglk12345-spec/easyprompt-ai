@@ -25,6 +25,7 @@ interface ChatBubbleProps {
     onDownloadAsTxt?: (promptText: string) => void;
     onDownloadAsMarkdown?: (promptText: string) => void;
     onSendOption?: (option: string) => void;
+    onRunPrompt?: (promptText: string) => void;
     onExportToPlatform?: (platform: 'chatgpt' | 'claude' | 'copilot' | 'gemini', promptText: string) => void;
 }
 
@@ -43,6 +44,7 @@ export default function ChatBubble({
     onDownloadAsTxt,
     onDownloadAsMarkdown,
     onSendOption,
+    onRunPrompt,
     onExportToPlatform,
 }: ChatBubbleProps) {
     const { logActivity } = usePromptActions();
@@ -125,9 +127,9 @@ export default function ChatBubble({
                         <div className="mt-2 bg-white/80 dark:bg-slate-800/80 p-4 rounded-xl border border-blue-100 dark:border-slate-600 text-sm shadow-sm">
                             {score !== undefined && (
                                 <div className="mb-3 p-3 bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50 rounded-lg flex items-center justify-between gap-4">
-                                    <div className="flex flex-col gap-1">
+                                    <div className="flex flex-col gap-1 w-full">
                                         <div className="text-xs font-bold text-indigo-800 dark:text-indigo-300">Prompt Fit Score</div>
-                                        {explanation && <div className="text-xs text-indigo-600/80 dark:text-indigo-400/80">{explanation}</div>}
+                                        {explanation && <div className="text-sm text-indigo-700 dark:text-indigo-200 mt-1">{explanation}</div>}
                                     </div>
                                     <div className={`text-2xl font-black ${score >= 80 ? 'text-emerald-500' : score >= 50 ? 'text-amber-500' : 'text-rose-500'}`}>
                                         {score}
@@ -135,95 +137,83 @@ export default function ChatBubble({
                                 </div>
                             )}
                             <div className="bg-slate-900 text-slate-100 rounded-xl overflow-hidden font-mono text-xs md:text-sm border border-slate-800 shadow-xl max-w-full">
-                                <div className="bg-slate-800/80 px-4 py-2 flex items-center gap-2 border-b border-slate-700/50">
-                                    <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80"></div>
-                                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
-                                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
-                                    <span className="ml-2 text-slate-400 text-[10px] uppercase font-bold tracking-widest">Optimized Prompt</span>
+                                <div className="bg-slate-800/80 px-4 py-2 flex items-center justify-between border-b border-slate-700/50">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80"></div>
+                                        <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+                                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
+                                        <span className="ml-2 text-slate-400 text-[10px] uppercase font-bold tracking-widest">Optimized Prompt</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        {onSaveToTemplate && (
+                                            <button onClick={() => onSaveToTemplate(displayPrompt!)} className="text-slate-500 hover:text-emerald-400 transition-colors p-1" title="Save as Template">
+                                                <Save className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                        {onCopyToClipboard && (
+                                            <button onClick={() => onCopyToClipboard(displayPrompt!)} className="text-slate-500 hover:text-white transition-colors p-1" title="Copy">
+                                                <Copy className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="p-4 overflow-x-auto whitespace-pre-wrap">
                                     {displayPrompt}
                                 </div>
                             </div>
 
-                            <div className="flex gap-2 flex-wrap mt-4">
-                                {onSaveToTemplate && (
-                                    <button
-                                        id={`save-template-btn-${index}`}
-                                        type="button"
-                                        onClick={() => onSaveToTemplate(displayPrompt!)}
-                                        className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg shadow-sm transition-all hover-spring flex items-center gap-2 cursor-pointer text-xs md:text-sm"
-                                    >
-                                        <Save className="w-4 h-4" /> บันทึกเป็น Template
-                                    </button>
-                                )}
-                                {onCopyToClipboard && (
-                                    <button
-                                        id={`copy-prompt-btn-${index}`}
-                                        type="button"
-                                        onClick={() => onCopyToClipboard(displayPrompt!)}
-                                        className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold rounded-lg transition-all hover-spring flex items-center gap-2 cursor-pointer border border-slate-200 dark:border-slate-600 text-xs md:text-sm"
-                                    >
-                                        <Copy className="w-4 h-4" /> คัดลอก
-                                    </button>
-                                )}
-                                {onDownloadAsTxt && (
-                                    <button
-                                        id={`download-txt-btn-${index}`}
-                                        type="button"
-                                        onClick={() => onDownloadAsTxt(displayPrompt!)}
-                                        className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-sm transition-all hover-spring flex items-center gap-2 cursor-pointer text-xs md:text-sm"
-                                    >
-                                        <Download className="w-4 h-4" /> ดาวน์โหลด .txt
-                                    </button>
-                                )}
-                                {onDownloadAsMarkdown && (
-                                    <button
-                                        id={`download-md-btn-${index}`}
-                                        type="button"
-                                        onClick={() => onDownloadAsMarkdown(displayPrompt!)}
-                                        className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-sm transition-all hover-spring flex items-center gap-2 cursor-pointer text-xs md:text-sm"
-                                    >
-                                        <Download className="w-4 h-4" /> ดาวน์โหลด .md
-                                    </button>
-                                )}
-
-                            </div>
-
                             {/* Export to external AI platforms */}
-                            <div className="mt-4 pt-3 border-t border-slate-200/50 dark:border-slate-600/50 space-y-2">
+                            <div className="mt-3 flex items-center gap-3">
                                 <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
                                     <span className="material-symbols-outlined text-xs">power</span>
-                                    <span>ส่งออกด่วน 1-Click (Quick Export)</span>
+                                    <span>Quick Export:</span>
                                 </div>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <div className="flex items-center gap-1">
                                     <button
                                         type="button"
                                         onClick={() => onExportToPlatform ? onExportToPlatform('chatgpt', displayPrompt!) : window.open(`https://chatgpt.com/?q=${encodeURIComponent(displayPrompt!)}`, '_blank')}
-                                        className="py-2 px-3 bg-slate-900/5 dark:bg-slate-700/30 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all hover-spring cursor-pointer border border-transparent shadow-sm"
+                                        className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
+                                        title="ChatGPT"
                                     >
-                                        <MessageSquare className="w-3.5 h-3.5" /> ChatGPT
+                                        <MessageSquare className="w-4 h-4" />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => onExportToPlatform ? onExportToPlatform('claude', displayPrompt!) : window.open(`https://claude.ai/new?q=${encodeURIComponent(displayPrompt!)}`, '_blank')}
-                                        className="py-2 px-3 bg-slate-900/5 dark:bg-slate-700/30 text-slate-700 dark:text-slate-300 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all hover-spring cursor-pointer border border-transparent shadow-sm"
+                                        className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-lg transition-colors"
+                                        title="Claude"
                                     >
-                                        <Brain className="w-3.5 h-3.5" /> Claude
+                                        <Brain className="w-4 h-4" />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => onExportToPlatform ? onExportToPlatform('gemini', displayPrompt!) : window.open(`https://gemini.google.com/app?q=${encodeURIComponent(displayPrompt!)}`, '_blank')}
-                                        className="py-2 px-3 bg-slate-900/5 dark:bg-slate-700/30 text-slate-700 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer border border-transparent shadow-sm"
+                                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                                        title="Gemini"
                                     >
-                                        <Sparkles className="w-3.5 h-3.5" /> Gemini
+                                        <Sparkles className="w-4 h-4" />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => onExportToPlatform ? onExportToPlatform('copilot', displayPrompt!) : window.open(`https://copilot.microsoft.com/?q=${encodeURIComponent(displayPrompt!)}`, '_blank')}
-                                        className="py-2 px-3 bg-slate-900/5 dark:bg-slate-700/30 text-slate-700 dark:text-slate-300 hover:bg-cyan-50 hover:text-cyan-700 hover:border-cyan-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer border border-transparent shadow-sm"
+                                        className="p-1.5 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 rounded-lg transition-colors"
+                                        title="Copilot"
                                     >
-                                        <Code className="w-3.5 h-3.5" /> Copilot
+                                        <Code className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <div className="ml-auto">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (onRunPrompt && displayPrompt) {
+                                                onRunPrompt(displayPrompt);
+                                            }
+                                        }}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary dark:text-indigo-400 rounded-lg text-xs font-bold transition-colors"
+                                    >
+                                        <Zap className="w-3.5 h-3.5" />
+                                        <span>ใช้ Prompt นี้เลย</span>
                                     </button>
                                 </div>
                             </div>

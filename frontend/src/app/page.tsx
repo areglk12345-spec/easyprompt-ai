@@ -90,17 +90,9 @@ export default function Home() {
                                 <span className="material-symbols-outlined text-2xl">menu</span>
                             </button>
                         </div>
-                        <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
-                            <span className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest whitespace-nowrap">Workspace</span>
-                            <span className="h-4 w-px bg-slate-200 dark:bg-slate-700"></span>
-                            <Link href="/chat" className="text-primary dark:text-indigo-400 font-semibold text-sm hover:text-primary-dark transition-colors whitespace-nowrap">Chat Mode</Link>
-                            <Link href="/doctor" className="text-slate-500 dark:text-slate-400 font-medium text-sm hover:text-primary dark:hover:text-indigo-400 transition-colors whitespace-nowrap">Diagnostic</Link>
-                            <Link href="/templates" className="text-slate-500 dark:text-slate-400 font-medium text-sm hover:text-primary dark:hover:text-indigo-400 transition-colors whitespace-nowrap">Shared Library</Link>
-                        </div>
+                        <div className="hidden md:block"></div>
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1">
-                                <span className="text-xs font-bold text-primary dark:text-indigo-400 px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-800">Version 1.0</span>
-                            </div>
+
                             <UserMenu />
                         </div>
                     </header>
@@ -142,6 +134,73 @@ export default function Home() {
                             </div>
                         </div>
                     </section>
+
+                    {/* Comparison Section */}
+                    <section className="py-16 px-6 md:px-12 bg-slate-50/50 dark:bg-slate-900/50">
+                        <div className="max-w-5xl mx-auto space-y-12">
+                            <div className="text-center max-w-2xl mx-auto">
+                                <h3 className={`font-extrabold text-slate-800 dark:text-white mb-4 ${isLarge ? 'text-3xl md:text-4xl' : 'text-2xl md:text-3xl'}`}>
+                                    ทำไมต้อง <span className="text-primary">EasyPrompt AI</span>
+                                </h3>
+                                <p className="text-slate-500 dark:text-slate-400 font-medium">
+                                    ให้การเขียน Prompt เป็นเรื่องง่าย ไม่ต้องจำโครงสร้าง <span className="text-slate-700 dark:text-slate-300 font-bold border-b-2 border-indigo-300">ไม่ต้องมีความรู้ IT</span> ก็สั่งงาน AI ได้แม่นยำ 
+                                </p>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-8 relative">
+                                {/* Decorator in middle */}
+                                <div className="hidden md:flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white dark:bg-slate-800 rounded-full shadow-lg items-center justify-center border-4 border-slate-50 dark:border-slate-900 text-slate-400 font-black">
+                                    VS
+                                </div>
+                                
+                                {/* Normal Generators */}
+                                <div className="bg-white dark:bg-slate-800/80 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-full h-2 bg-slate-200 dark:bg-slate-700"></div>
+                                    <h4 className="text-xl font-bold text-slate-700 dark:text-slate-300 mb-6 flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-slate-400">psychology</span>
+                                        Prompt Generator ทั่วไป
+                                    </h4>
+                                    <ul className="space-y-4">
+                                        {[
+                                            "กรอกข้อมูลเองทั้งหมดในฟอร์มเดียวยาวๆ",
+                                            "ถ้าคิดไม่ออก ไม่รู้จะพิมพ์อะไร ก็จะค้างไปเลย",
+                                            "ต้องก๊อปปี้ไปวางใน ChatGPT/Gemini เองทีหลัง",
+                                            "ไม่ได้เรียนรู้ว่า Prompt ที่ดีต้องเขียนยังไง"
+                                        ].map((text, i) => (
+                                            <li key={i} className="flex items-start gap-3 text-slate-500 dark:text-slate-400 font-medium">
+                                                <span className="material-symbols-outlined text-rose-400 shrink-0 mt-0.5">close</span>
+                                                <span>{text}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* EasyPrompt AI */}
+                                <div className="bg-primary/5 dark:bg-indigo-900/10 rounded-3xl p-8 border-2 border-primary/20 dark:border-indigo-500/30 shadow-md relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
+                                    <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
+                                    <h4 className="text-xl font-bold text-primary dark:text-indigo-400 mb-6 flex items-center gap-2">
+                                        <span className="material-symbols-outlined">bolt</span>
+                                        EasyPrompt AI
+                                    </h4>
+                                    <ul className="space-y-4">
+                                        {[
+                                            "AI ชวนคุย ถามทีละเรื่องทีละขั้น (Step-by-step)",
+                                            "มีปุ่มตัวเลือก (Options) ให้กด ไม่ต้องพิมพ์เองก็ได้",
+                                            "สร้างเสร็จ กดใช้ Prompt ตรงนั้นได้เลยทันที",
+                                            "โชว์คะแนน Prompt Fit Score ให้รู้ว่า Prompt ดีแค่ไหน"
+                                        ].map((text, i) => (
+                                            <li key={i} className="flex items-start gap-3 text-slate-700 dark:text-slate-300 font-bold">
+                                                <span className="material-symbols-outlined text-emerald-500 shrink-0 mt-0.5">check_circle</span>
+                                                <span>{text}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
 
                     {/* Bento Feature Grid */}
                     <section className="py-16 px-6 md:px-12">
@@ -205,24 +264,6 @@ export default function Home() {
                                         {t('home.bento.history.btn')}
                                     </button>
                                 </Link>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Secondary CTA */}
-                    <section className="py-12 px-6 md:px-12 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                        <div className="max-w-3xl mx-auto text-center space-y-6">
-                            <h4 className="text-2xl font-bold text-primary dark:text-indigo-400">{t('home.cta.title')}</h4>
-                            <p className="text-slate-500 dark:text-slate-400 font-semibold">
-                                {t('home.cta.desc')}
-                            </p>
-                            <div className="flex justify-center gap-4">
-                                <button
-                                    onClick={toggleFontSize}
-                                    className="px-8 py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-bold shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                                >
-                                    {isLarge ? t('home.cta.btn_senior_off') : t('home.cta.btn_senior_on')}
-                                </button>
                             </div>
                         </div>
                     </section>

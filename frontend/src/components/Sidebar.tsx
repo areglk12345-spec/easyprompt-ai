@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { Moon, Sun, Monitor, Menu, X } from 'lucide-react';
-import FontSizeToggle from './FontSizeToggle';
 import { useLanguage } from '../context/LanguageContext';
 import { useFontSize } from '../context/FontSizeContext';
 import { useTheme } from '../context/ThemeContext';
@@ -43,7 +42,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
         const fetchRecent = async () => {
             try {
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-                const response = await authFetch(`${API_URL}/api/history`);
+                const response = await authFetch(`${API_URL}/api/history/`);
                 if (response.ok) {
                     const data = await response.json();
                     const sessions: ChatItem[] = [];
@@ -101,7 +100,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
     const handleDeleteChat = async (e: React.MouseEvent, sessionId: string) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!window.confirm("คุณแน่ใจหรือไม่ที่จะลบประวัติการสนทนานี้?")) return;
+        if (!window.confirm(t('sidebar.delete_confirm'))) return;
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
             const res = await authFetch(`${API_URL}/api/history/session/${sessionId}`, { method: 'DELETE' });
@@ -115,7 +114,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                     localStorage.removeItem('ep_session_id');
                 }
             } else {
-                alert("ลบแชทล้มเหลว");
+                alert(t('sidebar.delete_failed'));
             }
         } catch (error) {
             console.error(error);
@@ -193,7 +192,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
             <button 
                 onClick={(e) => handleDeleteChat(e, chat.id)}
                 className="absolute right-2 opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-md transition-all"
-                title="ลบแชท"
+                title={t('sidebar.delete_chat')}
             >
                 <span className="material-symbols-outlined text-[16px] block">delete</span>
             </button>
@@ -236,45 +235,29 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
             </div>
             
             {onNewChat ? (
-                <button onClick={onNewChat} className="w-full py-3.5 px-4 bg-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all hover-spring cursor-pointer">
+                <button onClick={onNewChat} className="w-full py-3.5 px-4 bg-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all hover-spring cursor-pointer whitespace-nowrap">
                     <span className="material-symbols-outlined !wght-500">add</span>
                     New Chat
                 </button>
             ) : (
-                <Link href="/chat" onClick={() => { if(typeof window !== 'undefined') localStorage.removeItem('ep_session_id'); }} className="w-full py-3.5 px-4 bg-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all hover-spring cursor-pointer">
+                <Link href="/chat" onClick={() => { if(typeof window !== 'undefined') localStorage.removeItem('ep_session_id'); }} className="w-full py-3.5 px-4 bg-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all hover-spring cursor-pointer whitespace-nowrap">
                     <span className="material-symbols-outlined !wght-500">add</span>
                     New Chat
                 </Link>
             )}
             
-            <nav className="flex-1 space-y-2 mt-8">
+            <nav className="flex-1 space-y-2 mt-8 overflow-x-hidden">
                 <Link href="/chat" className={activePage === 'chat' ? activeClass : inactiveClass}>
-                    <span className="material-symbols-outlined">chat_bubble</span>
-                    <span className="text-[15px]">{t('menu.chat')}</span>
+                    <span className="material-symbols-outlined shrink-0">chat_bubble</span>
+                    <span className="text-[15px] whitespace-nowrap truncate">{t('menu.chat')}</span>
                 </Link>
                 <Link href="/templates" className={activePage === 'templates' ? activeClass : inactiveClass}>
-                    <span className="material-symbols-outlined">grid_view</span>
-                    <span className="text-[15px]">{t('sidebar.templates')}</span>
-                </Link>
-                <Link href="/marketplace" className={activePage === 'marketplace' ? activeClass : inactiveClass}>
-                    <span className="material-symbols-outlined">storefront</span>
-                    <span className="text-[15px]">Marketplace</span>
+                    <span className="material-symbols-outlined shrink-0">grid_view</span>
+                    <span className="text-[15px] whitespace-nowrap truncate">{t('sidebar.templates')}</span>
                 </Link>
                 <Link href="/doctor" className={activePage === 'doctor' ? activeClass : inactiveClass}>
-                    <span className="material-symbols-outlined">health_and_safety</span>
-                    <span className="text-[15px]">{t('menu.doctor')}</span>
-                </Link>
-                <Link href="/knowledge" className={activePage === 'knowledge' as any ? activeClass : inactiveClass}>
-                    <span className="material-symbols-outlined">folder_special</span>
-                    <span className="text-[15px]">Knowledge Base</span>
-                </Link>
-                <Link href="/history" className={activePage === 'history' ? activeClass : inactiveClass}>
-                    <span className="material-symbols-outlined">history</span>
-                    <span className="text-[15px]">{t('sidebar.history')}</span>
-                </Link>
-                <Link href="/settings" className={activePage === 'settings' ? activeClass : inactiveClass}>
-                    <span className="material-symbols-outlined">settings</span>
-                    <span className="text-[15px]">{t('menu.settings') || 'Settings'}</span>
+                    <span className="material-symbols-outlined shrink-0">health_and_safety</span>
+                    <span className="text-[15px] whitespace-nowrap truncate">{t('menu.doctor')}</span>
                 </Link>
             </nav>
 
@@ -282,7 +265,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
             {pinnedChats.length > 0 && (
                 <div className="mt-4 mb-1 space-y-1">
                     <div className="text-xs font-bold text-amber-500 dark:text-amber-400 mb-2 px-2 uppercase tracking-wider flex items-center gap-1">
-                        📌 Pinned
+                        📌 {t('sidebar.pinned')}
                     </div>
                     {pinnedChats.map(chat => renderChatItem(chat, true))}
                 </div>
@@ -291,7 +274,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
             {/* Folders */}
             {folders.length > 0 && (
                 <div className="mt-2 mb-1 space-y-1">
-                    <div className="text-xs font-bold text-slate-400 dark:text-slate-500 mb-2 px-2 uppercase tracking-wider">Folders</div>
+                    <div className="text-xs font-bold text-slate-400 dark:text-slate-500 mb-2 px-2 uppercase tracking-wider">{t('sidebar.folders')}</div>
                     {folders.map(folder => (
                         <div key={folder.id} className="px-3 py-1.5 text-[13px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2">
                             <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: folder.color }}></span>
@@ -304,8 +287,19 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
             {/* Recent Chats */}
             {recentChats.length > 0 && (
                 <div className="flex-1 overflow-y-auto mt-4 custom-scrollbar pr-2 space-y-1">
-                    <div className="text-xs font-bold text-slate-400 dark:text-slate-500 mb-3 px-2 uppercase tracking-wider">Recent Chats</div>
+                    <div className="text-xs font-bold text-slate-400 dark:text-slate-500 mb-3 px-2 uppercase tracking-wider">{t('sidebar.recent')}</div>
                     {recentChats.map(chat => renderChatItem(chat))}
+                    
+                    {/* View All History Link */}
+                    <div className="pt-2 pb-1">
+                        <Link 
+                            href="/history" 
+                            className="text-[13px] text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-indigo-400 flex items-center justify-center gap-1 py-1.5 transition-colors font-semibold whitespace-nowrap"
+                        >
+                            {t('sidebar.view_all') || 'ดูทั้งหมด'}
+                            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                        </Link>
+                    </div>
                 </div>
             )}
 
@@ -363,7 +357,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                         type="text"
                         value={newFolderName}
                         onChange={e => setNewFolderName(e.target.value)}
-                        placeholder="Folder name"
+                        placeholder={t('sidebar.new_folder')}
                         className="flex-1 text-xs px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white outline-none focus:border-primary"
                         onKeyDown={e => { if (e.key === 'Enter') handleCreateFolder(); if (e.key === 'Escape') setShowNewFolder(false); }}
                         autoFocus
@@ -378,78 +372,34 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                     className="mx-2 mt-2 text-xs text-slate-400 hover:text-primary font-semibold flex items-center gap-1 transition-colors"
                 >
                     <span className="material-symbols-outlined text-sm">create_new_folder</span>
-                    New Folder
+                    {t('sidebar.new_folder')}
                 </button>
             )}
 
-            {isLoggedIn && (
-                <div className="mx-2 mt-4 p-3 bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/30 rounded-xl flex items-center justify-between">
-                    <div>
-                        <div className="text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 mb-0.5">
-                            My Credits
-                        </div>
-                        <div className="text-lg font-black text-indigo-600 dark:text-indigo-400 leading-none">
-                            {user?.credits ?? 0}
-                            <span className="text-xs font-semibold text-slate-400 ml-1">💎</span>
-                        </div>
-                    </div>
-                    <Link href="/pricing" className="bg-indigo-600 hover:bg-indigo-700 text-white p-1.5 rounded-lg transition-colors shadow-sm" title="Top Up">
-                        <span className="material-symbols-outlined text-sm block">add</span>
+            {isLoggedIn && user?.role === 'admin' && (
+                <div className="mt-4 mb-2 mx-2 space-y-2">
+                    <Link 
+                        href="/dashboard" 
+                        className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl font-bold border border-indigo-100 dark:border-indigo-800/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all whitespace-nowrap"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">shield_person</span>
+                        {t('sidebar.admin')}
                     </Link>
                 </div>
             )}
-            {isLoggedIn && user?.role === 'admin' && (
-                <div className="mt-4 mb-2 mx-2">
+
+            {isLoggedIn && (
+                <div className={`mx-2 ${user?.role !== 'admin' ? 'mt-4 mb-2' : 'mb-2'}`}>
                     <Link 
-                        href="/dashboard" 
-                        className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl font-bold border border-indigo-100 dark:border-indigo-800/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all"
+                        href="/pricing" 
+                        className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl font-bold border border-amber-100 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all whitespace-nowrap"
                     >
-                        <span className="material-symbols-outlined text-[18px]">shield_person</span>
-                        โหมดแอดมิน
+                        <span className="material-symbols-outlined text-[18px]">electric_bolt</span>
+                        ซื้อเครดิต / อัปเกรด
                     </Link>
                 </div>
             )}
             
-            <div className="pt-6 mt-auto border-t border-outline-variant/30 dark:border-slate-700/50 space-y-3">
-                {/* Dark Mode Toggle with Auto-Sync */}
-                <div className="flex items-center justify-between px-2 py-3">
-                    <span className="text-slate-500 dark:text-slate-400 font-semibold text-sm flex items-center gap-2">
-                        {themeIcon}
-                        {themeLabel} Mode
-                    </span>
-                    <div className="flex items-center gap-1">
-                        {/* 3-way segmented control */}
-                        <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 gap-0.5">
-                            <button
-                                onClick={() => setThemeMode('light')}
-                                className={`p-1.5 rounded-md transition-all ${themeMode === 'light' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}
-                                title="Light"
-                            >
-                                <Sun className="w-3.5 h-3.5 text-amber-500" />
-                            </button>
-                            <button
-                                onClick={() => setThemeMode('system')}
-                                className={`p-1.5 rounded-md transition-all ${themeMode === 'system' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}
-                                title="System (Auto)"
-                            >
-                                <Monitor className="w-3.5 h-3.5 text-slate-500" />
-                            </button>
-                            <button
-                                onClick={() => setThemeMode('dark')}
-                                className={`p-1.5 rounded-md transition-all ${themeMode === 'dark' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'hover:bg-slate-200/50 dark:hover:bg-slate-700/50'}`}
-                                title="Dark"
-                            >
-                                <Moon className="w-3.5 h-3.5 text-indigo-500" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                {/* Font Size Toggle */}
-                <div className="flex items-center justify-between px-2 py-3">
-                    <span className="text-slate-500 dark:text-slate-400 font-semibold text-sm">Text Size</span>
-                    <FontSizeToggle isLarge={fontSize === 'large'} onToggle={toggleFontSize} />
-                </div>
-            </div>
         </aside>
         </>
     );

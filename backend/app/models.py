@@ -45,6 +45,7 @@ class ChatHistory(Base):
     user_id = Column(Integer, ForeignKey("app_users.id"), nullable=True)
     folder_id = Column(Integer, ForeignKey("chat_folders.id"), nullable=True)
     is_pinned = Column(Boolean, default=False)
+    workspace = Column(String(100), default="ทั่วไป")
 
     user = relationship("User", back_populates="chats")
     folder = relationship("ChatFolder", back_populates="chats")
@@ -57,6 +58,7 @@ class ChatFolder(Base):
     name = Column(String(100), nullable=False)
     color = Column(String(20), default="#6366f1")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    workspace = Column(String(100), default="ทั่วไป")
 
     user = relationship("User", back_populates="chat_folders")
     chats = relationship("ChatHistory", back_populates="folder")
@@ -73,6 +75,7 @@ class PromptTemplate(Base):
     is_public = Column(Boolean, default=False)
     is_recommended = Column(Boolean, default=False)
     organization = Column(String(100), default="ทั่วไป")
+    workspace = Column(String(100), default="ทั่วไป")
 
     creator = relationship("User", back_populates="templates")
     favorited_by = relationship("User", secondary=user_favorites, back_populates="favorite_templates")

@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Header
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, auth
@@ -17,7 +17,7 @@ router = APIRouter()
 
 @router.post("/", response_model=AgentResponse)
 @limiter.limit("20/minute")
-def chat_with_agent(request: Request, payload: UserMessage, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+def chat_with_agent(request: Request, payload: UserMessage, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db), x_workspace: str = Depends(auth.get_workspace)):
     try:
         past_chats = db.query(models.ChatHistory).filter(models.ChatHistory.session_id == payload.session_id).order_by(models.ChatHistory.id.desc()).limit(10).all()
         past_chats.reverse()
@@ -98,7 +98,8 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
             fitted_prompt=ai_result.get("fitted_prompt", ""),
             tone=payload.tone or "ทั่วไป",
             easy_language=payload.easy_language or False,
-            user_id=current_user.id if current_user else None
+            user_id=current_user.id if current_user else None,
+            workspace=x_workspace
         )
         db.add(new_chat)
         db.commit()
@@ -126,7 +127,7 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
 
 @router.post("/stream")
 @limiter.limit("20/minute")
-def stream_chat_with_agent(request: Request, payload: UserMessage, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+def stream_chat_with_agent(request: Request, payload: UserMessage, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db), x_workspace: str = Depends(auth.get_workspace)):
     try:
         past_chats = db.query(models.ChatHistory).filter(models.ChatHistory.session_id == payload.session_id).order_by(models.ChatHistory.id.desc()).limit(10).all()
         past_chats.reverse()
@@ -186,12 +187,20 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
                     except Exception as parse_err:
                         print(f"Error parsing file: {parse_err}")
 
-        stream_system_prompt = (
-            "คุณคือ AI ผู้ช่วยอัจฉริยะ (EasyPrompt Agent) ช่วยผู้ใช้เขียนหรือปรับแต่ง Prompt/ข้อความให้ดีที่สุด\n"
-            "กฎสำคัญ:\n"
-            "1. หากคำถามผู้ใช้ยังไม่ชัดเจนหรือกว้างเกินไป ให้ถามกลับสั้นๆ 1 คำถามเพื่อขอข้อมูลเพิ่ม\n"
-            "2. หากข้อมูลชัดเจนพอแล้ว หรือผู้ใช้แค่ต้องการคำแนะนำสั้นๆ (เช่น ปรับคำสุภาพ, แปลภาษา, แก้ประโยค) ให้ตอบผลลัพธ์ให้ทันที ห้ามถามคำถามต่อ"
-        )
+        if getattr(payload, 'is_direct_run', False):
+            stream_system_prompt = (
+                "คุณคือผู้ช่วย AI อัจฉริยะ (EasyPrompt Assistant)\n"
+                "โปรดตอบคำถามหรือทำตามคำสั่งของผู้ใช้อย่างดีที่สุด ให้ข้อมูลที่ครบถ้วนและมีประโยชน์ เป็นธรรมชาติและเป็นกันเอง"
+            )
+        else:
+            stream_system_prompt = (
+                "คุณคือ AI ผู้ช่วยอัจฉริยะ (EasyPrompt Agent) ช่วยผู้ใช้เขียนหรือปรับแต่ง Prompt/ข้อความให้ดีที่สุด\n"
+                "กฎสำคัญ:\n"
+                "1. วิเคราะห์ว่าผู้ใช้บอกข้อมูลครบ 4 มิติหรือไม่ (เป้าหมาย, กลุ่มเป้าหมาย, โทนภาษา, รายละเอียด)\n"
+                "2. หากข้อมูลยังไม่ครบ ให้คุณถามกลับ 'เพียงแค่ 1 คำถามเท่านั้น' เพื่อขอข้อมูลที่ยังขาดหายไป ห้ามร่างข้อความให้เด็ดขาด\n"
+                "3. ห้ามทักทายยืดยาว หรือพูดว่า 'ยินดีด้วย' ให้เข้าเรื่องและถามคำถามทันทีอย่างสุภาพ เช่น 'ได้เลยครับ อยากทราบว่า...'\n"
+                "4. หากข้อมูลชัดเจนครบถ้วนแล้ว หรือผู้ใช้แค่ต้องการคำแนะนำสั้นๆ ให้ตอบรับสั้นๆ ว่า 'ข้อมูลครบถ้วนแล้ว กำลังสร้าง Prompt ให้คุณครับ...' (ห้ามถามคำถามต่อ)"
+            )
 
         def event_generator():
             import uuid
@@ -210,7 +219,8 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
                     fitted_prompt="",
                     tone=payload.tone or "ทั่วไป",
                     easy_language=payload.easy_language or False,
-                    user_id=current_user.id if current_user else None
+                    user_id=current_user.id if current_user else None,
+                    workspace=x_workspace
                 )
                 db.add(new_chat)
                 db.commit()
@@ -225,11 +235,12 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
 
 @router.post("/refine", response_model=AgentResponse)
 @limiter.limit("20/minute")
-def refine_chat_prompt(request: Request, payload: RefineMessage, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+def refine_chat_prompt(request: Request, payload: RefineMessage, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db), x_workspace: str = Depends(auth.get_workspace)):
     try:
         # Get the latest chat message in this session
         last_chat = db.query(models.ChatHistory).filter(
-            models.ChatHistory.session_id == payload.session_id
+            models.ChatHistory.session_id == payload.session_id,
+            models.ChatHistory.workspace == x_workspace
         ).order_by(models.ChatHistory.id.desc()).first()
 
         if not last_chat:
