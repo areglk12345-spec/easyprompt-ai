@@ -287,3 +287,56 @@ html.high-contrast button.bg-primary {
     background-color: #fff !important;
     color: #000 !important;
 }
+
+/* Premium Typography Refinements */
+h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+
+p {
+    line-height: 1.6;
+}
+
+/* Mesh Gradients */
+.mesh-bg {
+    background: radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+    background-size: 200% 200%;
+    animation: mesh-movement 15s ease infinite alternate;
+}
+
+.mesh-bg-light {
+    background: radial-gradient(at 0% 0%, hsla(253, 100%, 95%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(225, 100%, 90%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(339, 100%, 95%, 1) 0, transparent 50%);
+    background-size: 200% 200%;
+    animation: mesh-movement 15s ease infinite alternate;
+}
+
+@keyframes mesh-movement {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Premium Component Shadows & Glows */
+.ai-glow-border {
+    position: relative;
+}
+.ai-glow-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #4648d4, #8b5cf6, #06b6d4, #4648d4);
+    background-size: 200% 200%;
+    animation: ai-glow-spin 4s linear infinite;
+    z-index: -1;
+}
+
+@keyframes ai-glow-spin {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}

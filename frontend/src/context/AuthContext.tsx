@@ -30,6 +30,9 @@ type AuthContextType = {
     logout: () => void;
     refreshUser: () => Promise<void>;
     authFetch: (url: string, options?: RequestInit) => Promise<Response>;
+    isLoginModalOpen: boolean;
+    openLoginModal: () => void;
+    closeLoginModal: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,6 +42,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [activeWorkspace, setActiveWorkspace] = useState<string>('ทั่วไป');
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+    const openLoginModal = () => setIsLoginModalOpen(true);
+    const closeLoginModal = () => setIsLoginModalOpen(false);
 
     useEffect(() => {
         // Load token and user from localStorage on mount
@@ -103,6 +110,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setActiveWorkspace('ทั่วไป');
         localStorage.removeItem('ep_token');
         localStorage.removeItem('ep_user');
+        localStorage.removeItem('ep_onboarding_completed');
+        localStorage.removeItem('ep_session_id');
     };
 
     const switchWorkspace = (workspace: string) => {
@@ -154,7 +163,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             register,
             logout,
             refreshUser,
-            authFetch
+            authFetch,
+            isLoginModalOpen,
+            openLoginModal,
+            closeLoginModal
         }}>
             {children}
         </AuthContext.Provider>

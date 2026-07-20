@@ -7,7 +7,7 @@ import { useFontSize } from '../../../context/FontSizeContext';
 
 export default function Verify2FAPage() {
     const router = useRouter();
-    const { login2fa } = useAuth();
+    const { login2fa, openLoginModal } = useAuth();
     const { fontSize } = useFontSize();
     const isLarge = fontSize === 'large';
 
@@ -21,7 +21,8 @@ export default function Verify2FAPage() {
     useEffect(() => {
         // If no pending username, redirect back to login
         if (typeof window !== 'undefined' && !sessionStorage.getItem('ep_2fa_pending')) {
-            router.push('/login');
+            openLoginModal();
+            router.push('/');
         }
         // Focus first input
         inputRefs.current[0]?.focus();
@@ -163,10 +164,11 @@ export default function Verify2FAPage() {
                         <p className="text-slate-400 dark:text-slate-500 text-xs">
                             เปิดแอป Google Authenticator หรือ Authy แล้วกรอกรหัสที่แสดงอยู่
                         </p>
-                        <button
+                        <button 
                             onClick={() => {
                                 sessionStorage.removeItem('ep_2fa_pending');
-                                router.push('/login');
+                                openLoginModal();
+                                router.push('/');
                             }}
                             className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm font-bold transition-colors"
                         >

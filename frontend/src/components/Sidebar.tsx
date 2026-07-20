@@ -9,6 +9,9 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { useState, useEffect, useRef } from 'react';
+import UserMenu from './UserMenu';
+import AccessibilityModal from './AccessibilityModal';
+import HelpTooltip from './HelpTooltip';
 
 interface SidebarProps {
     activePage?: 'chat' | 'templates' | 'doctor' | 'history' | 'admin' | 'home' | 'settings' | 'dashboard' | 'marketplace' | 'knowledge';
@@ -19,7 +22,7 @@ type ChatItem = { id: string; title: string; is_pinned?: boolean; folder_id?: nu
 type FolderItem = { id: number; name: string; color: string };
 
 export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
-    const { t } = useLanguage();
+    const { t, language, toggleLanguage } = useLanguage();
     const { fontSize, toggleFontSize } = useFontSize();
     const isLarge = false; // Forced normal size
     const { isDarkMode, themeMode, setThemeMode } = useTheme();
@@ -35,6 +38,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
     const [contextMenu, setContextMenu] = useState<{x: number; y: number; chatId: string; isPinned: boolean} | null>(null);
     const [showNewFolder, setShowNewFolder] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
+    const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
     const contextMenuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -245,7 +249,6 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                     New Chat
                 </Link>
             )}
-            
             <nav className="flex-1 space-y-2 mt-8 overflow-x-hidden">
                 <Link href="/chat" className={activePage === 'chat' ? activeClass : inactiveClass}>
                     <span className="material-symbols-outlined shrink-0">chat_bubble</span>
@@ -255,7 +258,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                     <span className="material-symbols-outlined shrink-0">grid_view</span>
                     <span className="text-[15px] whitespace-nowrap truncate">{t('sidebar.templates')}</span>
                 </Link>
-                <Link href="/doctor" className={activePage === 'doctor' ? activeClass : inactiveClass}>
+                <Link href="/doctor" title="ระบบช่วยตรวจและปรับปรุง Prompt ของคุณให้ดีขึ้น (Dr. Prompt)" className={activePage === 'doctor' ? activeClass : inactiveClass}>
                     <span className="material-symbols-outlined shrink-0">health_and_safety</span>
                     <span className="text-[15px] whitespace-nowrap truncate">{t('menu.doctor')}</span>
                 </Link>
@@ -388,19 +391,61 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                 </div>
             )}
 
-            {isLoggedIn && (
-                <div className={`mx-2 ${user?.role !== 'admin' ? 'mt-4 mb-2' : 'mb-2'}`}>
-                    <Link 
-                        href="/pricing" 
-                        className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl font-bold border border-amber-100 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all whitespace-nowrap"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">electric_bolt</span>
-                        ซื้อเครดิต / อัปเกรด
-                    </Link>
+            {/* Credits System Display */}
+            {isLoggedIn && user?.role !== 'admin' && (
+                <div className="mx-4 mb-3">
+                    <div className="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-3 border border-amber-100 dark:border-amber-800/50 flex items-center justify-between shadow-sm">
+                        <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-amber-500 text-[20px]">bolt</span>
+                            <span className="text-xs font-bold text-amber-700 dark:text-amber-400">AI Credits</span>
+                        </div>
+                        <span className="font-black text-amber-600 dark:text-amber-300">{user?.credits?.toLocaleString() || 0}</span>
+                    </div>
                 </div>
             )}
+
+            {/* Bottom Utilities Row */}
+            <div className="mt-auto pt-4 pb-2 px-4 flex items-center justify-around text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800">
+                {/* Language Toggle */}
+                <button
+                    onClick={toggleLanguage}
+                    title="Change Language"
+                    className="p-2 hover:text-primary dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all flex items-center justify-center font-bold text-xs"
+                >
+                    <span className="material-symbols-outlined text-lg mr-1">language</span>
+                    {language === 'th' ? 'TH' : 'EN'}
+                </button>
+
+                {/* Accessibility Modal Toggle */}
+                <button
+                    onClick={() => setIsAccessibilityOpen(true)}
+                    title="Accessibility & Display"
+                    className="p-2 hover:text-primary dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all flex items-center justify-center"
+                >
+                    <span className="material-symbols-outlined text-lg">visibility</span>
+                </button>
+
+                {/* Settings Link */}
+                <Link
+                    href="/settings"
+                    title="Settings"
+                    className="p-2 hover:text-primary dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all flex items-center justify-center"
+                >
+                    <span className="material-symbols-outlined text-lg">settings</span>
+                </Link>
+            </div>
             
+            {/* User Profile / Menu at the bottom */}
+            <div className="pb-2 px-2 border-t border-slate-100 dark:border-slate-800 pt-2">
+                <UserMenu />
+            </div>
+
         </aside>
+
+        <AccessibilityModal 
+            isOpen={isAccessibilityOpen} 
+            onClose={() => setIsAccessibilityOpen(false)} 
+        />
         </>
     );
 }

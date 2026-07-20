@@ -52,7 +52,7 @@ type AdminTemplate = {
 
 function AdminPageContent() {
     const router = useRouter();
-    const { authFetch, user, isLoggedIn, isLoading: authLoading } = useAuth();
+    const { authFetch, user, isLoggedIn, isLoading: authLoading, openLoginModal } = useAuth();
     const { t } = useLanguage();
     const { fontSize } = useFontSize();
     const isLarge = fontSize === 'large';
@@ -311,7 +311,8 @@ function AdminPageContent() {
     useEffect(() => {
         if (authLoading) return;
         if (!isLoggedIn || !user) {
-            router.push('/login');
+            openLoginModal();
+            router.push('/');
             return;
         }
         if (user.role !== 'admin') {
@@ -414,7 +415,6 @@ function AdminPageContent() {
                             </span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <UserMenu />
                         </div>
                     </header>
 

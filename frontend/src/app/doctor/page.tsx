@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import UserMenu from '../../components/UserMenu';
 import Sidebar from '../../components/Sidebar';
+import HelpTooltip from '../../components/HelpTooltip';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFontSize } from '../../context/FontSizeContext';
@@ -104,7 +105,13 @@ export default function DoctorPage() {
                                 <span className="material-symbols-outlined text-primary dark:text-indigo-400 text-3xl">medical_services</span>
                                 {t('doctor.title')}
                             </span>
-                            <span className="px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-[10px]">BETA</span>
+                            <div className="flex items-center gap-2">
+                                <span className="px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-[10px]">BETA</span>
+                                <HelpTooltip 
+                                    title="หมอพร้อมพ์ (Dr. Prompt)" 
+                                    content="ระบบช่วยวิเคราะห์และปรับปรุงคำสั่ง Prompt ของคุณให้ดีขึ้น ชัดเจนขึ้น และมีประสิทธิภาพมากขึ้น เพื่อให้ AI ทำงานได้ตรงใจคุณที่สุด"
+                                />
+                            </div>
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
@@ -116,7 +123,6 @@ export default function DoctorPage() {
                                     <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${easyLanguage ? 'translate-x-6' : 'translate-x-1'}`} />
                                 </button>
                             </div>
-                            <UserMenu />
                         </div>
                     </header>
 
@@ -156,22 +162,28 @@ export default function DoctorPage() {
                                         <div className="flex items-center justify-between flex-wrap gap-4 pt-2">
                                             {/* Quick insert helper chips */}
                                             <div className="flex space-x-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => insertChip("Act as a professional [role].")}
-                                                    className="px-4 py-2 rounded-full border border-slate-200 bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-indigo-400 transition-all text-xs font-bold cursor-pointer flex items-center gap-1.5"
-                                                >
-                                                    <span className="material-symbols-outlined text-sm">psychology</span>
-                                                    <span>Role-play</span>
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => insertChip("Output in a clean markdown table structure.")}
-                                                    className="px-4 py-2 rounded-full border border-slate-200 bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-indigo-400 transition-all text-xs font-bold cursor-pointer flex items-center gap-1.5"
-                                                >
-                                                    <span className="material-symbols-outlined text-sm">format_list_bulleted</span>
-                                                    <span>Structured</span>
-                                                </button>
+                                                <div className="flex items-center">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => insertChip("Act as a professional [role].")}
+                                                        className="px-4 py-2 rounded-full border border-slate-200 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-indigo-400 transition-all text-xs font-bold cursor-pointer flex items-center gap-1.5"
+                                                    >
+                                                        <span className="material-symbols-outlined text-sm">psychology</span>
+                                                        <span>Role-play</span>
+                                                    </button>
+                                                    <HelpTooltip title="สวมบทบาท (Role-play)" content="สั่งให้ AI สวมบทบาทเป็นผู้เชี่ยวชาญในด้านนั้นๆ เช่น 'ทำตัวเป็นนักการตลาด' เพื่อให้ได้คำตอบที่ลึกซึ้งและตรงสายงานมากขึ้น" />
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => insertChip("Output in a clean markdown table structure.")}
+                                                        className="px-4 py-2 rounded-full border border-slate-200 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-indigo-400 transition-all text-xs font-bold cursor-pointer flex items-center gap-1.5"
+                                                    >
+                                                        <span className="material-symbols-outlined text-sm">format_list_bulleted</span>
+                                                        <span>Structured</span>
+                                                    </button>
+                                                    <HelpTooltip title="จัดโครงสร้าง (Structured)" content="สั่งให้ AI จัดรูปแบบคำตอบให้เป็นระเบียบ เช่น ทำเป็นตาราง (Table) หรือหัวข้อย่อย เพื่อให้อ่านและนำไปใช้งานต่อได้ง่าย" />
+                                                </div>
                                             </div>
 
                                             <Button

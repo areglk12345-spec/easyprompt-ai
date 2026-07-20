@@ -120,7 +120,8 @@ export default function KnowledgePage() {
                             <span className="h-4 w-px bg-slate-200 dark:bg-slate-700"></span>
                             <span className="text-sm font-bold text-slate-800 dark:text-white">Knowledge Base</span>
                         </div>
-                        <UserMenu />
+                        <div className="flex items-center gap-4">
+                        </div>
                     </header>
 
                     <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">

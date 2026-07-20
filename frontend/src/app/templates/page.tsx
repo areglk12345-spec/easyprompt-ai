@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Globe, Building2, User, Library, Briefcase, BookOpen, Palette, Pin, Star } from 'lucide-react';
 import UserMenu from '../../components/UserMenu';
 import Sidebar from '../../components/Sidebar';
+import HelpTooltip from '../../components/HelpTooltip';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFontSize } from '../../context/FontSizeContext';
@@ -159,10 +160,13 @@ export default function TemplatesPage() {
                             <span className="font-headline-md text-xl md:text-2xl font-bold text-primary dark:text-indigo-400 flex items-center gap-2">
                                 <span className="material-symbols-outlined text-primary text-3xl">grid_view</span>
                                 {t('sidebar.templates')}
+                                <HelpTooltip 
+                                    title="เทมเพลต (Templates)" 
+                                    content="คลังเก็บคำสั่ง Prompt สำเร็จรูปที่คุณบันทึกไว้ ช่วยให้คุณเรียกใช้งานคำสั่งเดิมซ้ำได้อย่างรวดเร็วโดยไม่ต้องพิมพ์ใหม่"
+                                />
                             </span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <UserMenu />
                         </div>
                     </header>
 
@@ -190,56 +194,56 @@ export default function TemplatesPage() {
 
                         {/* Ownership Filter Bar (Private vs Public) */}
                         {isLoggedIn && (
-                            <div className="flex gap-2 bg-slate-100/60 dark:bg-slate-800/60 p-1.5 rounded-2xl max-w-md border border-slate-200/40 dark:border-slate-700/40" role="group" aria-label="กรองเทมเพลตตามสิทธิ์">
+                            <div className="flex gap-2 bg-slate-100/60 dark:bg-slate-800/60 p-1.5 rounded-2xl w-fit max-w-full overflow-x-auto custom-scrollbar border border-slate-200/40 dark:border-slate-700/40" role="group" aria-label="กรองเทมเพลตตามสิทธิ์">
                                 <button
                                     onClick={() => setOwnershipFilter('all')}
                                     aria-pressed={ownershipFilter === 'all'}
-                                    className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all text-xs cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary ${
+                                    className={`flex-1 flex items-center justify-center whitespace-nowrap py-2 px-4 rounded-xl font-bold transition-all text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary ${
                                         ownershipFilter === 'all'
                                             ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm'
                                             : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                                     }`}
                                 >
-                                    <Globe className="w-4 h-4 inline-block mr-1" /> {t('templates.filter.all')}
+                                    <Globe className="w-4 h-4 mr-1.5 shrink-0" /> {t('templates.filter.all')}
                                 </button>
                                 <button
                                     onClick={() => setOwnershipFilter('public')}
                                     aria-pressed={ownershipFilter === 'public'}
-                                    className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all text-xs cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary ${
+                                    className={`flex-1 flex items-center justify-center whitespace-nowrap py-2 px-4 rounded-xl font-bold transition-all text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary ${
                                         ownershipFilter === 'public'
                                             ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm'
                                             : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                                     }`}
                                 >
-                                    <Building2 className="w-4 h-4 inline-block mr-1" /> {t('templates.filter.public')}
+                                    <Building2 className="w-4 h-4 mr-1.5 shrink-0" /> {t('templates.filter.public')}
                                 </button>
                                 <button
                                     onClick={() => setOwnershipFilter('mine')}
                                     aria-pressed={ownershipFilter === 'mine'}
-                                    className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all text-xs cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary ${
+                                    className={`flex-1 flex items-center justify-center whitespace-nowrap py-2 px-4 rounded-xl font-bold transition-all text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary ${
                                         ownershipFilter === 'mine'
                                             ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm'
                                             : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                                     }`}
                                 >
-                                    <User className="w-4 h-4 inline-block mr-1" /> {t('templates.filter.mine')}
+                                    <User className="w-4 h-4 mr-1.5 shrink-0" /> {t('templates.filter.mine')}
                                 </button>
                                 <button
                                     onClick={() => setOwnershipFilter('favorites')}
                                     aria-pressed={ownershipFilter === 'favorites'}
-                                    className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all text-xs cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary ${
+                                    className={`flex-1 flex items-center justify-center whitespace-nowrap py-2 px-4 rounded-xl font-bold transition-all text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary ${
                                         ownershipFilter === 'favorites'
                                             ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm'
                                             : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                                     }`}
                                 >
-                                    <Star className="w-4 h-4 inline-block mr-1" /> รายการโปรด
+                                    <Star className="w-4 h-4 mr-1.5 shrink-0" /> รายการโปรด
                                 </button>
                             </div>
                         )}
 
                         {/* Category Filter Tabs */}
-                        <div className="flex flex-wrap gap-2" role="tablist" aria-label="หมวดหมู่เทมเพลต">
+                        <div className="flex overflow-x-auto pb-2 gap-2 custom-scrollbar snap-x" role="tablist" aria-label="หมวดหมู่เทมเพลต">
                             {CATEGORIES.map((cat) => (
                                 <button
                                     key={cat}

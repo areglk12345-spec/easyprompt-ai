@@ -297,7 +297,6 @@ export default function SettingsPage() {
                             </span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <UserMenu />
                         </div>
                     </header>
 
@@ -438,7 +437,7 @@ export default function SettingsPage() {
                                 </div>
 
                                 {/* Voice Navigation */}
-                                <div className="flex items-center justify-between pt-6 border-t border-slate-200/50 dark:border-slate-700/50">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-6 gap-4 border-t border-slate-200/50 dark:border-slate-700/50">
                                     <div className="space-y-1">
                                         <p className="font-bold text-slate-800 dark:text-white">Voice Control (ควบคุมด้วยเสียง)</p>
                                         <p className="text-slate-500 dark:text-slate-400 text-sm">เปิดใช้งานไมโครโฟนสำหรับการป้อนข้อมูลและค้นหาเซสชันคำสั่งด้วยเสียงพูด</p>
@@ -454,7 +453,7 @@ export default function SettingsPage() {
                                 </div>
 
                                 {/* TTS Voice Selection */}
-                                <div className="flex items-center justify-between pt-6 border-t border-slate-200/50 dark:border-slate-700/50">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-6 gap-4 border-t border-slate-200/50 dark:border-slate-700/50">
                                     <div className="space-y-1">
                                         <p className="font-bold text-slate-800 dark:text-white">Reading Voice (เสียงอ่านข้อความ)</p>
                                         <p className="text-slate-500 dark:text-slate-400 text-sm">เลือกเสียงสำหรับระบบอ่านออกเสียงอัตโนมัติ (TTS)</p>
@@ -477,7 +476,7 @@ export default function SettingsPage() {
                                 </div>
 
                                 {/* High Contrast Toggle */}
-                                <div className="flex items-center justify-between pt-6 border-t border-slate-200/50 dark:border-slate-700/50">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-6 gap-4 border-t border-slate-200/50 dark:border-slate-700/50">
                                     <div className="space-y-1">
                                         <p className="font-bold text-slate-800 dark:text-white">High Contrast (สีตัดกันสูง)</p>
                                         <p className="text-slate-500 dark:text-slate-400 text-sm">เพิ่มความชัดเจนของข้อความและปุ่ม ลดความล้าของสายตา</p>
@@ -493,7 +492,7 @@ export default function SettingsPage() {
                                 </div>
 
                                 {/* Simplified UI Toggle */}
-                                <div className="flex items-center justify-between pt-6 border-t border-slate-200/50 dark:border-slate-700/50">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-6 gap-4 border-t border-slate-200/50 dark:border-slate-700/50">
                                     <div className="space-y-1">
                                         <p className="font-bold text-slate-800 dark:text-white">Simplified UI (ซ่อนเมนูขั้นสูง)</p>
                                         <p className="text-slate-500 dark:text-slate-400 text-sm">แสดงเฉพาะฟังก์ชันที่จำเป็นและลดความซับซ้อนของหน้าจอ</p>
@@ -540,7 +539,7 @@ export default function SettingsPage() {
 
                                 {/* Two-Factor Authentication */}
                                 <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                         <div className="flex items-center gap-4">
                                             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${is2FAEnabled ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-purple-50 text-purple-600 border-purple-100'}`}>
                                                 <span className="material-symbols-outlined">{is2FAEnabled ? 'verified_user' : 'password'}</span>

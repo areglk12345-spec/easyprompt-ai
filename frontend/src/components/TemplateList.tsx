@@ -54,7 +54,7 @@ export default function TemplateList({
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col gap-4">
             {filteredTemplates.map((tpl) => {
                 const canDelete = currentUser && (tpl.user_id === currentUser.id || currentUser.role === 'admin');
                 return (

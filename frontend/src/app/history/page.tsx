@@ -22,7 +22,7 @@ type ChatHistory = {
 };
 
 export default function HistoryPage() {
-    const { authFetch, user, isLoggedIn } = useAuth();
+    const { authFetch, user, isLoggedIn, openLoginModal } = useAuth();
     const { t } = useLanguage();
     const { fontSize } = useFontSize();
     const { logActivity, copyToClipboard, downloadAsTxt, saveToTemplate } = usePromptActions();
@@ -138,7 +138,6 @@ export default function HistoryPage() {
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            <UserMenu />
                         </div>
                     </header>
 
@@ -167,7 +166,7 @@ export default function HistoryPage() {
                             <div className="glass-panel-heavy border border-amber-200 bg-amber-50/60 rounded-3xl p-5 text-slate-700 flex items-center gap-3 shadow-sm">
                                 <span className="shrink-0"><AlertTriangle className="w-8 h-8 text-amber-500" /></span>
                                 <div className="text-sm">
-                                    <span className="font-bold">{t('history.incognito_warning_1')}</span>{t('history.incognito_warning_2')}<Link href="/login" className="text-blue-600 hover:text-blue-700 font-extrabold underline">{t('history.incognito_login')}</Link>
+                                    <span className="font-bold">{t('history.incognito_warning_1')}</span>{t('history.incognito_warning_2')}<button onClick={openLoginModal} className="text-blue-600 hover:text-blue-700 font-extrabold underline">{t('history.incognito_login')}</button>
                                 </div>
                             </div>
                         )}

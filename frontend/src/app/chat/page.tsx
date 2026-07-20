@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link';
 import UserMenu from '../../components/UserMenu';
 import Sidebar from '../../components/Sidebar';
+import HelpTooltip from '../../components/HelpTooltip';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFontSize } from '../../context/FontSizeContext';
@@ -468,7 +469,13 @@ export default function ChatPage() {
                                 &larr; <span className="hidden sm:inline">{t('menu.home')}</span>
                             </Link>
                             <span className="h-4 w-px bg-slate-200 dark:bg-slate-700"></span>
-                            <span className="text-sm font-bold text-slate-800 dark:text-white hidden md:inline">{t('chat.title')}</span>
+                            <div className="flex items-center">
+                                <span className="text-sm font-bold text-slate-800 dark:text-white hidden md:inline">{t('chat.title')}</span>
+                                <HelpTooltip 
+                                    title="หน้าแชท (Chat)" 
+                                    content="หน้าสำหรับพูดคุยกับ AI คุณสามารถตั้งคำถาม หรือให้ AI ช่วยเขียนบทความ โค้ด หรืออื่นๆ ได้เหมือนแชทปกติ"
+                                />
+                            </div>
                         </div>
                         <div className="flex items-center gap-4 ml-auto">
                             {sessionId && messages.length > 0 && (
@@ -482,6 +489,12 @@ export default function ChatPage() {
                             )}
                             <div className="flex items-center gap-2 mr-2">
                                 <span className={`hidden xl:inline text-slate-600 dark:text-slate-400 font-semibold ${isLarge ? 'text-lg' : 'text-sm'}`}>{t('home.easy_mode')}</span>
+                                <HelpTooltip 
+                                    title="โหมดภาษาง่าย (Easy Mode)" 
+                                    content="เมื่อเปิดใช้งาน ระบบจะพยายามตอบกลับด้วยภาษาที่เข้าใจง่าย ไม่ใช้ศัพท์เทคนิคซับซ้อน เหมาะสำหรับผู้เริ่มต้น"
+                                    align="right"
+                                    position="bottom"
+                                />
                                 <button
                                     onClick={() => setEasyLanguage(!easyLanguage)}
                                     className={`w-12 h-6 rounded-full flex items-center transition-colors shadow-inner ${easyLanguage ? 'bg-primary' : 'bg-slate-300'}`}
@@ -507,7 +520,6 @@ export default function ChatPage() {
                                 </div>
                             )}
 
-                            <UserMenu />
                         </div>
                     </header>
 
@@ -570,69 +582,6 @@ export default function ChatPage() {
 
                     {/* Bottom Input Bar */}
                     <footer className="p-4 md:p-6 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/90 to-transparent dark:from-[#020617] dark:via-[#020617]/90 shrink-0 sticky bottom-0 z-20 pointer-events-none">
-                        <div className="max-w-4xl mx-auto mb-2 flex justify-end pointer-events-auto">
-                            {/* Tone Selector Custom Dropdown */}
-                            <div className="relative pointer-events-auto">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsToneDropdownOpen(!isToneDropdownOpen)}
-                                    className="flex items-center gap-1.5 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:border-indigo-300 dark:hover:border-indigo-700"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-indigo-500">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
-                                    </svg>
-                                    <span className="bg-transparent text-xs font-bold text-slate-600 dark:text-slate-300 outline-none cursor-pointer">
-                                        {selectedTone}
-                                    </span>
-                                </button>
-
-                                {isToneDropdownOpen && (
-                                    <>
-                                        <div 
-                                            className="fixed inset-0 z-40" 
-                                            onClick={() => setIsToneDropdownOpen(false)}
-                                        ></div>
-                                        <div className="absolute bottom-full right-0 mb-2 w-64 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden animate-fade-in-up">
-                                            <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">เลือกโทนภาษา</span>
-                                            </div>
-                                            <div className="max-h-64 overflow-y-auto p-1 custom-scrollbar">
-                                                {[
-                                                    { value: 'ทั่วไป', label: t('chat.tone.general') || 'ทั่วไป', preview: 'เขียนแบบคนปกติคุยกัน สุภาพแต่ไม่เกร็ง' },
-                                                    { value: 'ทางการ', label: t('chat.tone.formal') || 'ทางการ', preview: 'เหมาะสำหรับส่งอีเมลถึงหัวหน้า หรือหนังสือราชการ' },
-                                                    { value: 'เป็นกันเอง', label: t('chat.tone.casual') || 'เป็นกันเอง', preview: 'เหมือนเพื่อนคุยกัน ใช้คำศัพท์วัยรุ่นได้นิดหน่อย' },
-                                                    { value: 'สนุกสนาน', label: t('chat.tone.fun') || 'สนุกสนาน', preview: 'สร้างสรรค์ ร่าเริง มีใส่อีโมจิให้ดูมีสีสัน' },
-                                                    { value: 'กระชับ', label: t('chat.tone.concise') || 'กระชับ', preview: 'สั้นๆ ได้ใจความ ไม่ต้องมีน้ำเยอะ' }
-                                                ].map(tone => (
-                                                    <button
-                                                        key={tone.value}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setSelectedTone(tone.value);
-                                                            setIsToneDropdownOpen(false);
-                                                        }}
-                                                        className={`w-full text-left px-3 py-2 rounded-xl transition-all ${selectedTone === tone.value ? 'bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'}`}
-                                                    >
-                                                        <div className="font-bold text-sm mb-0.5 flex justify-between items-center">
-                                                            {tone.label}
-                                                            {selectedTone === tone.value && (
-                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                                                                  <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
-                                                                </svg>
-                                                            )}
-                                                        </div>
-                                                        <div className={`text-xs ${selectedTone === tone.value ? 'text-indigo-500/80 dark:text-indigo-400/80' : 'text-slate-400 dark:text-slate-500'}`}>
-                                                            {tone.preview}
-                                                        </div>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
                         {/* Attached Files Preview */}
                         {attachedFiles.length > 0 && (
                             <div className="max-w-4xl mx-auto mb-2 flex flex-wrap gap-2 pointer-events-auto">

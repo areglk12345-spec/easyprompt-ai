@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminSidebar from '../../components/AdminSidebar';
+import Sidebar from '../../components/Sidebar';
 import UserMenu from '../../components/UserMenu';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -49,7 +50,11 @@ export default function DashboardPage() {
     return (
         <div className={`min-h-screen bg-transparent transition-all duration-300 ${isLarge ? 'text-lg' : 'text-sm'}`}>
             <div className="flex min-h-screen">
-                <AdminSidebar activePage="dashboard" />
+                {user?.role === 'admin' ? (
+                    <AdminSidebar activePage="dashboard" />
+                ) : (
+                    <Sidebar activePage="dashboard" />
+                )}
 
                 <main className="flex-1 flex flex-col bg-slate-50/50 dark:bg-slate-900 overflow-y-auto h-screen relative custom-scrollbar transition-colors duration-300">
                     <header className="sticky top-0 z-30 flex justify-between items-center px-6 md:px-12 w-full h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-700/30 shrink-0">
@@ -60,7 +65,6 @@ export default function DashboardPage() {
                             </span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <UserMenu />
                         </div>
                     </header>
 
@@ -91,15 +95,27 @@ export default function DashboardPage() {
                                             <div className="text-3xl font-black text-slate-800 dark:text-white">{stats?.total_templates || 0}</div>
                                         </div>
                                     </div>
-                                    <div className={statCardStyle}>
-                                        <div className="w-14 h-14 rounded-full bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
-                                            <Users className="w-6 h-6" />
+                                    {user?.role === 'admin' ? (
+                                        <div className={statCardStyle}>
+                                            <div className="w-14 h-14 rounded-full bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                                <Users className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Users in Org</div>
+                                                <div className="text-3xl font-black text-slate-800 dark:text-white">{stats?.total_users || 0}</div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Users in Org</div>
-                                            <div className="text-3xl font-black text-slate-800 dark:text-white">{stats?.total_users || 0}</div>
+                                    ) : (
+                                        <div className={statCardStyle}>
+                                            <div className="w-14 h-14 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                                <span className="material-symbols-outlined !font-bold text-2xl">bolt</span>
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">AI Credits</div>
+                                                <div className="text-3xl font-black text-slate-800 dark:text-white">{stats?.total_credits?.toLocaleString() || 0}</div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
 
                                 {/* Credit Stats (Admin Only) */}

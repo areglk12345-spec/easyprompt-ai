@@ -84,6 +84,13 @@ module.exports = {
                 float: 'float 6s ease-in-out infinite',
                 'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                 'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+            },
+            boxShadow: {
+                'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 4px 10px -4px rgba(0, 0, 0, 0.04)',
+                'premium-dark': '0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 4px 10px -4px rgba(0, 0, 0, 0.3)',
+                'inner-glow': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.8), inset 0 0 8px 0 rgba(255, 255, 255, 0.2)',
+                'inner-glow-dark': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.1), inset 0 0 8px 0 rgba(255, 255, 255, 0.02)',
+                'ai-glow': '0 0 20px -5px rgba(99, 102, 241, 0.4), 0 0 10px -2px rgba(99, 102, 241, 0.2)',
             }
         },
     },
