@@ -113,6 +113,84 @@ export default function Home() {
                     </div>
                 </section>
 
+                {/* Why EasyPrompt Section */}
+                <section id="features" className="py-24 bg-slate-50 dark:bg-[#0b0f19] px-6 border-t border-slate-200/50 dark:border-slate-800/50 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 dark:bg-purple-500/5 blur-[100px] rounded-full pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/5 blur-[100px] rounded-full pointer-events-none" />
+                    
+                    <div className="max-w-7xl mx-auto relative z-10">
+                        <div className="text-center space-y-4 mb-16">
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-sm font-bold tracking-wide">
+                                <span className="material-symbols-outlined text-[18px]">psychology_alt</span>
+                                ทำไมต้อง EasyPrompt?
+                            </div>
+                            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-800 dark:text-white">
+                                ยกระดับการทำงานด้วย AI ให้ง่ายกว่าที่เคย
+                            </h2>
+                            <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
+                                บอกลาการนั่งคิดคำสั่ง AI นานๆ หรือได้คำตอบที่ไม่ตรงใจ ด้วยเครื่องมือที่ออกแบบมาเพื่อคนไทยโดยเฉพาะ
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {/* Feature 1 */}
+                            <div className="glass-panel bg-white/70 dark:bg-slate-800/50 border border-white/50 dark:border-slate-700/50 p-8 rounded-3xl hover:-translate-y-2 transition-transform duration-300 hover:shadow-xl hover:shadow-indigo-500/10 group">
+                                <div className="w-14 h-14 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-6 group-hover:scale-110 transition-transform">
+                                    <span className="material-symbols-outlined !font-bold text-3xl">medical_services</span>
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-3">Dr. Prompt ช่วยวินิจฉัยคำสั่ง</h3>
+                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                                    พิมพ์คำสั่งมาสั้นๆ หรือไม่รู้จะเริ่มยังไง ระบบ Dr. Prompt ของเราจะช่วยวิเคราะห์ ขยายความ และปรับแต่งให้เป็นคำสั่งระดับโปรโดยอัตโนมัติ
+                                </p>
+                            </div>
+
+                            {/* Feature 2 */}
+                            <div className="glass-panel bg-white/70 dark:bg-slate-800/50 border border-white/50 dark:border-slate-700/50 p-8 rounded-3xl hover:-translate-y-2 transition-transform duration-300 hover:shadow-xl hover:shadow-purple-500/10 group">
+                                <div className="w-14 h-14 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-6 group-hover:scale-110 transition-transform">
+                                    <span className="material-symbols-outlined !font-bold text-3xl">library_books</span>
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-3">คลังเทมเพลตพร้อมใช้ (Templates)</h3>
+                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                                    รวมรวมชุดคำสั่ง (Prompt) ที่ดีที่สุดในหลากหลายสายอาชีพ ทั้งการตลาด เขียนโค้ด แปลภาษา แค่คลิกเดียวก็พร้อมใช้งานทันที ไม่ต้องเริ่มจากศูนย์
+                                </p>
+                            </div>
+
+                            {/* Feature 3 */}
+                            <div className="glass-panel bg-white/70 dark:bg-slate-800/50 border border-white/50 dark:border-slate-700/50 p-8 rounded-3xl hover:-translate-y-2 transition-transform duration-300 hover:shadow-xl hover:shadow-emerald-500/10 group">
+                                <div className="w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6 group-hover:scale-110 transition-transform">
+                                    <span className="material-symbols-outlined !font-bold text-3xl">history</span>
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-3">ประวัติการใช้งานแบบจัดเต็ม</h3>
+                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                                    ค้นหาและเรียกดูคำสั่งเก่าๆ ได้อย่างง่ายดาย พร้อมปุ่ม Export ไปใช้งานต่อ หรือบันทึกเป็นเทมเพลตส่วนตัวไว้ใช้ในอนาคตได้ทันที
+                                </p>
+                            </div>
+
+                            {/* Feature 4 */}
+                            <div className="glass-panel bg-white/70 dark:bg-slate-800/50 border border-white/50 dark:border-slate-700/50 p-8 rounded-3xl hover:-translate-y-2 transition-transform duration-300 hover:shadow-xl hover:shadow-blue-500/10 group lg:col-span-1 md:col-span-1">
+                                <div className="w-14 h-14 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6 group-hover:scale-110 transition-transform">
+                                    <span className="material-symbols-outlined !font-bold text-3xl">public</span>
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-3">เชื่อมต่อกับ AI ชั้นนำ</h3>
+                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                                    ไม่ว่าคุณจะชอบใช้ ChatGPT, Claude, หรือ Gemini เรามีปุ่มคัดลอกและเปิดเว็บไซต์เหล่านั้นให้คุณนำ Prompt ไปวางใช้งานได้ทันที ไร้รอยต่อ
+                                </p>
+                            </div>
+
+                            {/* Feature 5 */}
+                            <div className="glass-panel bg-white/70 dark:bg-slate-800/50 border border-white/50 dark:border-slate-700/50 p-8 rounded-3xl hover:-translate-y-2 transition-transform duration-300 hover:shadow-xl hover:shadow-rose-500/10 group lg:col-span-2">
+                                <div className="w-14 h-14 rounded-2xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400 mb-6 group-hover:scale-110 transition-transform">
+                                    <span className="material-symbols-outlined !font-bold text-3xl">corporate_fare</span>
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-3">ตอบโจทย์ทั้งบุคคลและองค์กร</h3>
+                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                                    รองรับระบบ Workspace สำหรับองค์กร พร้อม Dashboard สำหรับผู้ดูแลระบบ เพื่อแชร์ Prompt และดูสถิติการใช้งานร่วมกันในทีม ช่วยเพิ่มประสิทธิภาพทั้งบริษัท
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 {/* Pricing Section (Gemini Style) */}
                 <section id="pricing" className="py-24 bg-white dark:bg-[#0b0f19] px-6">
                     <div className="max-w-7xl mx-auto space-y-16">

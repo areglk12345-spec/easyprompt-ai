@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Zap, Save, Copy, Download, MessageSquare, Brain, Sparkles, Code, Activity, RefreshCw } from 'lucide-react';
+import { Zap, Save, Copy, Download, MessageSquare, Brain, Sparkles, Code, Activity, RefreshCw, Edit2, Check, X } from 'lucide-react';
 import { usePromptActions } from '../hooks/usePromptActions';
 import TTSButton from './TTSButton';
 import ReactMarkdown from 'react-markdown';
@@ -27,6 +27,8 @@ interface ChatBubbleProps {
     onSendOption?: (option: string) => void;
     onRunPrompt?: (promptText: string) => void;
     onExportToPlatform?: (platform: 'chatgpt' | 'claude' | 'copilot' | 'gemini', promptText: string) => void;
+    onEdit?: (newText: string) => void;
+    onRegenerate?: () => void;
 }
 
 export default function ChatBubble({
@@ -46,9 +48,13 @@ export default function ChatBubble({
     onSendOption,
     onRunPrompt,
     onExportToPlatform,
+    onEdit,
+    onRegenerate,
 }: ChatBubbleProps) {
     const { logActivity } = usePromptActions();
     const [displayPrompt, setDisplayPrompt] = useState(fittedPrompt);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editText, setEditText] = useState(text);
 
     useEffect(() => {
         setDisplayPrompt(fittedPrompt);
@@ -58,17 +64,22 @@ export default function ChatBubble({
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
+            transition={{ type: "spring", stiffness: 260, damping: 20, mass: 1 }}
             className="flex flex-col gap-2"
         >
-            <div className={`flex ${role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`flex gap-3 ${role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                {role === 'agent' && (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-indigo-600 flex-shrink-0 flex items-center justify-center text-white shadow-sm border border-white/20 mt-1">
+                        <span className="text-lg leading-none">👻</span>
+                    </div>
+                )}
                 <div
-                    className={`max-w-[85%] md:max-w-[75%] flex flex-col gap-3 ${
+                    className={`max-w-[90%] md:max-w-[80%] lg:max-w-[75%] flex flex-col gap-3 ${
                         isLarge ? 'p-5' : 'p-4'
                     } ${
                         role === 'user'
                             ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-3xl rounded-tr-sm shadow-sm border border-slate-200/50 dark:border-slate-700/50'
-                            : 'bg-transparent text-slate-800 dark:text-slate-200 rounded-3xl rounded-tl-sm'
+                            : 'bg-white dark:bg-[#131422] text-slate-800 dark:text-slate-200 rounded-3xl rounded-tl-sm shadow-md border border-slate-200 dark:border-[#2a2b3d]'
                     }`}
                 >
                     <div className="flex items-start justify-between gap-4 w-full">
@@ -115,11 +126,50 @@ export default function ChatBubble({
                                     </ReactMarkdown>
                                 </div>
                             ) : (
-                                <div className="whitespace-pre-wrap">{text}</div>
+                                <div className="whitespace-pre-wrap">
+                                    {isEditing ? (
+                                        <div className="flex flex-col gap-2">
+                                            <textarea 
+                                                value={editText}
+                                                onChange={(e) => setEditText(e.target.value)}
+                                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary min-h-[80px] custom-scrollbar"
+                                                autoFocus
+                                            />
+                                            <div className="flex justify-end gap-2 mt-1">
+                                                <button onClick={() => { setIsEditing(false); setEditText(text); }} className="flex items-center gap-1 text-xs px-2 py-1 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+                                                    <X className="w-3 h-3" /> ยกเลิก
+                                                </button>
+                                                <button onClick={() => { setIsEditing(false); if(onEdit && editText.trim() !== text) onEdit(editText); }} className="flex items-center gap-1 text-xs px-2 py-1 bg-primary text-white rounded-md hover:bg-indigo-600 transition-colors shadow-sm">
+                                                    <Check className="w-3 h-3" /> บันทึก
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : text}
+                                </div>
                             )}
                         </div>
                         {role === 'agent' && (
-                            <TTSButton text={displayPrompt ? `${text} ${displayPrompt}` : text} className="shrink-0 mt-1" />
+                            <div className="flex flex-col gap-1 shrink-0 mt-1">
+                                <TTSButton text={displayPrompt ? `${text} ${displayPrompt}` : text} />
+                                {onRegenerate && (
+                                    <button 
+                                        onClick={onRegenerate}
+                                        className="p-2 text-slate-400 hover:text-primary dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-all flex items-center justify-center"
+                                        title="สร้างคำตอบใหม่ (Regenerate)"
+                                    >
+                                        <RefreshCw className="w-4 h-4" />
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                        {role === 'user' && !isEditing && onEdit && (
+                            <button 
+                                onClick={() => setIsEditing(true)}
+                                className="shrink-0 p-1.5 text-slate-400 hover:text-primary dark:hover:text-indigo-400 hover:bg-slate-200 dark:hover:bg-slate-700/50 rounded-lg transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                title="แก้ไขข้อความ"
+                            >
+                                <Edit2 className="w-3.5 h-3.5" />
+                            </button>
                         )}
                     </div>
 

@@ -108,7 +108,7 @@ export default function DoctorPage() {
                             <div className="flex items-center gap-2">
                                 <span className="px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-[10px]">BETA</span>
                                 <HelpTooltip 
-                                    title="หมอพร้อมพ์ (Dr. Prompt)" 
+                                    title="Dr. Prompt" 
                                     content="ระบบช่วยวิเคราะห์และปรับปรุงคำสั่ง Prompt ของคุณให้ดีขึ้น ชัดเจนขึ้น และมีประสิทธิภาพมากขึ้น เพื่อให้ AI ทำงานได้ตรงใจคุณที่สุด"
                                 />
                             </div>
@@ -128,11 +128,19 @@ export default function DoctorPage() {
 
                     <div className="max-w-[1280px] mx-auto w-full px-6 md:px-12 py-12 space-y-12 animate-slide-up">
                         {/* Hero Header */}
-                        <section className="max-w-3xl space-y-2">
-                            <h2 className="font-display-lg text-4xl font-extrabold text-slate-800 dark:text-white leading-tight">{t('doctor.hero_title')}</h2>
-                            <p className="font-body-lg text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed">
-                                {t('doctor.hero_subtitle')}
-                            </p>
+                        <section className="max-w-3xl space-y-4">
+                            <div>
+                                <h2 className="font-display-lg text-4xl font-extrabold text-slate-800 dark:text-white leading-tight">{t('doctor.hero_title')}</h2>
+                                <p className="font-body-lg text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed mt-2">
+                                    {t('doctor.hero_subtitle')}
+                                </p>
+                            </div>
+                            <div className="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800/50 p-4 rounded-xl flex items-start gap-3 shadow-sm animate-fade-in-up">
+                                <span className="material-symbols-outlined text-indigo-500 mt-0.5">info</span>
+                                <p className="text-sm text-indigo-800 dark:text-indigo-300 leading-relaxed">
+                                    <strong>โหมดนี้ทำงานอย่างไร?</strong> Dr. Prompt จะช่วย <i>วิเคราะห์และขยายความ</i> คำสั่งของคุณให้ครอบคลุมและเป็นมืออาชีพมากขึ้น เพียงพิมพ์สิ่งที่คุณต้องการสั้นๆ แล้วระบบจะช่วยจัดโครงสร้างและเพิ่มบริบทที่ขาดหายไปให้สมบูรณ์
+                                </p>
+                            </div>
                         </section>
 
                         {/* 12-Column Grid splitting Input & Results */}

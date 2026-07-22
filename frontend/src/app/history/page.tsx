@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFontSize } from '../../context/FontSizeContext';
 import { usePromptActions } from '../../hooks/usePromptActions';
+import HelpTooltip from '../../components/HelpTooltip';
 
 type ChatHistory = {
     id: number;
@@ -25,7 +26,7 @@ export default function HistoryPage() {
     const { authFetch, user, isLoggedIn, openLoginModal } = useAuth();
     const { t } = useLanguage();
     const { fontSize } = useFontSize();
-    const { logActivity, copyToClipboard, downloadAsTxt, saveToTemplate } = usePromptActions();
+    const { logActivity, copyToClipboard, downloadAsTxt, saveToTemplate, exportToPlatform } = usePromptActions();
 
     const [history, setHistory] = useState<ChatHistory[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -124,6 +125,10 @@ export default function HistoryPage() {
                             <span className="font-headline-md text-xl md:text-2xl font-bold text-primary dark:text-indigo-400 flex items-center gap-2">
                                 <span className="material-symbols-outlined text-primary dark:text-indigo-400 text-3xl">history</span>
                                 {t('history.title')}
+                                <HelpTooltip 
+                                    title="ประวัติการใช้งาน (History)" 
+                                    content="ดูประวัติการพูดคุยและคำสั่ง Prompt ทั้งหมดที่คุณเคยใช้ สามารถกดคัดลอกหรือบันทึกเก็บไว้ใช้ซ้ำได้"
+                                />
                             </span>
                             
                             <div className="relative flex-1 hidden md:block">
@@ -174,8 +179,27 @@ export default function HistoryPage() {
                         {isLoading ? (
                             <div className="text-center text-slate-500 py-10 animate-pulse font-semibold">{t('history.loading')}</div>
                         ) : filteredHistory.length === 0 ? (
-                            <div className="text-center glass-panel-heavy rounded-3xl p-10 shadow-sm text-slate-500 dark:text-slate-400 font-semibold border border-slate-200/30 dark:border-slate-700/30 bg-white/70 dark:bg-slate-800/70">
-                                {searchQuery ? t('history.not_found') : t('history.empty')}
+                            <div className="flex flex-col items-center justify-center glass-panel-heavy rounded-[32px] p-16 shadow-sm border border-slate-200/50 dark:border-slate-700/50 text-center space-y-6 bg-white/70 dark:bg-slate-800/70">
+                                <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 mb-2">
+                                    <span className="material-symbols-outlined text-5xl">{searchQuery ? 'search_off' : 'history_toggle_off'}</span>
+                                </div>
+                                <div className="space-y-2 max-w-sm">
+                                    <h3 className="text-2xl font-bold text-slate-800 dark:text-white">
+                                        {searchQuery ? t('history.not_found') : 'ยังไม่มีประวัติการใช้งาน'}
+                                    </h3>
+                                    <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                                        {searchQuery ? 'ลองค้นหาด้วยคำอื่น' : 'ประวัติการพูดคุยและคำสั่ง Prompt ของคุณจะถูกบันทึกไว้ที่นี่ เริ่มต้นแชทใหม่เพื่อสร้างประวัติแรกของคุณเลย!'}
+                                    </p>
+                                </div>
+                                {!searchQuery && (
+                                    <Link
+                                        href="/chat"
+                                        className="mt-4 px-8 py-3.5 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all flex items-center gap-2"
+                                    >
+                                        <span className="material-symbols-outlined">add_comment</span>
+                                        เริ่มการสนทนาใหม่
+                                    </Link>
+                                )}
                             </div>
                         ) : (
                             <div className="space-y-10">
@@ -266,6 +290,24 @@ export default function HistoryPage() {
                                                                             >
                                                                                 <span className="material-symbols-outlined text-[16px]">download</span> .TXT
                                                                             </button>
+                                                                            
+                                                                            {/* Export Buttons */}
+                                                                            <div className="flex gap-2 ml-auto">
+                                                                                <button
+                                                                                    onClick={() => exportToPlatform('chatgpt', item.fitted_prompt || item.agent_response, 'history')}
+                                                                                    className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all"
+                                                                                    title="คัดลอกและเปิดเว็บ ChatGPT ทันที"
+                                                                                >
+                                                                                    <span className="material-symbols-outlined text-[16px]">open_in_new</span> ChatGPT
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => exportToPlatform('claude', item.fitted_prompt || item.agent_response, 'history')}
+                                                                                    className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-orange-700 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-all"
+                                                                                    title="คัดลอกและเปิดเว็บ Claude ทันที"
+                                                                                >
+                                                                                    <span className="material-symbols-outlined text-[16px]">open_in_new</span> Claude
+                                                                                </button>
+                                                                            </div>
                                                                             </div>
                                                                     </div>
                                                                 )}
@@ -342,8 +384,45 @@ export default function HistoryPage() {
                                                                             {item.fitted_prompt}
                                                                         </div>
                                                                         <div className="flex gap-2 flex-wrap">
-                                                                            <button onClick={() => copyToClipboard(item.fitted_prompt!)} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg cursor-pointer">{t('history.copy')}</button>
-                                                                            <button onClick={() => downloadAsTxt(item.fitted_prompt!)} className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold rounded-lg cursor-pointer">{t('history.download')}</button>
+                                                                            <button
+                                                                                onClick={() => copyToClipboard(item.fitted_prompt || item.agent_response, 'history')}
+                                                                                className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all hover:text-primary hover:border-primary/30"
+                                                                                title="คัดลอกข้อความ"
+                                                                            >
+                                                                                <span className="material-symbols-outlined text-[16px]">content_copy</span> คัดลอก
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => saveToTemplate(item.fitted_prompt || item.agent_response, "Prompt จากประวัติ", "history")}
+                                                                                className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all hover:text-amber-600 hover:border-amber-600/30"
+                                                                                title="บันทึกเป็นเทมเพลต"
+                                                                            >
+                                                                                <span className="material-symbols-outlined text-[16px]">bookmark_add</span> บันทึก
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => downloadAsTxt(item.fitted_prompt || item.agent_response, "history_prompt")}
+                                                                                className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all hover:text-emerald-600 hover:border-emerald-600/30"
+                                                                                title="ดาวน์โหลด .txt"
+                                                                            >
+                                                                                <span className="material-symbols-outlined text-[16px]">download</span> .TXT
+                                                                            </button>
+                                                                            
+                                                                            {/* Export Buttons */}
+                                                                            <div className="flex gap-2 ml-auto">
+                                                                                <button
+                                                                                    onClick={() => exportToPlatform('chatgpt', item.fitted_prompt || item.agent_response, 'history')}
+                                                                                    className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all"
+                                                                                    title="คัดลอกและเปิดเว็บ ChatGPT ทันที"
+                                                                                >
+                                                                                    <span className="material-symbols-outlined text-[16px]">open_in_new</span> ChatGPT
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => exportToPlatform('claude', item.fitted_prompt || item.agent_response, 'history')}
+                                                                                    className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-orange-700 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-all"
+                                                                                    title="คัดลอกและเปิดเว็บ Claude ทันที"
+                                                                                >
+                                                                                    <span className="material-symbols-outlined text-[16px]">open_in_new</span> Claude
+                                                                                </button>
+                                                                            </div>
                                                                             </div>
                                                                     </div>
                                                                 )}

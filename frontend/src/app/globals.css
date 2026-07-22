@@ -31,7 +31,9 @@
 body {
     font-family: 'Outfit', 'Sarabun', sans-serif;
     background: #f8fafc;
-    background-image: radial-gradient(at top center, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
+    background-image: radial-gradient(at top center, rgba(99, 102, 241, 0.1) 0%, transparent 60%), linear-gradient(135deg, #f8fafc 0%, #eef2f6 100%);
+    background-size: 200% 200%;
+    animation: gradient 15s ease infinite;
     background-attachment: fixed;
     color: #0f172a;
     min-height: 100vh;
@@ -42,7 +44,9 @@ body {
 .dark body,
 html.dark body {
     background: #020617;
-    background-image: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(120, 119, 198, 0.15), transparent);
+    background-image: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(120, 119, 198, 0.2), transparent), linear-gradient(135deg, #020617 0%, #080c1d 100%);
+    background-size: 200% 200%;
+    animation: gradient 15s ease infinite;
     color: #f1f5f9;
 }
 

@@ -22,6 +22,7 @@ interface TemplateListProps {
     onDownloadAsTxt: (promptText: string, title: string) => void;
     onDeleteTemplate?: (id: number) => void;
     onToggleFavorite?: (id: number) => void;
+    onCreateNew?: () => void;
 }
 
 export default function TemplateList({
@@ -33,6 +34,7 @@ export default function TemplateList({
     onDownloadAsTxt,
     onDeleteTemplate,
     onToggleFavorite,
+    onCreateNew,
 }: TemplateListProps) {
     const filteredTemplates = templates.filter((t) => {
         if (ownershipFilter === 'mine') return !t.is_public;
@@ -42,13 +44,39 @@ export default function TemplateList({
     });
 
     if (filteredTemplates.length === 0) {
-        let emptyMessage = 'ไม่พบเทมเพลตที่ตรงกับหมวดหมู่ที่เลือก';
-        if (ownershipFilter === 'mine') emptyMessage = 'ยังไม่มีเทมเพลตส่วนตัวที่คุณเซฟไว้ครับ ลองเซฟเก็บไว้ดูนะ!';
-        if (ownershipFilter === 'favorites') emptyMessage = 'ยังไม่มีเทมเพลตในรายการโปรด กดดาว (⭐) เพื่อบันทึกได้เลย!';
+        let emptyTitle = 'ไม่พบเทมเพลต';
+        let emptyMessage = 'ยังไม่มีเทมเพลตที่ตรงกับหมวดหมู่ที่เลือก';
+        let icon = 'search_off';
+        
+        if (ownershipFilter === 'mine') {
+            emptyTitle = 'เทมเพลตส่วนตัวของคุณ';
+            emptyMessage = 'คุณยังไม่ได้สร้างเทมเพลตส่วนตัวใดๆ ลองสร้างเทมเพลตแรกเพื่อประหยัดเวลาการทำงานของคุณดูสิ!';
+            icon = 'edit_document';
+        }
+        if (ownershipFilter === 'favorites') {
+            emptyTitle = 'ยังไม่มีรายการโปรด';
+            emptyMessage = 'กดไอคอนรูปดาว (⭐) ที่เทมเพลตที่คุณชื่นชอบเพื่อบันทึกไว้ใช้งานอย่างรวดเร็วในครั้งหน้า';
+            icon = 'star';
+        }
         
         return (
-            <div className="text-center glass-panel-heavy rounded-3xl p-10 shadow-sm text-slate-500 font-semibold border border-slate-200/30">
-                {emptyMessage}
+            <div className="flex flex-col items-center justify-center glass-panel-heavy rounded-[32px] p-16 shadow-sm border border-slate-200/50 dark:border-slate-700/50 text-center space-y-6">
+                <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 mb-2">
+                    <span className="material-symbols-outlined text-5xl">{icon}</span>
+                </div>
+                <div className="space-y-2 max-w-sm">
+                    <h3 className="text-2xl font-bold text-slate-800 dark:text-white">{emptyTitle}</h3>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{emptyMessage}</p>
+                </div>
+                {ownershipFilter === 'mine' && onCreateNew && (
+                    <button
+                        onClick={onCreateNew}
+                        className="mt-4 px-8 py-3.5 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all flex items-center gap-2"
+                    >
+                        <span className="material-symbols-outlined">add</span>
+                        สร้างเทมเพลตแรกของคุณ
+                    </button>
+                )}
             </div>
         );
     }

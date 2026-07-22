@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '../services/api';
 
 type User = {
@@ -41,11 +42,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
     const [activeWorkspace, setActiveWorkspace] = useState<string>('ทั่วไป');
-    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-    const openLoginModal = () => setIsLoginModalOpen(true);
-    const closeLoginModal = () => setIsLoginModalOpen(false);
+    const openLoginModal = () => {
+        router.push('/login');
+    };
+    const closeLoginModal = () => {};
 
     useEffect(() => {
         // Load token and user from localStorage on mount
@@ -164,7 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             logout,
             refreshUser,
             authFetch,
-            isLoginModalOpen,
+            isLoginModalOpen: false,
             openLoginModal,
             closeLoginModal
         }}>

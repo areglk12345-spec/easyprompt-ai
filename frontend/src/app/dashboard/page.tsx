@@ -5,6 +5,7 @@ import Link from 'next/link';
 import AdminSidebar from '../../components/AdminSidebar';
 import Sidebar from '../../components/Sidebar';
 import UserMenu from '../../components/UserMenu';
+import HelpTooltip from '../../components/HelpTooltip';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFontSize } from '../../context/FontSizeContext';
@@ -75,6 +76,34 @@ export default function DashboardPage() {
                             </div>
                         ) : (
                             <>
+                                {/* Onboarding / Welcome Widget */}
+                                <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-2xl"></div>
+                                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                                        <div className="space-y-4 max-w-xl">
+                                            <h2 className="text-3xl font-extrabold tracking-tight">ยินดีต้อนรับสู่ EasyPrompt! 👋</h2>
+                                            <p className="text-indigo-100 text-lg leading-relaxed">เริ่มต้นสร้างสรรค์ผลงานของคุณได้ง่ายๆ ใน 3 ขั้นตอน เพื่อให้คุณทำงานร่วมกับ AI ได้อย่างมืออาชีพ</p>
+                                        </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full md:w-auto">
+                                            <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl flex flex-col items-center text-center space-y-2">
+                                                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold text-xl mb-1">1</div>
+                                                <span className="font-semibold text-sm">เลือกเทมเพลต</span>
+                                                <span className="text-xs text-indigo-200">ประหยัดเวลาด้วย Prompt สำเร็จรูป</span>
+                                            </div>
+                                            <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl flex flex-col items-center text-center space-y-2">
+                                                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold text-xl mb-1">2</div>
+                                                <span className="font-semibold text-sm">ให้ Dr. Prompt ช่วย</span>
+                                                <span className="text-xs text-indigo-200">ปรับแต่งคำสั่งให้สมบูรณ์แบบ</span>
+                                            </div>
+                                            <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl flex flex-col items-center text-center space-y-2">
+                                                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold text-xl mb-1">3</div>
+                                                <span className="font-semibold text-sm">ส่งออกไป AI</span>
+                                                <span className="text-xs text-indigo-200">คลิกเดียวเพื่อใช้งานกับ ChatGPT</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {/* Stats Row */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className={statCardStyle}>
@@ -82,7 +111,10 @@ export default function DashboardPage() {
                                             <MessageSquare className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Prompts Created</div>
+                                            <div className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                Prompts Created
+                                                <HelpTooltip text="จำนวนครั้งทั้งหมดที่คุณและทีมได้ส่งคำสั่ง (Prompt) ในระบบ" />
+                                            </div>
                                             <div className="text-3xl font-black text-slate-800 dark:text-white">{stats?.total_prompts || 0}</div>
                                         </div>
                                     </div>
@@ -91,7 +123,10 @@ export default function DashboardPage() {
                                             <Files className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Templates</div>
+                                            <div className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                Templates
+                                                <HelpTooltip text="จำนวนเทมเพลตสำเร็จรูปที่มีในระบบ หรือที่คุณสร้างบันทึกเอาไว้" />
+                                            </div>
                                             <div className="text-3xl font-black text-slate-800 dark:text-white">{stats?.total_templates || 0}</div>
                                         </div>
                                     </div>
@@ -101,7 +136,10 @@ export default function DashboardPage() {
                                                 <Users className="w-6 h-6" />
                                             </div>
                                             <div>
-                                                <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Users in Org</div>
+                                                <div className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                    Users in Org
+                                                    <HelpTooltip text="จำนวนสมาชิกทั้งหมดที่อยู่ในองค์กรของคุณ" />
+                                                </div>
                                                 <div className="text-3xl font-black text-slate-800 dark:text-white">{stats?.total_users || 0}</div>
                                             </div>
                                         </div>
@@ -111,7 +149,10 @@ export default function DashboardPage() {
                                                 <span className="material-symbols-outlined !font-bold text-2xl">bolt</span>
                                             </div>
                                             <div>
-                                                <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">AI Credits</div>
+                                                <div className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                    AI Credits
+                                                    <HelpTooltip text="จำนวนเครดิตคงเหลือสำหรับใช้งานฟีเจอร์ AI ชั้นสูง เช่น Dr. Prompt" />
+                                                </div>
                                                 <div className="text-3xl font-black text-slate-800 dark:text-white">{stats?.total_credits?.toLocaleString() || 0}</div>
                                             </div>
                                         </div>
@@ -126,7 +167,10 @@ export default function DashboardPage() {
                                                 <CreditCard className="w-6 h-6" />
                                             </div>
                                             <div>
-                                                <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Total Credits in System</div>
+                                                <div className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                    Total Credits in System
+                                                    <HelpTooltip text="จำนวนเครดิตโดยรวมทั้งหมดในระบบที่แจกจ่ายให้ผู้ใช้" />
+                                                </div>
                                                 <div className="text-3xl font-black text-slate-800 dark:text-white">{stats?.total_credits?.toLocaleString() || 0} 💎</div>
                                             </div>
                                         </div>
@@ -135,7 +179,10 @@ export default function DashboardPage() {
                                                 <Crown className="w-6 h-6" />
                                             </div>
                                             <div>
-                                                <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Premium Users</div>
+                                                <div className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                    Premium Users
+                                                    <HelpTooltip text="จำนวนสมาชิกที่เป็นผู้ใช้งานระดับพรีเมียม (Premium)" />
+                                                </div>
                                                 <div className="text-3xl font-black text-slate-800 dark:text-white">{stats?.premium_users || 0}</div>
                                             </div>
                                         </div>

@@ -117,6 +117,23 @@ export function usePromptActions() {
 
     const exportToPlatform = (platform: 'chatgpt' | 'claude' | 'copilot' | 'gemini', promptText: string, source: string = 'chat') => {
         logActivity(`export_${platform}`, source);
+        try {
+            navigator.clipboard.writeText(promptText);
+        } catch (e) {
+            console.error("Clipboard copy error:", e);
+        }
+        
+        const platformNames: Record<string, string> = {
+            chatgpt: 'ChatGPT',
+            claude: 'Claude AI',
+            copilot: 'Microsoft Copilot',
+            gemini: 'Google Gemini'
+        };
+
+        toast.success(`คัดลอก Prompt แล้ว! กำลังนำคุณไปยัง ${platformNames[platform] || platform}`, {
+            style: { borderRadius: '10px', background: '#333', color: '#fff' }
+        });
+
         let url = '';
         if (platform === 'chatgpt') url = `https://chatgpt.com/?q=${encodeURIComponent(promptText)}`;
         else if (platform === 'claude') url = `https://claude.ai/new?q=${encodeURIComponent(promptText)}`;

@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Moon, Sun, Monitor, Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useFontSize } from '../context/FontSizeContext';
 import { useTheme } from '../context/ThemeContext';
@@ -24,17 +25,21 @@ type FolderItem = { id: number; name: string; color: string };
 export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
     const { t, language, toggleLanguage } = useLanguage();
     const { fontSize, toggleFontSize } = useFontSize();
-    const isLarge = false; // Forced normal size
+    const isLarge = fontSize === 'large';
     const { isDarkMode, themeMode, setThemeMode } = useTheme();
     const { authFetch, isLoggedIn, user } = useAuth();
-    const { isSimplifiedUI } = useAccessibility();
+    const { isSimplifiedUI, isHighContrast, isTTSOn, toggleHighContrast, toggleTTS } = useAccessibility();
     const activeClass = "flex items-center gap-4 py-3 px-4 bg-primary/5 dark:bg-primary/10 text-primary dark:text-indigo-400 rounded-xl font-bold transition-all hover-spring";
     const inactiveClass = "flex items-center gap-4 py-3 px-4 text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 rounded-xl font-semibold transition-all hover-spring";
 
     const [recentChats, setRecentChats] = useState<ChatItem[]>([]);
     const [pinnedChats, setPinnedChats] = useState<ChatItem[]>([]);
+    const [allSessions, setAllSessions] = useState<ChatItem[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [folders, setFolders] = useState<FolderItem[]>([]);
+    const [expandedFolder, setExpandedFolder] = useState<number | null>(null);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
     const [contextMenu, setContextMenu] = useState<{x: number; y: number; chatId: string; isPinned: boolean} | null>(null);
     const [showNewFolder, setShowNewFolder] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
@@ -62,6 +67,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                             });
                         }
                     });
+                    setAllSessions(sessions);
                     setPinnedChats(sessions.filter(c => c.is_pinned).slice(0, 5));
                     setRecentChats(sessions.filter(c => !c.is_pinned).slice(0, 5));
                 }
@@ -208,6 +214,15 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
 
     return (
         <>
+            {/* Desktop Hamburger Toggle (When Collapsed) */}
+            <button
+                onClick={() => setIsDesktopCollapsed(false)}
+                className={`hidden md:block fixed top-5 left-4 z-40 p-2.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-xl shadow-sm border border-slate-200/50 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-indigo-400 transition-all hover-spring ${isDesktopCollapsed ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}
+                aria-label="Open Sidebar"
+            >
+                <Menu className="w-5 h-5" />
+            </button>
+
             {/* Mobile Hamburger Toggle */}
             <button
                 onClick={() => setIsMobileOpen(!isMobileOpen)}
@@ -218,15 +233,22 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
             </button>
 
             {/* Mobile Backdrop Overlay */}
-            {isMobileOpen && (
-                <div 
-                    className="md:hidden fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm transition-opacity"
-                    onClick={() => setIsMobileOpen(false)}
-                />
-            )}
+            <AnimatePresence>
+                {isMobileOpen && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="md:hidden fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm"
+                        onClick={() => setIsMobileOpen(false)}
+                    />
+                )}
+            </AnimatePresence>
 
-            <aside className={`fixed md:sticky top-0 h-screen py-8 px-6 bg-white/95 dark:bg-slate-900/95 md:bg-white/60 md:dark:bg-slate-900/40 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/50 w-64 shrink-0 z-40 transition-transform duration-300 ease-in-out ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} flex flex-col`}>
-                <div className="flex items-center space-x-3 px-2 mb-10 mt-6 md:mt-0">
+            <aside className={`fixed md:sticky top-0 h-screen bg-white/95 dark:bg-slate-900/95 md:bg-white/60 md:dark:bg-slate-900/40 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/50 shrink-0 z-40 transition-all duration-300 ease-in-out ${isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'} ${isDesktopCollapsed ? 'md:-translate-x-full md:w-0 md:border-r-0' : 'md:translate-x-0 md:w-64'} overflow-hidden`}>
+                <div className="w-64 px-6 py-8 h-full flex flex-col">
+                <div className="flex items-center justify-between px-2 mb-10 mt-6 md:mt-0">
                 <Link href="/" className="flex items-center space-x-3">
                     <div className="w-9 h-9 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary dark:text-indigo-400">
                         <span className="material-symbols-outlined !font-bold text-2xl">bolt</span>
@@ -236,6 +258,15 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                         <p className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-semibold">Minimal Assistant</p>
                     </div>
                 </Link>
+                
+                {/* Desktop Collapse Button */}
+                <button
+                    onClick={() => setIsDesktopCollapsed(true)}
+                    className="hidden md:flex p-1.5 text-slate-400 hover:text-primary dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                    aria-label="Collapse Sidebar"
+                >
+                    <span className="material-symbols-outlined text-[20px]">keyboard_double_arrow_left</span>
+                </button>
             </div>
             
             {onNewChat ? (
@@ -249,6 +280,22 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                     New Chat
                 </Link>
             )}
+
+            {isLoggedIn && (
+                <div className="mt-4 px-2">
+                    <div className="relative">
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="ค้นหาแชท..."
+                            className="w-full pl-9 pr-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[13px] outline-none focus:border-primary text-slate-700 dark:text-slate-300 transition-colors"
+                        />
+                    </div>
+                </div>
+            )}
+
             <nav className="flex-1 space-y-2 mt-8 overflow-x-hidden">
                 <Link href="/chat" className={activePage === 'chat' ? activeClass : inactiveClass}>
                     <span className="material-symbols-outlined shrink-0">chat_bubble</span>
@@ -262,49 +309,98 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                     <span className="material-symbols-outlined shrink-0">health_and_safety</span>
                     <span className="text-[15px] whitespace-nowrap truncate">{t('menu.doctor')}</span>
                 </Link>
+                <Link href="/settings" className={activePage === 'settings' ? activeClass : inactiveClass}>
+                    <span className="material-symbols-outlined shrink-0">settings</span>
+                    <span className="text-[15px] whitespace-nowrap truncate">{t('menu.settings')}</span>
+                </Link>
             </nav>
 
-            {/* Pinned Chats */}
-            {pinnedChats.length > 0 && (
-                <div className="mt-4 mb-1 space-y-1">
-                    <div className="text-xs font-bold text-amber-500 dark:text-amber-400 mb-2 px-2 uppercase tracking-wider flex items-center gap-1">
-                        📌 {t('sidebar.pinned')}
-                    </div>
-                    {pinnedChats.map(chat => renderChatItem(chat, true))}
-                </div>
-            )}
-
-            {/* Folders */}
-            {folders.length > 0 && (
-                <div className="mt-2 mb-1 space-y-1">
-                    <div className="text-xs font-bold text-slate-400 dark:text-slate-500 mb-2 px-2 uppercase tracking-wider">{t('sidebar.folders')}</div>
-                    {folders.map(folder => (
-                        <div key={folder.id} className="px-3 py-1.5 text-[13px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: folder.color }}></span>
-                            {folder.name}
+            <div className="flex-1 overflow-y-auto mt-4 px-2 custom-scrollbar">
+                {isLoggedIn && searchTerm ? (
+                    <div className="mb-6">
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">ผลการค้นหา</div>
+                        <div className="space-y-1">
+                            {allSessions.filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase())).length > 0 ? (
+                                allSessions.filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase())).map(chat => renderChatItem(chat))
+                            ) : (
+                                <div className="px-3 py-2 text-xs text-slate-400 text-center">ไม่พบผลลัพธ์</div>
+                            )}
                         </div>
-                    ))}
-                </div>
-            )}
-
-            {/* Recent Chats */}
-            {recentChats.length > 0 && (
-                <div className="flex-1 overflow-y-auto mt-4 custom-scrollbar pr-2 space-y-1">
-                    <div className="text-xs font-bold text-slate-400 dark:text-slate-500 mb-3 px-2 uppercase tracking-wider">{t('sidebar.recent')}</div>
-                    {recentChats.map(chat => renderChatItem(chat))}
-                    
-                    {/* View All History Link */}
-                    <div className="pt-2 pb-1">
-                        <Link 
-                            href="/history" 
-                            className="text-[13px] text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-indigo-400 flex items-center justify-center gap-1 py-1.5 transition-colors font-semibold whitespace-nowrap"
-                        >
-                            {t('sidebar.view_all') || 'ดูทั้งหมด'}
-                            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                        </Link>
                     </div>
-                </div>
-            )}
+                ) : (
+                    <>
+                        {/* Pinned Chats */}
+                        {isLoggedIn && pinnedChats.length > 0 && (
+                            <div className="mb-6">
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3 flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[14px]">push_pin</span>
+                                    {t('sidebar.pinned')}
+                                </div>
+                                <div className="space-y-1">
+                                    {pinnedChats.map(chat => renderChatItem(chat, true))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Folders */}
+                        {isLoggedIn && folders.length > 0 && (
+                            <div className="mb-6">
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">{t('sidebar.folders')}</div>
+                                <div className="space-y-1">
+                                    {folders.map(folder => (
+                                        <div key={folder.id}>
+                                            <button 
+                                                onClick={() => setExpandedFolder(expandedFolder === folder.id ? null : folder.id)}
+                                                className="w-full flex items-center justify-between px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors group"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: folder.color }}></span>
+                                                    <span className="font-semibold text-[13px]">{folder.name}</span>
+                                                </div>
+                                                <span className="material-symbols-outlined text-slate-400 text-[18px] transition-transform duration-200" style={{ transform: expandedFolder === folder.id ? 'rotate(90deg)' : 'rotate(0)' }}>
+                                                    chevron_right
+                                                </span>
+                                            </button>
+                                            
+                                            {/* Folder Contents (Expanded) */}
+                                            {expandedFolder === folder.id && (
+                                                <div className="pl-4 mt-1 border-l-2 border-slate-100 dark:border-slate-800 ml-4 space-y-1 animate-fade-in-up">
+                                                    {allSessions.filter(c => c.folder_id === folder.id).length > 0 ? (
+                                                        allSessions.filter(c => c.folder_id === folder.id).map(chat => renderChatItem(chat))
+                                                    ) : (
+                                                        <div className="text-[11px] text-slate-400 py-1 pl-2 italic">ไม่มีแชทในโฟลเดอร์นี้</div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Recent Chats */}
+                        {isLoggedIn && recentChats.length > 0 && (
+                            <div className="mb-2">
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">{t('sidebar.recent')}</div>
+                                <div className="space-y-1">
+                                    {recentChats.map(chat => renderChatItem(chat))}
+                                </div>
+                                
+                                {/* View All History Link */}
+                                <div className="pt-2 pb-1">
+                                    <Link 
+                                        href="/history" 
+                                        className="text-[13px] text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-indigo-400 flex items-center justify-center gap-1 py-1.5 transition-colors font-semibold whitespace-nowrap"
+                                    >
+                                        {t('sidebar.view_all') || 'ดูทั้งหมด'}
+                                        <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
 
             {/* Context Menu */}
             {contextMenu && (
@@ -391,19 +487,6 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                 </div>
             )}
 
-            {/* Credits System Display */}
-            {isLoggedIn && user?.role !== 'admin' && (
-                <div className="mx-4 mb-3">
-                    <div className="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-3 border border-amber-100 dark:border-amber-800/50 flex items-center justify-between shadow-sm">
-                        <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-amber-500 text-[20px]">bolt</span>
-                            <span className="text-xs font-bold text-amber-700 dark:text-amber-400">AI Credits</span>
-                        </div>
-                        <span className="font-black text-amber-600 dark:text-amber-300">{user?.credits?.toLocaleString() || 0}</span>
-                    </div>
-                </div>
-            )}
-
             {/* Bottom Utilities Row */}
             <div className="mt-auto pt-4 pb-2 px-4 flex items-center justify-around text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800">
                 {/* Language Toggle */}
@@ -416,36 +499,55 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                     {language === 'th' ? 'TH' : 'EN'}
                 </button>
 
-                {/* Accessibility Modal Toggle */}
-                <button
-                    onClick={() => setIsAccessibilityOpen(true)}
-                    title="Accessibility & Display"
-                    className="p-2 hover:text-primary dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all flex items-center justify-center"
-                >
-                    <span className="material-symbols-outlined text-lg">visibility</span>
-                </button>
+                {/* Eye Icon (Accessibility) */}
+                <div className="group relative flex justify-center">
+                    <button
+                        onClick={toggleHighContrast}
+                        className={`p-2 rounded-xl transition-all flex items-center justify-center ${isHighContrast ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-400 hover:text-primary dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                    >
+                        <span className="material-symbols-outlined text-lg">visibility</span>
+                    </button>
+                    <div className="absolute bottom-full mb-2 hidden group-hover:block w-max px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded-lg shadow-xl z-50">
+                        {isHighContrast ? 'ปิดโหมดสีตัดกันสูง' : 'เปิดโหมดสีตัดกันสูง'}
+                    </div>
+                </div>
 
-                {/* Settings Link */}
-                <Link
-                    href="/settings"
-                    title="Settings"
-                    className="p-2 hover:text-primary dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all flex items-center justify-center"
-                >
-                    <span className="material-symbols-outlined text-lg">settings</span>
-                </Link>
+                {/* Ear Icon (Voice) */}
+                <div className="group relative flex justify-center">
+                    <button
+                        onClick={toggleTTS}
+                        className={`p-2 rounded-xl transition-all flex items-center justify-center ${isTTSOn ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-400 hover:text-primary dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                    >
+                        <span className="material-symbols-outlined text-lg">hearing</span>
+                    </button>
+                    <div className="absolute bottom-full mb-2 hidden group-hover:block w-max px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded-lg shadow-xl z-50">
+                        {isTTSOn ? 'ปิดระบบอ่านออกเสียง' : 'เปิดระบบอ่านออกเสียง'}
+                    </div>
+                </div>
             </div>
+
+            {/* Credits System Display */}
+            {isLoggedIn && user?.role !== 'admin' && (
+                <div className="mx-2 mb-2">
+                    <div className="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-3 border border-amber-100 dark:border-amber-800/50 flex items-center justify-between shadow-sm">
+                        <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-amber-500 text-[20px]">bolt</span>
+                            <span className="text-xs font-bold text-amber-700 dark:text-amber-400">AI Credits</span>
+                        </div>
+                        <span className="font-black text-amber-600 dark:text-amber-300">{user?.credits?.toLocaleString() || 0}</span>
+                    </div>
+                </div>
+            )}
             
             {/* User Profile / Menu at the bottom */}
             <div className="pb-2 px-2 border-t border-slate-100 dark:border-slate-800 pt-2">
+                <button onClick={() => setIsDesktopCollapsed(!isDesktopCollapsed)} className="p-2 mb-2 w-full text-left text-[10px] text-slate-400 uppercase font-bold hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg">
+                    {isDesktopCollapsed ? 'Expand' : 'Collapse'}
+                </button>
                 <UserMenu />
             </div>
-
-        </aside>
-
-        <AccessibilityModal 
-            isOpen={isAccessibilityOpen} 
-            onClose={() => setIsAccessibilityOpen(false)} 
-        />
+            </div>
+            </aside>
         </>
     );
 }

@@ -3,13 +3,15 @@ import { HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface HelpTooltipProps {
-    content: React.ReactNode;
+    content?: React.ReactNode;
+    text?: React.ReactNode;
     title?: string;
     align?: 'center' | 'left' | 'right';
     position?: 'top' | 'bottom';
 }
 
-export default function HelpTooltip({ content, title, align = 'center', position = 'top' }: HelpTooltipProps) {
+export default function HelpTooltip({ content, text, title, align = 'center', position = 'top' }: HelpTooltipProps) {
+    const displayContent = content || text;
     const [isOpen, setIsOpen] = useState(false);
     const tooltipRef = useRef<HTMLDivElement>(null);
 
@@ -62,7 +64,7 @@ export default function HelpTooltip({ content, title, align = 'center', position
                         className={`absolute ${alignClass} ${positionClass} w-64 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-[100] text-sm text-slate-600 dark:text-slate-300 pointer-events-auto`}
                     >
                         {title && <div className="font-bold text-slate-800 dark:text-white mb-1">{title}</div>}
-                        <div>{content}</div>
+                        <div>{displayContent}</div>
                         {/* Triangle pointer */}
                         <div className={`absolute ${pointerAlignClass} ${pointerPositionClass} w-0 h-0 border-l-[8px] border-r-[8px] border-l-transparent border-r-transparent drop-shadow-sm`}></div>
                     </motion.div>

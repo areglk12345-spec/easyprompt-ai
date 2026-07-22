@@ -7,8 +7,6 @@ import { FontSizeProvider } from '../context/FontSizeContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import { AccessibilityProvider } from '../context/AccessibilityContext';
 
-import LoginModal from '../components/LoginModal';
-
 import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -39,6 +37,13 @@ export const metadata = {
   }
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -56,7 +61,6 @@ export default function RootLayout({
                   {children}
                   <Toaster position="bottom-right" />
 
-                  <LoginModal />
                 </AccessibilityProvider>
               </ThemeProvider>
             </FontSizeProvider>

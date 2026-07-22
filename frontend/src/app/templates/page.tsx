@@ -177,7 +177,7 @@ export default function TemplatesPage() {
                                 <h2 className="font-display-lg text-4xl font-extrabold text-slate-800 dark:text-white leading-tight flex items-center gap-3">
                                     <Library className="w-8 h-8 text-primary dark:text-indigo-400" /> {t('templates.title')}
                                 </h2>
-                                <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base leading-relaxed">
+                                <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base leading-relaxed line-clamp-1">
                                     {t('templates.desc')}
                                 </p>
                             </div>
@@ -274,6 +274,7 @@ export default function TemplatesPage() {
                                 onDownloadAsTxt={downloadAsTxt}
                                 onDeleteTemplate={handleDeleteTemplate}
                                 onToggleFavorite={handleToggleFavorite}
+                                onCreateNew={() => setIsCreateModalOpen(true)}
                             />
                         )}
                     </div>

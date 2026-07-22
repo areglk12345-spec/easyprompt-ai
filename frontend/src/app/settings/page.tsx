@@ -300,7 +300,7 @@ export default function SettingsPage() {
                         </div>
                     </header>
 
-                    <div className="flex-1 w-full max-w-4xl mx-auto px-6 py-12 space-y-12 animate-slide-up">
+                    <div className="w-full max-w-4xl pl-6 pr-6 md:pl-12 py-12 space-y-12 animate-slide-up">
                         {/* Welcome Header */}
                         <section className="space-y-2">
                             <h2 className="font-display-lg text-4xl font-extrabold text-slate-800 dark:text-white leading-tight">Manage Your Account</h2>
@@ -420,66 +420,21 @@ export default function SettingsPage() {
                         {/* Accessibility Section */}
                         <section className="space-y-6">
                             <div className="flex items-center gap-2 text-primary">
-                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>visibility</span>
+                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>accessibility_new</span>
                                 <h3 className={`${headingSize} text-slate-800 dark:text-white`}>Accessibility</h3>
                             </div>
                             <div className="glass-panel-heavy p-8 rounded-3xl space-y-8 shadow-sm">
                                 
-                                {/* Font Size Slider */}
-                                <div className="flex flex-col p-6 bg-primary/5 rounded-2xl border border-primary/10 gap-6">
-                                    <div className="space-y-1">
-                                        <p className="font-body-lg font-bold text-primary dark:text-indigo-400">Text Size (ขนาดตัวอักษร)</p>
-                                        <p className="text-slate-500 dark:text-slate-400 text-sm">เลื่อนเพื่อปรับขนาดตัวอักษรและหน้าต่างทั้งหมดในระบบให้เหมาะกับการอ่านของคุณ</p>
-                                    </div>
-                                    <div className="w-full max-w-lg mx-auto">
-                                        <TextSizeSlider />
-                                    </div>
-                                </div>
-
-                                {/* Voice Navigation */}
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-6 gap-4 border-t border-slate-200/50 dark:border-slate-700/50">
-                                    <div className="space-y-1">
-                                        <p className="font-bold text-slate-800 dark:text-white">Voice Control (ควบคุมด้วยเสียง)</p>
-                                        <p className="text-slate-500 dark:text-slate-400 text-sm">เปิดใช้งานไมโครโฟนสำหรับการป้อนข้อมูลและค้นหาเซสชันคำสั่งด้วยเสียงพูด</p>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleTogglePreference('voice_control', setVoiceControl, voiceControl)}
-                                        role="switch" aria-checked={voiceControl}
-                                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none hover-spring ${voiceControl ? 'bg-primary' : 'bg-slate-300'}`}
-                                    >
-                                        <span className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${voiceControl ? 'translate-x-6' : 'translate-x-0'}`} />
-                                    </button>
-                                </div>
-
-                                {/* TTS Voice Selection */}
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-6 gap-4 border-t border-slate-200/50 dark:border-slate-700/50">
-                                    <div className="space-y-1">
-                                        <p className="font-bold text-slate-800 dark:text-white">Reading Voice (เสียงอ่านข้อความ)</p>
-                                        <p className="text-slate-500 dark:text-slate-400 text-sm">เลือกเสียงสำหรับระบบอ่านออกเสียงอัตโนมัติ (TTS)</p>
-                                    </div>
-                                    <select
-                                        value={selectedVoiceURI}
-                                        onChange={(e) => {
-                                            setSelectedVoiceURI(e.target.value);
-                                            localStorage.setItem('preferred_voice', e.target.value);
-                                        }}
-                                        className="w-48 h-10 px-3 rounded-xl bg-slate-100/60 border border-slate-200/50 focus:bg-white focus:border-primary outline-none transition-all font-body-md text-slate-800 dark:text-white"
-                                    >
-                                        <option value="">-- เลือกเสียง --</option>
-                                        {voices.map(voice => (
-                                            <option key={voice.voiceURI} value={voice.voiceURI}>
-                                                {voice.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
                                 {/* High Contrast Toggle */}
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-6 gap-4 border-t border-slate-200/50 dark:border-slate-700/50">
-                                    <div className="space-y-1">
-                                        <p className="font-bold text-slate-800 dark:text-white">High Contrast (สีตัดกันสูง)</p>
-                                        <p className="text-slate-500 dark:text-slate-400 text-sm">เพิ่มความชัดเจนของข้อความและปุ่ม ลดความล้าของสายตา</p>
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border bg-indigo-50 text-indigo-600 border-indigo-100 dark:bg-indigo-900/40 dark:border-indigo-800">
+                                            <span className="material-symbols-outlined text-2xl">visibility</span>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="font-bold text-slate-800 dark:text-white">High Contrast (โหมดสีตัดกันสูง)</p>
+                                            <p className="text-slate-500 dark:text-slate-400 text-sm">ช่วยให้อ่านข้อความและมองเห็นปุ่มต่างๆ ได้ชัดเจนยิ่งขึ้น เหมาะสำหรับผู้มีปัญหาทางสายตา</p>
+                                        </div>
                                     </div>
                                     <button
                                         type="button"
@@ -491,21 +446,43 @@ export default function SettingsPage() {
                                     </button>
                                 </div>
 
-                                {/* Simplified UI Toggle */}
+                                {/* Voice Control Toggle */}
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-6 gap-4 border-t border-slate-200/50 dark:border-slate-700/50">
-                                    <div className="space-y-1">
-                                        <p className="font-bold text-slate-800 dark:text-white">Simplified UI (ซ่อนเมนูขั้นสูง)</p>
-                                        <p className="text-slate-500 dark:text-slate-400 text-sm">แสดงเฉพาะฟังก์ชันที่จำเป็นและลดความซับซ้อนของหน้าจอ</p>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/40 dark:border-amber-800">
+                                            <span className="material-symbols-outlined text-2xl">hearing</span>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="font-bold text-slate-800 dark:text-white">Voice & Audio (ควบคุมด้วยเสียงและอ่านออกเสียง)</p>
+                                            <p className="text-slate-500 dark:text-slate-400 text-sm">เปิดใช้งานไมโครโฟนเพื่อสั่งการด้วยเสียง และให้ระบบอ่านออกเสียงคำตอบได้</p>
+                                        </div>
                                     </div>
                                     <button
                                         type="button"
-                                        onClick={toggleSimplifiedUI}
-                                        role="switch" aria-checked={isSimplifiedUI}
-                                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isSimplifiedUI ? 'bg-primary' : 'bg-slate-300'}`}
+                                        onClick={() => handleTogglePreference('voice_control', setVoiceControl, voiceControl)}
+                                        role="switch" aria-checked={voiceControl}
+                                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none hover-spring ${voiceControl ? 'bg-primary' : 'bg-slate-300'}`}
                                     >
-                                        <span className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isSimplifiedUI ? 'translate-x-6' : 'translate-x-0'}`} />
+                                        <span className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${voiceControl ? 'translate-x-6' : 'translate-x-0'}`} />
                                     </button>
                                 </div>
+
+                                {/* Font Size Slider */}
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-6 gap-4 border-t border-slate-200/50 dark:border-slate-700/50">
+                                    <div className="flex items-center gap-4 flex-1">
+                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/40 dark:border-emerald-800">
+                                            <span className="material-symbols-outlined text-2xl">format_size</span>
+                                        </div>
+                                        <div className="space-y-1 w-full max-w-sm">
+                                            <p className="font-bold text-slate-800 dark:text-white">Text Size (ขนาดตัวอักษร)</p>
+                                            <p className="text-slate-500 dark:text-slate-400 text-sm">เลื่อนเพื่อปรับขนาดตัวอักษรในระบบ</p>
+                                            <div className="pt-2 w-full">
+                                                <TextSizeSlider />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
                             </div>
                         </section>
 

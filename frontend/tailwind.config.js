@@ -13,8 +13,8 @@ module.exports = {
         extend: {
             colors: {
                 primary: {
-                    DEFAULT: "#4648d4", // ครามกึ่งน้ำเงินพรีเมียมจากต้นแบบ
-                    dark: "#2f2ebe",
+                    DEFAULT: "#7c3aed", // Mascot Purple/Violet
+                    dark: "#6d28d9",
                 },
                 roseAccent: "#f43f5e",
                 purpleAccent: "#8b5cf6",
@@ -78,12 +78,18 @@ module.exports = {
                 pulseGlow: {
                     '0%, 100%': { opacity: '0.6', transform: 'scale(1)' },
                     '50%': { opacity: '0.9', transform: 'scale(1.03)' },
+                },
+                gradient: {
+                    '0%': { backgroundPosition: '0% 50%' },
+                    '50%': { backgroundPosition: '100% 50%' },
+                    '100%': { backgroundPosition: '0% 50%' },
                 }
             },
             animation: {
                 float: 'float 6s ease-in-out infinite',
                 'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                 'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+                'gradient': 'gradient 15s ease infinite',
             },
             boxShadow: {
                 'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 4px 10px -4px rgba(0, 0, 0, 0.04)',
