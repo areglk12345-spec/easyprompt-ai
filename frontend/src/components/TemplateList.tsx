@@ -22,6 +22,8 @@ interface TemplateListProps {
     onDownloadAsTxt: (promptText: string, title: string) => void;
     onDeleteTemplate?: (id: number) => void;
     onToggleFavorite?: (id: number) => void;
+    onTogglePublish?: (id: number) => void;
+    onRunInChat?: (promptText: string) => void;
     onCreateNew?: () => void;
 }
 
@@ -34,6 +36,8 @@ export default function TemplateList({
     onDownloadAsTxt,
     onDeleteTemplate,
     onToggleFavorite,
+    onTogglePublish,
+    onRunInChat,
     onCreateNew,
 }: TemplateListProps) {
     const filteredTemplates = templates.filter((t) => {
@@ -85,6 +89,7 @@ export default function TemplateList({
         <div className="flex flex-col gap-4">
             {filteredTemplates.map((tpl) => {
                 const canDelete = currentUser && (tpl.user_id === currentUser.id || currentUser.role === 'admin');
+                const canPublish = currentUser && (tpl.user_id === currentUser.id || currentUser.role === 'admin');
                 return (
                     <PromptCard
                         key={tpl.id}
@@ -100,6 +105,8 @@ export default function TemplateList({
                         onDownloadAsTxt={onDownloadAsTxt}
                         onDelete={() => onDeleteTemplate?.(tpl.id)}
                         onToggleFavorite={() => onToggleFavorite?.(tpl.id)}
+                        onTogglePublish={canPublish ? () => onTogglePublish?.(tpl.id) : undefined}
+                        onRunInChat={onRunInChat}
                     />
                 );
             })}

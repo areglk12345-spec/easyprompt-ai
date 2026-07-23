@@ -75,12 +75,12 @@ def get_templates(category: Optional[str] = None, type: Optional[str] = "all", c
     return results
 
 @router.get("/marketplace", response_model=List[TemplateResponse])
-def get_marketplace_templates(category: Optional[str] = None, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+def get_marketplace_templates(category: Optional[str] = None, sort_by: Optional[str] = "likes", current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db)):
     query = db.query(models.PromptTemplate).filter(models.PromptTemplate.is_public == True)
     if category and category != "ทั้งหมด":
         query = query.filter(models.PromptTemplate.category == category)
         
-    templates = query.order_by(models.PromptTemplate.id.desc()).all()
+    templates = query.all()
     results = []
     for tpl in templates:
         is_favorite = False
@@ -99,7 +99,25 @@ def get_marketplace_templates(category: Optional[str] = None, current_user: Opti
             "is_favorite": is_favorite,
             "likes_count": len(tpl.favorited_by)
         })
+    
+    if sort_by == "likes":
+        results.sort(key=lambda x: x["likes_count"], reverse=True)
+    else:
+        results.sort(key=lambda x: x["id"], reverse=True)
+
     return results
+
+@router.post("/{template_id}/publish")
+def publish_template(template_id: int, current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db)):
+    template = db.query(models.PromptTemplate).filter(models.PromptTemplate.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="ไม่พบเทมเพลตที่ระบุ")
+    if template.user_id != current_user.id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="คุณไม่มีสิทธิ์เผยแพร่เทมเพลตนี้")
+        
+    template.is_public = not template.is_public
+    db.commit()
+    return {"status": "success", "is_public": template.is_public}
 
 @router.post("/{template_id}/copy")
 def copy_template(template_id: int, current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db)):

@@ -16,6 +16,8 @@ interface PromptCardProps {
     onDownloadAsTxt: (promptText: string, title: string) => void;
     onDelete?: () => void;
     onToggleFavorite?: () => void;
+    onTogglePublish?: () => void;
+    onRunInChat?: (promptText: string) => void;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -45,10 +47,11 @@ export default function PromptCard({
     onDownloadAsTxt,
     onDelete,
     onToggleFavorite,
+    onTogglePublish,
+    onRunInChat
 }: PromptCardProps) {
     const badgeClass = CATEGORY_COLORS[category] || CATEGORY_COLORS['ทั่วไป'];
     const IconComponent = CATEGORY_ICONS[category] || Pin;
-    const cardPadding = isLarge ? 'p-8' : 'p-6';
 
     return (
         <div
@@ -91,6 +94,31 @@ export default function PromptCard({
 
             {/* Actions */}
             <div className="flex items-center gap-2 w-full lg:w-auto shrink-0 justify-end mt-2 lg:mt-0">
+                {onRunInChat && (
+                    <button
+                        type="button"
+                        onClick={() => onRunInChat(promptText)}
+                        title="นำไปใช้ในแชท"
+                        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-xs shadow-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-1 cursor-pointer"
+                    >
+                        <span className="material-symbols-outlined text-[14px]">bolt</span>
+                        ใช้ในแชท
+                    </button>
+                )}
+                {onTogglePublish && (
+                    <button
+                        type="button"
+                        onClick={onTogglePublish}
+                        title={isPublic ? "ยกเลิกเผยแพร่" : "แชร์สู่ Marketplace"}
+                        className={`p-2 rounded-lg text-xs font-bold transition-all hover:scale-105 border ${
+                            isPublic
+                                ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                                : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'
+                        }`}
+                    >
+                        <Globe className="w-4 h-4" />
+                    </button>
+                )}
                 <button
                     id={`copy-tpl-${id}`}
                     type="button"

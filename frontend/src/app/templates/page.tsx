@@ -136,6 +136,24 @@ export default function TemplatesPage() {
         }
     };
 
+    const handleTogglePublish = async (id: number) => {
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            const response = await authFetch(`${API_URL}/api/templates/${id}/publish`, { method: 'POST' });
+            if (!response.ok) throw new Error('Publish failed');
+            const data = await response.json();
+            setTemplates(templates.map(t => t.id === id ? { ...t, is_public: data.is_public } : t));
+            alert(data.is_public ? "แชร์เทมเพลตสู่ Marketplace เรียบร้อยแล้ว!" : "ยกเลิกการเผยแพร่เรียบร้อยแล้ว");
+        } catch (error) {
+            console.error("Error toggling publish:", error);
+        }
+    };
+
+    const handleRunInChat = (promptText: string) => {
+        localStorage.setItem('ep_pending_prompt', promptText);
+        window.location.href = '/chat';
+    };
+
     const downloadAsTxt = (text: string, title: string) => {
         const element = document.createElement("a");
         const file = new Blob([text], { type: 'text/plain;charset=utf-8' });
@@ -274,6 +292,8 @@ export default function TemplatesPage() {
                                 onDownloadAsTxt={downloadAsTxt}
                                 onDeleteTemplate={handleDeleteTemplate}
                                 onToggleFavorite={handleToggleFavorite}
+                                onTogglePublish={handleTogglePublish}
+                                onRunInChat={handleRunInChat}
                                 onCreateNew={() => setIsCreateModalOpen(true)}
                             />
                         )}

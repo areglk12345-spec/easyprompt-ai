@@ -159,7 +159,14 @@ function ChatContent() {
         setSessionId(sid);
     }, [urlSessionId]);
 
-    // ตรวจจับและส่งคำถามอัตโนมัติหากถูกส่งมาจากหน้าแรก
+    // Check for pending prompt from Marketplace or Templates page
+    useEffect(() => {
+        const pending = localStorage.getItem('ep_pending_prompt');
+        if (pending) {
+            setInputText(pending);
+            localStorage.removeItem('ep_pending_prompt');
+        }
+    }, []);
 
 
     // 2. สร้าง State สำหรับเก็บประวัติการสนทนา (ตั้งค่าเริ่มต้นเป็นข้อความทักทาย พร้อม Quick Actions)
