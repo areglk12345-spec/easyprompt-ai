@@ -69,8 +69,15 @@ export default function ChatBubble({
         >
             <div className={`flex gap-3 ${role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {role === 'agent' && (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-indigo-600 flex-shrink-0 flex items-center justify-center text-white shadow-sm border border-white/20 mt-1">
-                        <span className="text-lg leading-none">👻</span>
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 via-purple-600 to-cyan-500 flex-shrink-0 flex items-center justify-center text-white shadow-md border border-white/30 mt-1 relative overflow-hidden group">
+                        <svg width="24" height="24" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform group-hover:scale-110 transition-transform">
+                            <rect x="18" y="22" width="64" height="42" rx="21" fill="#6366f1" />
+                            <rect x="24" y="28" width="52" height="30" rx="14" fill="#0f172a" />
+                            <circle cx="38" cy="42" r="5" fill="#38bdf8" />
+                            <circle cx="62" cy="42" r="5" fill="#38bdf8" />
+                            <path d="M 44 48 Q 50 52 56 48" fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" />
+                            <rect x="30" y="60" width="40" height="26" rx="13" fill="#38bdf8" />
+                        </svg>
                     </div>
                 )}
                 <div
