@@ -1,0 +1,113 @@
+/* EZ-Bot Animated Mascot Styles & Keyframes */
+
+@keyframes mascot-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1.5deg);
+  }
+}
+
+@keyframes mascot-bounce {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-14px) scale(1.05);
+  }
+}
+
+@keyframes aura-pulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes antenna-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px #8b5cf6);
+  }
+  50% {
+    filter: drop-shadow(0 0 12px #38bdf8);
+  }
+}
+
+@keyframes eye-blink {
+  0%, 90%, 100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes energy-ring-rotate {
+  0% {
+    transform: rotate(0deg) scaleX(1.3);
+  }
+  100% {
+    transform: rotate(360deg) scaleX(1.3);
+  }
+}
+
+@keyframes bubble-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.mascot-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.mascot-interactive {
+  pointer-events: auto;
+}
+
+.mascot-float-anim {
+  animation: mascot-float 4.5s ease-in-out infinite;
+}
+
+.mascot-happy-anim {
+  animation: mascot-bounce 0.6s ease-in-out infinite;
+}
+
+.mascot-aura {
+  animation: aura-pulse 3s ease-in-out infinite;
+}
+
+.antenna-light {
+  animation: antenna-glow 2s ease-in-out infinite;
+}
+
+.eye-blink-anim {
+  transform-origin: center;
+  animation: eye-blink 4s ease-in-out infinite;
+}
+
+.ring-rotate {
+  transform-origin: center;
+  animation: energy-ring-rotate 8s linear infinite;
+}
+
+.bubble-appear {
+  animation: bubble-pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}

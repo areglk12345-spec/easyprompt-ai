@@ -44,6 +44,8 @@ export const viewport = {
   userScalable: false,
 };
 
+import MascotAgent from '../components/MascotAgent';
+
 export default function RootLayout({
   children,
 }: {
@@ -65,7 +67,7 @@ export default function RootLayout({
                 <AccessibilityProvider>
                   {children}
                   <Toaster position="bottom-right" />
-
+                  <MascotAgent />
                 </AccessibilityProvider>
               </ThemeProvider>
             </FontSizeProvider>
