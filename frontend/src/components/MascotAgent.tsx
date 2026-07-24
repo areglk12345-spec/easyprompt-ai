@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { useTTS } from '../hooks/useTTS';
 
 export type MascotMood = 'idle' | 'thinking' | 'doctor' | 'senior_mode' | 'happy';
 
@@ -35,10 +36,10 @@ export default function MascotAgent({
   onMascotClick
 }: MascotAgentProps) {
   const { language, t } = useLanguage();
+  const { speak, stop, isSpeaking: isSpeakingTTS } = useTTS();
   const [internalMood, setInternalMood] = useState<MascotMood>('idle');
   const [tipIndex, setTipIndex] = useState(0);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [showSpeechBubble, setShowSpeechBubble] = useState(true);
 
   // Active mood prioritizes external prop or falls back to internal state
@@ -68,14 +69,10 @@ export default function MascotAgent({
 
   const handleSpeak = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(currentTip);
-      utterance.lang = 'th-TH';
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
+    if (isSpeakingTTS) {
+      stop();
+    } else {
+      speak(currentTip);
     }
   };
 
@@ -118,7 +115,7 @@ export default function MascotAgent({
               <button
                 onClick={handleSpeak}
                 className={`p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-600 transition-colors ${
-                  isSpeaking ? 'text-indigo-600 animate-pulse' : ''
+                  isSpeakingTTS ? 'text-indigo-600 animate-pulse' : ''
                 }`}
                 title="ฟังเสียงสปีกเกอร์"
               >

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Globe, User, Copy, Download, Pin, Briefcase, BookOpen, Palette, Star } from 'lucide-react';
+import TTSButton from './TTSButton';
 
 interface PromptCardProps {
     id: number;
@@ -119,6 +120,7 @@ export default function PromptCard({
                         <Globe className="w-4 h-4" />
                     </button>
                 )}
+                <TTSButton text={`${title}: ${promptText}`} className="!p-2 shadow-none" />
                 <button
                     id={`copy-tpl-${id}`}
                     type="button"

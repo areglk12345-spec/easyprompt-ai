@@ -45,10 +45,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const [activeWorkspace, setActiveWorkspace] = useState<string>('ทั่วไป');
 
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
     const openLoginModal = () => {
-        router.push('/login');
+        setIsLoginModalOpen(true);
     };
-    const closeLoginModal = () => {};
+    const closeLoginModal = () => {
+        setIsLoginModalOpen(false);
+    };
 
     useEffect(() => {
         // Load token and user from localStorage on mount
@@ -83,6 +87,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setActiveWorkspace(data.user.organization || 'ทั่วไป');
         localStorage.setItem('ep_token', data.access_token);
         localStorage.setItem('ep_user', JSON.stringify(data.user));
+        localStorage.removeItem('ep_guest_usage_count');
+        setIsLoginModalOpen(false);
     };
 
     const login2fa = async (username: string, totpCode: string) => {
@@ -92,6 +98,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setActiveWorkspace(data.user.organization || 'ทั่วไป');
         localStorage.setItem('ep_token', data.access_token);
         localStorage.setItem('ep_user', JSON.stringify(data.user));
+        localStorage.removeItem('ep_guest_usage_count');
+        setIsLoginModalOpen(false);
     };
 
     const socialLogin = async (idToken: string) => {
@@ -101,6 +109,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setActiveWorkspace(data.user.organization || 'ทั่วไป');
         localStorage.setItem('ep_token', data.access_token);
         localStorage.setItem('ep_user', JSON.stringify(data.user));
+        localStorage.removeItem('ep_guest_usage_count');
+        setIsLoginModalOpen(false);
     };
 
     const register = async (username: string, password: string, fullName: string, organization: string = 'ทั่วไป') => {
@@ -167,7 +177,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             logout,
             refreshUser,
             authFetch,
-            isLoginModalOpen: false,
+            isLoginModalOpen,
             openLoginModal,
             closeLoginModal
         }}>

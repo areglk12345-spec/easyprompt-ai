@@ -11,6 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFontSize } from '../../context/FontSizeContext';
 import { usePromptActions } from '../../hooks/usePromptActions';
+import { useTTS } from '../../hooks/useTTS';
 import ChatBubble from '../../components/ChatBubble';
 import { Button } from '../../components/ui/Button';
 
@@ -32,11 +33,23 @@ type Message = {
 };
 
 function ChatContent() {
-    const { authFetch, user, refreshUser } = useAuth();
+    const { authFetch, user, refreshUser, isLoggedIn, openLoginModal } = useAuth();
     const { t } = useLanguage();
     const { fontSize } = useFontSize();
     const isLarge = fontSize === 'large';
     const { logActivity, copyToClipboard, downloadAsTxt, downloadAsMarkdown, saveToTemplate, exportToPlatform, analyzeTextAccessibility } = usePromptActions();
+    const { speak, isAutoSpeakOn } = useTTS();
+
+    // Guest Trial State (2 trial questions for unauthenticated users)
+    const [guestUsageCount, setGuestUsageCount] = useState<number>(0);
+    const [isGuestLimitModalOpen, setIsGuestLimitModalOpen] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const saved = parseInt(localStorage.getItem('ep_guest_usage_count') || '0', 10);
+            setGuestUsageCount(isNaN(saved) ? 0 : saved);
+        }
+    }, []);
 
     const [isReadingLevelModalOpen, setIsReadingLevelModalOpen] = useState(false);
     const [readingLevelResult, setReadingLevelResult] = useState<any>(null);
@@ -393,6 +406,18 @@ function ChatContent() {
         const messageToSend = customText !== undefined ? customText : inputText;
         if (!messageToSend.trim() || isLoading) return;
 
+        // Guest Trial Quota Enforcement (Limit to 2 trial questions for unauthenticated users)
+        if (!isLoggedIn && !user) {
+            const currentCount = parseInt(localStorage.getItem('ep_guest_usage_count') || '0', 10);
+            if (currentCount >= 2) {
+                setIsGuestLimitModalOpen(true);
+                return;
+            }
+            const newCount = currentCount + 1;
+            localStorage.setItem('ep_guest_usage_count', String(newCount));
+            setGuestUsageCount(newCount);
+        }
+
         // นำข้อความผู้ใช้ใส่เข้าไปในหน้าจอก่อน
         setMessages((prev) => [...prev, { role: 'user', text: messageToSend }]);
         if (customText === undefined) {
@@ -460,6 +485,11 @@ function ChatContent() {
                                 window.dispatchEvent(new Event('chat_updated'));
                             }
                             setAttachedFiles([]); // Clear after sending
+                            
+                            // Auto-Speak AI response if enabled
+                            if (isAutoSpeakOn && accumulatedText.trim()) {
+                                speak(accumulatedText);
+                            }
                             
                             // Call refine endpoint to get fitted prompt IF NOT a direct run
                             if (!isDirectRun) {
@@ -536,7 +566,7 @@ function ChatContent() {
         } finally {
             setIsLoading(false);
         }
-    }, [inputText, isLoading, sessionId, selectedTone, easyLanguage, authFetch, attachedFiles, selectedDocument, selectedModel, refreshUser]);
+    }, [inputText, isLoading, sessionId, selectedTone, easyLanguage, authFetch, attachedFiles, selectedDocument, selectedModel, refreshUser, isAutoSpeakOn, speak, isLoggedIn, user]);
 
     const handleEditMessage = useCallback((index: number, newText: string) => {
         if (isLoading) return;
@@ -762,6 +792,23 @@ function ChatContent() {
 
                     {/* Bottom Input Bar */}
                     <footer className="p-4 pb-6 md:p-6 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/90 to-transparent dark:from-[#020617] dark:via-[#020617]/90 shrink-0 sticky bottom-0 z-20 pointer-events-none">
+                        {/* Guest Trial Banner */}
+                        {!isLoggedIn && !user && (
+                            <div className="max-w-4xl mx-auto mb-3 pointer-events-auto bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-purple-500/10 border border-amber-500/30 dark:border-amber-500/40 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm shadow-sm">
+                                <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 font-semibold">
+                                    <span className="material-symbols-outlined text-amber-500 text-lg">stars</span>
+                                    <span>โหมดทดลองใช้งานฟรี: สิทธิ์คงเหลือ <strong className="text-amber-600 dark:text-amber-400 font-extrabold text-base">{Math.max(0, 2 - guestUsageCount)}</strong> / 2 คำถาม</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={openLoginModal}
+                                    className="px-3.5 py-1.5 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold transition-transform hover:scale-105 shadow-sm text-xs shrink-0"
+                                >
+                                    เข้าสู่ระบบเพื่อใช้ไม่จำกัด (ฟรี)
+                                </button>
+                            </div>
+                        )}
+
                         {/* Active Listening Indicator */}
                         {isListening && (
                             <div className="max-w-4xl mx-auto mb-2 pointer-events-auto flex items-center justify-center animate-fade-in-up">
@@ -1046,6 +1093,44 @@ function ChatContent() {
                             ) : (
                                 <div className="text-center text-rose-500 py-10 font-medium">ไม่สามารถวิเคราะห์ได้ กรุณาลองใหม่อีกครั้ง</div>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Guest Trial Limit Reached Modal */}
+            {isGuestLimitModalOpen && (
+                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 text-center animate-scale-up">
+                        <div className="w-16 h-16 rounded-3xl bg-amber-100 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-700 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-md">
+                            <span className="material-symbols-outlined text-4xl">lock_open</span>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <h3 className="text-2xl font-black text-slate-800 dark:text-white">ทดลองใช้งานครบ 2 คำถามแล้ว 🎉</h3>
+                            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+                                สมัครสมาชิกหรือเข้าสู่ระบบฟรี เพื่อใช้งานสร้างและเกลา Prompt ได้แบบไม่จำกัด พร้อมบันทึกประวัติการใช้งานของคุณได้ทันที!
+                            </p>
+                        </div>
+
+                        <div className="pt-2 flex flex-col gap-3">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsGuestLimitModalOpen(false);
+                                    openLoginModal();
+                                }}
+                                className="w-full py-3.5 bg-primary hover:bg-primary/90 text-white font-extrabold rounded-2xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                            >
+                                <span className="material-symbols-outlined">login</span>
+                                <span>เข้าสู่ระบบ / สมัครสมาชิกฟรี</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsGuestLimitModalOpen(false)}
+                                className="w-full py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 font-bold rounded-2xl transition-colors text-sm"
+                            >
+                                ปิดหน้าต่างนี้
+                            </button>
                         </div>
                     </div>
                 </div>

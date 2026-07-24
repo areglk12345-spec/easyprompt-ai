@@ -4,14 +4,23 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Play, Check, ArrowRight, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
+const heroSubtitles = [
+    "รวมสุดยอดเทมเพลตคำสั่ง (Prompt) พร้อมระบบ Dr. Prompt ช่วยปรับแต่งคำสั่งให้คมชัด ทำงานเสร็จไวขึ้น 10 เท่าในคลิกเดียว",
+    "เปลี่ยนคำพูดธรรมดา ให้เป็น Prompt ระดับมืออาชีพ ช่วยสั่งงาน AI ได้แม่นยำ ตรงใจ 100%",
+    "ออกแบบมาเพื่อทุกคน รองรับการปรับขนาดตัวหนังสือ อ่านออกเสียง AI Accessibility Agent ภาษาไทย",
+    "ช่วยร่างนิยาย เขียนบทความ สรุปเอกสาร และวิเคราะห์คำสั่ง AI ให้คุณในไม่กี่วินาที"
+];
+
 export default function Home() {
     const router = useRouter();
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, openLoginModal } = useAuth();
     const { isDarkMode } = useTheme();
     const [scrolled, setScrolled] = useState(false);
+    const [subtitleIndex, setSubtitleIndex] = useState(0);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -19,6 +28,13 @@ export default function Home() {
         };
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setSubtitleIndex((prev) => (prev + 1) % heroSubtitles.length);
+        }, 4000);
+        return () => clearInterval(timer);
     }, []);
 
     return (
@@ -49,11 +65,15 @@ export default function Home() {
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login" className="hidden md:block font-bold text-sm text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                <button 
+                                    type="button"
+                                    onClick={openLoginModal} 
+                                    className="hidden md:block font-bold text-sm text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                                >
                                     เข้าสู่ระบบ
-                                </Link>
+                                </button>
                                 <Link 
-                                    href="/login" 
+                                    href="/chat" 
                                     className="px-5 py-2.5 rounded-full bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 hover:scale-105 transition-all shadow-lg shadow-indigo-500/25 flex items-center gap-2"
                                 >
                                     เริ่มใช้งานฟรี <ArrowRight className="w-4 h-4" />
@@ -83,12 +103,37 @@ export default function Home() {
                             </span>
                         </h1>
                         
-                        <p className="text-lg md:text-2xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                            รวมสุดยอดเทมเพลตคำสั่ง (Prompt) พร้อมระบบ <strong>Dr. Prompt</strong> ช่วยปรับแต่งคำสั่งให้คมชัด ทำงานเสร็จไวขึ้น 10 เท่าในคลิกเดียว
-                        </p>
+                        {/* Animated Rotating Subtitle under EZPrompt */}
+                        <div className="min-h-[90px] md:min-h-[70px] flex flex-col items-center justify-center max-w-2xl mx-auto px-4 relative my-2">
+                            <AnimatePresence mode="wait">
+                                <motion.p
+                                    key={subtitleIndex}
+                                    initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
+                                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                                    exit={{ opacity: 0, y: -16, filter: "blur(4px)" }}
+                                    transition={{ duration: 0.45, ease: "easeInOut" }}
+                                    className="text-lg md:text-2xl text-slate-600 dark:text-slate-300 font-medium leading-relaxed"
+                                >
+                                    {heroSubtitles[subtitleIndex]}
+                                </motion.p>
+                            </AnimatePresence>
+
+                            {/* Indicator Dots */}
+                            <div className="flex justify-center items-center gap-2 mt-4">
+                                {heroSubtitles.map((_, i) => (
+                                    <button
+                                        key={i}
+                                        type="button"
+                                        onClick={() => setSubtitleIndex(i)}
+                                        className={`h-2 rounded-full transition-all duration-300 ${i === subtitleIndex ? 'w-8 bg-indigo-600 dark:bg-indigo-400' : 'w-2 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400'}`}
+                                        aria-label={`Go to slide ${i + 1}`}
+                                    />
+                                ))}
+                            </div>
+                        </div>
                         
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                            <Link href="/login" className="w-full sm:w-auto px-8 py-4 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-lg hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-2">
+                            <Link href="/chat" className="w-full sm:w-auto px-8 py-4 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-lg hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-2">
                                 ทดลองใช้งานฟรี
                             </Link>
                             <a href="#video-demo" className="w-full sm:w-auto px-8 py-4 rounded-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2">
@@ -215,7 +260,7 @@ export default function Home() {
                                     </div>
                                 </div>
                                 
-                                <Link href="/login" className="w-full py-3 rounded-full border border-slate-300 dark:border-slate-700 font-bold text-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors mb-8">
+                                <Link href="/chat" className="w-full py-3 rounded-full border border-slate-300 dark:border-slate-700 font-bold text-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors mb-8">
                                     เริ่มต้นใช้งานฟรี
                                 </Link>
                                 
@@ -249,9 +294,13 @@ export default function Home() {
                                     </div>
                                 </div>
                                 
-                                <Link href="/login" className="w-full py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-center transition-colors mb-8 shadow-md">
+                                <button 
+                                    type="button" 
+                                    onClick={openLoginModal} 
+                                    className="w-full py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-center transition-colors mb-8 shadow-md"
+                                >
                                     สมัครแพ็กเกจ Pro
-                                </Link>
+                                </button>
                                 
                                 <ul className="space-y-4 mt-auto">
                                     <li className="flex gap-3 text-slate-700 dark:text-slate-200 text-sm font-medium">
@@ -280,9 +329,13 @@ export default function Home() {
                                     </div>
                                 </div>
                                 
-                                <Link href="/login" className="w-full py-3 rounded-full border border-slate-300 dark:border-slate-700 font-bold text-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors mb-8">
+                                <button 
+                                    type="button" 
+                                    onClick={openLoginModal} 
+                                    className="w-full py-3 rounded-full border border-slate-300 dark:border-slate-700 font-bold text-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors mb-8"
+                                >
                                     ติดต่อทีมขาย
-                                </Link>
+                                </button>
                                 
                                 <ul className="space-y-4 mt-auto">
                                     <li className="flex gap-3 text-slate-700 dark:text-slate-300 text-sm font-medium">

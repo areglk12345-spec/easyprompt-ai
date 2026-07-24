@@ -16,3 +16,4 @@ PyPDF2==3.0.1
 python-multipart==0.0.9
 psycopg2-binary==2.9.9
 firebase-admin==6.5.0
+edge-tts==7.2.8

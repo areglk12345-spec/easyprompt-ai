@@ -45,6 +45,7 @@ export const viewport = {
 };
 
 import MascotAgent from '../components/MascotAgent';
+import LoginModal from '../components/LoginModal';
 
 export default function RootLayout({
   children,
@@ -66,6 +67,7 @@ export default function RootLayout({
               <ThemeProvider>
                 <AccessibilityProvider>
                   {children}
+                  <LoginModal />
                   <Toaster position="bottom-right" />
                   <MascotAgent />
                 </AccessibilityProvider>

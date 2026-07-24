@@ -9,13 +9,28 @@ import { useAuth } from '../../context/AuthContext';
 import TextSizeSlider from '../../components/TextSizeSlider';
 import { useFontSize } from '../../context/FontSizeContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
+import { useTTS } from '../../hooks/useTTS';
 import { useTheme } from '../../context/ThemeContext';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Sun, Moon, Monitor, Volume2, Play, Square, Mic, FastForward } from 'lucide-react';
 
 export default function SettingsPage() {
     const { user, authFetch, refreshUser } = useAuth();
     const { fontSize, toggleFontSize } = useFontSize();
-    const { isHighContrast, isSimplifiedUI, toggleHighContrast, toggleSimplifiedUI } = useAccessibility();
+    const { 
+        isHighContrast, 
+        isSimplifiedUI, 
+        toggleHighContrast, 
+        toggleSimplifiedUI,
+        isAutoSpeakOn,
+        toggleAutoSpeak,
+        ttsRate,
+        setTTSRate,
+        ttsPitch,
+        setTTSPitch,
+        preferredVoiceURI,
+        setPreferredVoiceURI
+    } = useAccessibility();
+    const { previewVoice, stop, isSpeaking } = useTTS();
     const { themeMode, setThemeMode } = useTheme();
     const isLarge = fontSize === 'large';
     
@@ -453,8 +468,8 @@ export default function SettingsPage() {
                                             <span className="material-symbols-outlined text-2xl">hearing</span>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="font-bold text-slate-800 dark:text-white">Voice & Audio (ควบคุมด้วยเสียงและอ่านออกเสียง)</p>
-                                            <p className="text-slate-500 dark:text-slate-400 text-sm">เปิดใช้งานไมโครโฟนเพื่อสั่งการด้วยเสียง และให้ระบบอ่านออกเสียงคำตอบได้</p>
+                                            <p className="font-bold text-slate-800 dark:text-white">Voice & Audio (สั่งการด้วยเสียง)</p>
+                                            <p className="text-slate-500 dark:text-slate-400 text-sm">เปิดใช้งานไมโครโฟนเพื่อสั่งการด้วยเสียง</p>
                                         </div>
                                     </div>
                                     <button
@@ -465,6 +480,129 @@ export default function SettingsPage() {
                                     >
                                         <span className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${voiceControl ? 'translate-x-6' : 'translate-x-0'}`} />
                                     </button>
+                                </div>
+
+                                {/* Auto-Speak Toggle */}
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-6 gap-4 border-t border-slate-200/50 dark:border-slate-700/50">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border bg-sky-50 text-sky-600 border-sky-100 dark:bg-sky-900/40 dark:border-sky-800">
+                                            <span className="material-symbols-outlined text-2xl">volume_up</span>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="font-bold text-slate-800 dark:text-white">Auto-Speak AI Responses (อ่านคำตอบ AI อัตโนมัติ)</p>
+                                            <p className="text-slate-500 dark:text-slate-400 text-sm">ให้อุปกรณ์อ่านออกเสียงข้อความตอบกลับของ AI โดยอัตโนมัติทันทีที่พิมพ์เสร็จ</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={toggleAutoSpeak}
+                                        role="switch" aria-checked={isAutoSpeakOn}
+                                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none hover-spring ${isAutoSpeakOn ? 'bg-primary' : 'bg-slate-300'}`}
+                                    >
+                                        <span className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isAutoSpeakOn ? 'translate-x-6' : 'translate-x-0'}`} />
+                                    </button>
+                                </div>
+
+                                {/* TTS Voice Selector & Preview Test */}
+                                <div className="space-y-4 pt-6 border-t border-slate-200/50 dark:border-slate-700/50">
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-900/40 dark:border-purple-800">
+                                                <span className="material-symbols-outlined text-2xl">record_voice_over</span>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="font-bold text-slate-800 dark:text-white">Voice Selector & Preview (เสียงพากย์ และทดสอบฟังเสียง)</p>
+                                                <p className="text-slate-500 dark:text-slate-400 text-sm">เลือกเสียงอ่านภาษาไทย/อังกฤษ และกดปุ่มเพื่อทดสอบฟังเสียง</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center pl-16">
+                                        <select
+                                            value={preferredVoiceURI}
+                                            onChange={(e) => setPreferredVoiceURI(e.target.value)}
+                                            className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
+                                        >
+                                            <optgroup label="✨ Neural AI Voices (พากย์ธรรมชาติระดับมนุษย์)">
+                                                <option value="th-TH-PremwadeeNeural">👧 เสียงผู้หญิงไทยนุ่มนวล (Premwadee Neural AI)</option>
+                                                <option value="th-TH-NiwatNeural">👨 เสียงผู้ชายไทยสุภาพ (Niwat Neural AI)</option>
+                                                <option value="en-US-AvaNeural">👩 English Neural Female (Ava AI)</option>
+                                                <option value="en-US-AndrewNeural">👨 English Neural Male (Andrew AI)</option>
+                                            </optgroup>
+                                            <optgroup label="🌐 เสียงมาตรฐานของเบราว์เซอร์ (Browser Voices)">
+                                                {voices.map((v) => (
+                                                    <option key={v.voiceURI} value={v.voiceURI}>
+                                                        {v.name} ({v.lang})
+                                                    </option>
+                                                ))}
+                                            </optgroup>
+                                        </select>
+                                        <button
+                                            type="button"
+                                            onClick={() => isSpeaking ? stop() : previewVoice(preferredVoiceURI)}
+                                            className={`px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-sm border ${
+                                                isSpeaking 
+                                                    ? 'bg-rose-500 text-white border-rose-600 hover:bg-rose-600' 
+                                                    : 'bg-primary text-white border-primary hover:bg-primary/90'
+                                            }`}
+                                        >
+                                            {isSpeaking ? (
+                                                <>
+                                                    <Square className="w-4 h-4 fill-current" />
+                                                    <span>หยุดเล่น</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Play className="w-4 h-4 fill-current" />
+                                                    <span>ทดสอบฟังเสียง</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Speech Speed & Pitch Controls */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-200/50 dark:border-slate-700/50 pl-16">
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                            <span>ความเร็วเสียงอ่าน (Speed Rate):</span>
+                                            <span className="text-primary font-bold">{ttsRate.toFixed(2)}x</span>
+                                        </div>
+                                        <input
+                                            type="range"
+                                            min="0.5"
+                                            max="2.0"
+                                            step="0.05"
+                                            value={ttsRate}
+                                            onChange={(e) => setTTSRate(parseFloat(e.target.value))}
+                                            className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                                        />
+                                        <div className="flex justify-between text-xs text-slate-400">
+                                            <span>0.5x (ช้า)</span>
+                                            <span>1.0x (ปกติ)</span>
+                                            <span>2.0x (เร็ว)</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                            <span>ระดับโทนเสียง (Pitch):</span>
+                                            <span className="text-primary font-bold">{ttsPitch.toFixed(1)}</span>
+                                        </div>
+                                        <input
+                                            type="range"
+                                            min="0.5"
+                                            max="1.5"
+                                            step="0.1"
+                                            value={ttsPitch}
+                                            onChange={(e) => setTTSPitch(parseFloat(e.target.value))}
+                                            className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                                        />
+                                        <div className="flex justify-between text-xs text-slate-400">
+                                            <span>0.5 (ทุ้ม)</span>
+                                            <span>1.0 (ปกติ)</span>
+                                            <span>1.5 (แหลม)</span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Font Size Slider */}

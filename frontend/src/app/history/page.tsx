@@ -10,6 +10,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useFontSize } from '../../context/FontSizeContext';
 import { usePromptActions } from '../../hooks/usePromptActions';
 import HelpTooltip from '../../components/HelpTooltip';
+import TTSButton from '../../components/TTSButton';
 
 type ChatHistory = {
     id: number;
@@ -269,7 +270,8 @@ export default function HistoryPage() {
                                                                         <div className="font-mono text-sm text-slate-800 dark:text-slate-200 mb-3 whitespace-pre-wrap bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/50 dark:border-slate-700 shadow-inner">
                                                                             {item.fitted_prompt}
                                                                         </div>
-                                                                        <div className="flex gap-2 flex-wrap">
+                                                                        <div className="flex gap-2 flex-wrap items-center">
+                                                                            <TTSButton text={item.fitted_prompt || item.agent_response} />
                                                                             <button
                                                                                 onClick={() => copyToClipboard(item.fitted_prompt || item.agent_response, 'history')}
                                                                                 className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all hover:text-primary hover:border-primary/30"

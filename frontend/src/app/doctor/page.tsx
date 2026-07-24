@@ -11,6 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFontSize } from '../../context/FontSizeContext';
 import { usePromptActions } from '../../hooks/usePromptActions';
+import TTSButton from '../../components/TTSButton';
 import { Button } from '../../components/ui/Button';
 import { Textarea } from '../../components/ui/Textarea';
 
@@ -23,7 +24,7 @@ type DiagnosticResult = {
 };
 
 export default function DoctorPage() {
-    const { authFetch, user } = useAuth();
+    const { authFetch, user, isLoggedIn, openLoginModal } = useAuth();
     const { t } = useLanguage();
     const { fontSize } = useFontSize();
     const isLarge = fontSize === 'large';
@@ -36,6 +37,17 @@ export default function DoctorPage() {
     const [easyLanguage, setEasyLanguage] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Guest Trial State
+    const [guestUsageCount, setGuestUsageCount] = useState<number>(0);
+    const [isGuestLimitModalOpen, setIsGuestLimitModalOpen] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const saved = parseInt(localStorage.getItem('ep_guest_usage_count') || '0', 10);
+            setGuestUsageCount(isNaN(saved) ? 0 : saved);
+        }
+    }, []);
+
     const textSize = isLarge ? 'text-2xl' : 'text-base';
     const headingSize = isLarge ? 'text-4xl' : 'text-3xl';
     const buttonSize = isLarge ? 'px-8 py-4 text-xl' : 'px-6 py-3 text-base';
@@ -43,6 +55,18 @@ export default function DoctorPage() {
     const handleDiagnose = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!promptText.trim() || isLoading) return;
+
+        // Guest Trial Quota Enforcement
+        if (!isLoggedIn && !user) {
+            const currentCount = parseInt(localStorage.getItem('ep_guest_usage_count') || '0', 10);
+            if (currentCount >= 2) {
+                setIsGuestLimitModalOpen(true);
+                return;
+            }
+            const newCount = currentCount + 1;
+            localStorage.setItem('ep_guest_usage_count', String(newCount));
+            setGuestUsageCount(newCount);
+        }
 
         setIsLoading(true);
         setError(null);
@@ -148,6 +172,23 @@ export default function DoctorPage() {
                             
                             {/* Left Column (Input Area) - Span 7 */}
                             <div className="lg:col-span-7 space-y-6">
+                                {/* Guest Trial Banner */}
+                                {!isLoggedIn && !user && (
+                                    <div className="bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-purple-500/10 border border-amber-500/30 dark:border-amber-500/40 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm shadow-sm">
+                                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 font-semibold">
+                                            <span className="material-symbols-outlined text-amber-500 text-xl">stars</span>
+                                            <span>โหมดทดลองใช้งานฟรี: สิทธิ์คงเหลือ <strong className="text-amber-600 dark:text-amber-400 font-extrabold text-base">{Math.max(0, 2 - guestUsageCount)}</strong> / 2 คำถาม</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={openLoginModal}
+                                            className="px-3.5 py-1.5 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold transition-transform hover:scale-105 shadow-sm text-xs shrink-0"
+                                        >
+                                            เข้าสู่ระบบเพื่อใช้ไม่จำกัด (ฟรี)
+                                        </button>
+                                    </div>
+                                )}
+
                                 <div className="glass-panel-heavy p-8 rounded-[24px] border border-white/40 dark:border-slate-700 bg-white/70 dark:bg-slate-800/70 shadow-sm space-y-6">
                                     <div className="flex justify-between items-center">
                                         <label className="font-label-sm text-sm font-bold text-primary dark:text-indigo-400 uppercase tracking-wider">{t('doctor.input_label')}</label>
@@ -313,7 +354,8 @@ export default function DoctorPage() {
                                                 {result.fitted_prompt}
                                             </div>
 
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-2 items-center flex-wrap">
+                                                <TTSButton text={result.fitted_prompt} className="!p-3.5" />
                                                 <Button
                                                     variant="primary"
                                                     onClick={sendToChat}
@@ -415,6 +457,45 @@ export default function DoctorPage() {
                     </div>
                 </main>
             </div>
+
+            {/* Guest Trial Limit Reached Modal */}
+            {isGuestLimitModalOpen && (
+                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 text-center animate-scale-up">
+                        <div className="w-16 h-16 rounded-3xl bg-amber-100 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-700 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-md">
+                            <span className="material-symbols-outlined text-4xl">lock_open</span>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <h3 className="text-2xl font-black text-slate-800 dark:text-white">ทดลองใช้งานครบ 2 คำถามแล้ว 🎉</h3>
+                            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+                                สมัครสมาชิกหรือเข้าสู่ระบบฟรี เพื่อใช้งานวิเคราะห์และเกลา Prompt ใน Prompt Doctor ได้แบบไม่จำกัด!
+                            </p>
+                        </div>
+
+                        <div className="pt-2 flex flex-col gap-3">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsGuestLimitModalOpen(false);
+                                    openLoginModal();
+                                }}
+                                className="w-full py-3.5 bg-primary hover:bg-primary/90 text-white font-extrabold rounded-2xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                            >
+                                <span className="material-symbols-outlined">login</span>
+                                <span>เข้าสู่ระบบ / สมัครสมาชิกฟรี</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsGuestLimitModalOpen(false)}
+                                className="w-full py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 font-bold rounded-2xl transition-colors text-sm"
+                            >
+                                ปิดหน้าต่างนี้
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
