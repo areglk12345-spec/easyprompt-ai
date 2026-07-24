@@ -38,10 +38,11 @@ export default function HistoryPage() {
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const sid = localStorage.getItem('ep_session_id');
+                const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+                const urlSid = searchParams?.get('session_id');
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-                const url = sid 
-                    ? `${API_URL}/api/history/?session_id=${sid}` 
+                const url = urlSid 
+                    ? `${API_URL}/api/history/?session_id=${urlSid}` 
                     : `${API_URL}/api/history/`;
                 const response = await authFetch(url);
                 if (!response.ok) throw new Error('Failed to fetch history');
