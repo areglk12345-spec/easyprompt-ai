@@ -619,17 +619,18 @@ function ChatContent() {
                     )}
                     {/* Top AppBar */}
                     <header className="sticky top-0 z-30 flex justify-between items-center pl-16 pr-4 md:px-12 w-full h-auto min-h-[5rem] py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-700/30 shrink-0 gap-2 flex-wrap">
-                        <div className="flex items-center gap-4">
-                            <Link href="/" className="font-bold text-primary dark:text-indigo-400 hover:text-primary-dark transition-colors flex items-center gap-1">
-                                &larr; <span className="hidden sm:inline">{t('menu.home')}</span>
-                            </Link>
-                            <span className="h-4 w-px bg-slate-200 dark:bg-slate-700"></span>
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-indigo-600 flex items-center justify-center text-white shadow-sm border border-white/20">
-                                    <span className="text-lg leading-none">👻</span>
-                                </div>
-                                <span className="text-sm font-bold text-slate-800 dark:text-white hidden md:inline">พรอมพ์ตี้ · ผู้ช่วยเขียน Prompt</span>
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 via-purple-600 to-cyan-500 flex items-center justify-center text-white shadow-md border border-white/30 relative overflow-hidden group">
+                                <svg width="24" height="24" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform group-hover:scale-110 transition-transform">
+                                    <rect x="18" y="22" width="64" height="42" rx="21" fill="#6366f1" />
+                                    <rect x="24" y="28" width="52" height="30" rx="14" fill="#0f172a" />
+                                    <circle cx="38" cy="42" r="5" fill="#38bdf8" />
+                                    <circle cx="62" cy="42" r="5" fill="#38bdf8" />
+                                    <path d="M 44 48 Q 50 52 56 48" fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" />
+                                    <rect x="30" y="60" width="40" height="26" rx="13" fill="#38bdf8" />
+                                </svg>
                             </div>
+                            <span className="text-sm font-bold text-slate-800 dark:text-white hidden md:inline">EZ-Bot · มาสคอตผู้ช่วยเขียน Prompt</span>
                         </div>
                         <div className="flex items-center gap-4 ml-auto">
                             {sessionId && messages.length > 0 && (

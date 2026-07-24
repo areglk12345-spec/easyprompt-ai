@@ -108,7 +108,7 @@ export default function DoctorPage() {
                             <div className="flex items-center gap-2">
                                 <span className="px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-[10px]">BETA</span>
                                 <HelpTooltip 
-                                    title="Dr. Prompt" 
+                                    title="EZ-Bot Prompt Doctor" 
                                     content="ระบบช่วยวิเคราะห์และปรับปรุงคำสั่ง Prompt ของคุณให้ดีขึ้น ชัดเจนขึ้น และมีประสิทธิภาพมากขึ้น เพื่อให้ AI ทำงานได้ตรงใจคุณที่สุด"
                                 />
                             </div>
