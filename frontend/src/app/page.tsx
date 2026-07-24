@@ -143,16 +143,20 @@ export default function Home() {
                     </div>
 
                     {/* Promo Video */}
-                    <div id="video-demo" className="relative z-10 w-full max-w-5xl mx-auto mt-20 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-                        <div className="rounded-3xl overflow-hidden shadow-2xl shadow-slate-900/20 border border-slate-200/50 dark:border-white/10">
+                    <div id="video-demo" className="relative z-10 w-full max-w-5xl mx-auto mt-16 animate-fade-in-up space-y-4" style={{ animationDelay: '0.5s' }}>
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-200/60 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-300/40 dark:border-slate-700/40">
+                            <span className="material-symbols-outlined text-sm text-indigo-500">play_circle</span>
+                            <span>วิดีโอแนะนำการใช้งาน EZPrompt AI</span>
+                        </div>
+                        <div className="rounded-3xl overflow-hidden shadow-2xl shadow-indigo-500/10 border border-slate-200/80 dark:border-slate-800 bg-black">
                             <video
-                                className="w-full aspect-video bg-black"
+                                className="w-full aspect-video bg-black rounded-3xl"
                                 controls
+                                playsInline
                                 preload="metadata"
-                                poster=""
                             >
                                 <source src="/promo-video.mp4" type="video/mp4" />
-                                Your browser does not support the video tag.
+                                Browser ของคุณไม่รองรับการเล่นวิดีโอ
                             </video>
                         </div>
                     </div>
