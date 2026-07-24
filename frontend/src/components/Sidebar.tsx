@@ -309,10 +309,6 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                     <span className="material-symbols-outlined shrink-0">health_and_safety</span>
                     <span className="text-[15px] whitespace-nowrap truncate">{t('menu.doctor')}</span>
                 </Link>
-                <Link href="/settings" className={activePage === 'settings' ? activeClass : inactiveClass}>
-                    <span className="material-symbols-outlined shrink-0">settings</span>
-                    <span className="text-[15px] whitespace-nowrap truncate">{t('menu.settings')}</span>
-                </Link>
             </nav>
 
             <div className="flex-1 overflow-y-auto mt-4 px-2 custom-scrollbar">
