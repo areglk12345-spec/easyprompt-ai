@@ -305,7 +305,7 @@ export default function SettingsPage() {
                         <section className="space-y-2">
                             <h2 className="font-display-lg text-4xl font-extrabold text-slate-800 dark:text-white leading-tight">Manage Your Account</h2>
                             <p className="font-body-lg text-slate-500 dark:text-slate-400 leading-relaxed text-base">
-                                Customize your EasyPrompt experience to match your unique workflow and accessibility needs.
+                                Customize your EZPrompt experience to match your unique workflow and accessibility needs.
                             </p>
                         </section>
 
@@ -732,7 +732,7 @@ export default function SettingsPage() {
 
                     {/* Footer Component */}
                     <footer className="flex flex-col md:flex-row justify-between items-center w-full py-8 px-6 md:px-12 bg-white dark:bg-slate-900 border-t border-outline-variant/20 dark:border-slate-800 gap-6 mt-auto shrink-0">
-                        <p className="text-slate-400 text-xs font-semibold">© {new Date().getFullYear()} EasyPrompt AI. High-Tech Accessibility.</p>
+                        <p className="text-slate-400 text-xs font-semibold">© {new Date().getFullYear()} EZPrompt AI. High-Tech Accessibility.</p>
                         <div className="flex flex-wrap justify-center gap-8 text-xs font-bold text-slate-500">
                             <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
                             <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>

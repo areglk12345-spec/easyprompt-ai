@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 import os
+os.environ["TESTING"] = "true"
 
 from app.main import app
 from app.database import Base, get_db
@@ -26,6 +27,7 @@ def override_get_db():
         db.close()
 
 app.dependency_overrides[get_db] = override_get_db
+app.state.limiter.enabled = False
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_database():

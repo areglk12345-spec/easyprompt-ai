@@ -39,7 +39,7 @@ export default function OnboardingModal() {
                     <div className="w-16 h-16 bg-primary/10 text-primary mx-auto rounded-2xl flex items-center justify-center mb-4 ring-8 ring-primary/5">
                         <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>text_fields</span>
                     </div>
-                    <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">ยินดีต้อนรับสู่ EasyPrompt!</h2>
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">ยินดีต้อนรับสู่ EZPrompt!</h2>
                     <p className="text-slate-500 dark:text-slate-400 font-medium">มาเริ่มต้นด้วยการตั้งค่าขนาดตัวอักษรที่คุณอ่านสบายตาที่สุดกันก่อนครับ</p>
                 </div>
 

@@ -254,7 +254,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                         <span className="material-symbols-outlined !font-bold text-2xl">bolt</span>
                     </div>
                     <div>
-                        <h1 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">EasyPrompt</h1>
+                        <h1 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">EZPrompt</h1>
                         <p className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-semibold">Minimal Assistant</p>
                     </div>
                 </Link>

@@ -19,7 +19,7 @@ export default function UserMenu() {
 
     useEffect(() => {
         if (activeWorkspace) {
-            document.title = `EasyPrompt AI - Workspace: ${activeWorkspace}`;
+            document.title = `EZPrompt AI - Workspace: ${activeWorkspace}`;
         }
     }, [activeWorkspace]);
 

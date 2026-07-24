@@ -71,14 +71,14 @@ export default function SharedChatPage() {
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
                             <Sparkles className="w-4 h-4" />
                         </div>
-                        <span className="font-bold text-sm">EasyPrompt Shared Chat</span>
+                        <span className="font-bold text-sm">EZPrompt Shared Chat</span>
                     </div>
 
                     <Link 
                         href="/chat"
                         className="px-4 py-2 rounded-full bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-700 transition-colors shadow-md"
                     >
-                        ลองใช้งาน EasyPrompt
+                        ลองใช้งาน EZPrompt
                     </Link>
                 </div>
             </header>
@@ -105,7 +105,7 @@ export default function SharedChatPage() {
                             <div className="flex items-center gap-3">
                                 <MessageSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
                                 <div className="text-xs md:text-sm text-indigo-900 dark:text-indigo-200">
-                                    คุณกำลังรับชมประวัติการสนทนาที่มีผู้แชร์ผ่าน <strong>EasyPrompt AI</strong>
+                                    คุณกำลังรับชมประวัติการสนทนาที่มีผู้แชร์ผ่าน <strong>EZPrompt AI</strong>
                                 </div>
                             </div>
                         </div>

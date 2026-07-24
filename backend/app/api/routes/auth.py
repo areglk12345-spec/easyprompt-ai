@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -13,7 +14,7 @@ from datetime import datetime, timezone
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(key_func=get_remote_address, enabled=os.getenv("TESTING") != "true")
 router = APIRouter()
 
 @router.post("/register", response_model=UserProfile)

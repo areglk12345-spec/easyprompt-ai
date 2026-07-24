@@ -81,7 +81,7 @@ export default function DashboardPage() {
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-2xl"></div>
                                     <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
                                         <div className="space-y-4 max-w-xl">
-                                            <h2 className="text-3xl font-extrabold tracking-tight">ยินดีต้อนรับสู่ EasyPrompt! 👋</h2>
+                                            <h2 className="text-3xl font-extrabold tracking-tight">ยินดีต้อนรับสู่ EZPrompt! 👋</h2>
                                             <p className="text-indigo-100 text-lg leading-relaxed">เริ่มต้นสร้างสรรค์ผลงานของคุณได้ง่ายๆ ใน 3 ขั้นตอน เพื่อให้คุณทำงานร่วมกับ AI ได้อย่างมืออาชีพ</p>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full md:w-auto">

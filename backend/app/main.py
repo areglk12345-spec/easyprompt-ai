@@ -38,7 +38,7 @@ except Exception as e:
     logger.error(f"Failed to initialize Firebase Admin: {e}")
 
 # Setup Rate Limiter
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(key_func=get_remote_address, enabled=os.getenv("TESTING") != "true")
 
 # Lifespan: เชื่อมต่อ DB เมื่อ server เริ่ม
 @asynccontextmanager
@@ -68,7 +68,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="EasyPrompt AI Backend (Powered by Gemini)",
+    title="EZPrompt AI Backend (Powered by Gemini)",
     description="API สำหรับ AI Accessibility Agent / Prompt Fitter Agent",
     version="2.0.0",
     lifespan=lifespan

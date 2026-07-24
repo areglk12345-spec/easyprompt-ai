@@ -30,7 +30,7 @@ export default function Home() {
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">
                             <span className="material-symbols-outlined !font-bold">bolt</span>
                         </div>
-                        <span className="text-xl font-bold tracking-tight">EasyPrompt</span>
+                        <span className="text-xl font-bold tracking-tight">EZPrompt</span>
                     </Link>
 
                     <nav className="hidden md:flex items-center gap-8 font-semibold text-sm">
@@ -79,7 +79,7 @@ export default function Home() {
                         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1] animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                             สั่งงาน AI ให้ได้ดั่งใจด้วย <br className="hidden md:block" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-500 dark:from-indigo-400 dark:to-purple-400">
-                                EasyPrompt
+                                EZPrompt
                             </span>
                         </h1>
                         
@@ -113,7 +113,7 @@ export default function Home() {
                     </div>
                 </section>
 
-                {/* Why EasyPrompt Section */}
+                {/* Why EZPrompt Section */}
                 <section id="features" className="py-24 bg-slate-50 dark:bg-[#0b0f19] px-6 border-t border-slate-200/50 dark:border-slate-800/50 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 dark:bg-purple-500/5 blur-[100px] rounded-full pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/5 blur-[100px] rounded-full pointer-events-none" />
@@ -122,7 +122,7 @@ export default function Home() {
                         <div className="text-center space-y-4 mb-16">
                             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-sm font-bold tracking-wide">
                                 <span className="material-symbols-outlined text-[18px]">psychology_alt</span>
-                                ทำไมต้อง EasyPrompt?
+                                ทำไมต้อง EZPrompt?
                             </div>
                             <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-800 dark:text-white">
                                 ยกระดับการทำงานด้วย AI ให้ง่ายกว่าที่เคย
@@ -311,11 +311,11 @@ export default function Home() {
                         <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                             <span className="material-symbols-outlined !font-bold text-lg">bolt</span>
                         </div>
-                        <span className="font-bold text-lg text-slate-800 dark:text-white">EasyPrompt</span>
+                        <span className="font-bold text-lg text-slate-800 dark:text-white">EZPrompt</span>
                     </div>
                     
                     <div className="text-slate-500 dark:text-slate-400 text-sm">
-                        &copy; {new Date().getFullYear()} EasyPrompt AI. All rights reserved.
+                        &copy; {new Date().getFullYear()} EZPrompt AI. All rights reserved.
                     </div>
                     
                     <div className="flex gap-6 text-sm font-medium">

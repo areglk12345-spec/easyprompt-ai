@@ -17,22 +17,6 @@ export function usePromptActions() {
         }
     };
 
-    const analyzeTextAccessibility = async (text: string) => {
-        try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-            const response = await authFetch(`${API_URL}/api/accessibility/analyze-text`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text }),
-            });
-            if (!response.ok) throw new Error('Analysis failed');
-            return await response.json();
-        } catch (e) {
-            console.error("Failed to analyze text accessibility:", e);
-            return null;
-        }
-    };
-
     const simplifyText = async (text: string) => {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -55,7 +39,7 @@ export function usePromptActions() {
         logActivity('copy_prompt', source);
     };
 
-    const downloadAsTxt = (text: string, title: string = "easyprompt") => {
+    const downloadAsTxt = (text: string, title: string = "ezprompt") => {
         const element = document.createElement("a");
         const file = new Blob([text], { type: 'text/plain;charset=utf-8' });
         element.href = URL.createObjectURL(file);
@@ -66,7 +50,7 @@ export function usePromptActions() {
         toast.success("ดาวน์โหลดไฟล์ .txt แล้ว", { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
     };
 
-    const downloadAsMarkdown = (text: string, title: string = "easyprompt") => {
+    const downloadAsMarkdown = (text: string, title: string = "ezprompt") => {
         const element = document.createElement("a");
         const file = new Blob([text], { type: 'text/markdown;charset=utf-8' });
         element.href = URL.createObjectURL(file);
@@ -142,10 +126,26 @@ export function usePromptActions() {
         window.open(url, '_blank');
     };
 
+    const analyzeTextAccessibility = async (text: string) => {
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            const response = await authFetch(`${API_URL}/api/accessibility/analyze`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text }),
+            });
+            if (!response.ok) throw new Error('Analysis failed');
+            return await response.json();
+        } catch (e) {
+            console.error("Failed to analyze text accessibility:", e);
+            return null;
+        }
+    };
+
     return {
         logActivity,
-        analyzeTextAccessibility,
         simplifyText,
+        analyzeTextAccessibility,
         copyToClipboard,
         downloadAsTxt,
         downloadAsMarkdown,
