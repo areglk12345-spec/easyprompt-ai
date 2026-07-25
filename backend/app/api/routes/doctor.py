@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -11,6 +12,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 import os
+logger = logging.getLogger("easyprompt.doctor")
 limiter = Limiter(key_func=get_remote_address, enabled=os.getenv("TESTING") != "true")
 router = APIRouter()
 
@@ -40,7 +42,7 @@ def diagnose_prompt(request: Request, payload: DoctorRequest, current_user: Opti
                 db.add(new_log)
                 db.commit()
             except Exception as log_err:
-                print(f"Failed to log doctor activity: {log_err}")
+                logger.error(f"Failed to log doctor activity: {log_err}")
 
         return ai_result
     except HTTPException as e:

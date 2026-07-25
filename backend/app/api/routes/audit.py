@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -6,6 +7,7 @@ from app.database import get_db
 from app import models, auth
 from app.schemas import AuditLogResponse
 
+logger = logging.getLogger("easyprompt.audit")
 router = APIRouter()
 
 def create_audit_log(
@@ -28,7 +30,7 @@ def create_audit_log(
         db.add(audit)
         db.commit()
     except Exception as e:
-        print(f"Failed to create audit log: {e}")
+        logger.error(f"Failed to create audit log: {e}")
         db.rollback()
 
 @router.get("/audit-logs", response_model=List[AuditLogResponse])

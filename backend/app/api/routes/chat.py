@@ -16,6 +16,9 @@ import os
 limiter = Limiter(key_func=get_remote_address, enabled=os.getenv("TESTING") != "true")
 router = APIRouter()
 
+import logging
+logger = logging.getLogger("easyprompt.chat")
+
 @router.post("/", response_model=AgentResponse)
 @limiter.limit("20/minute")
 def chat_with_agent(request: Request, payload: UserMessage, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db), x_workspace: str = Depends(auth.get_workspace)):
@@ -85,7 +88,7 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
                             types.Part.from_bytes(data=decoded_bytes, mime_type=file_obj['mime_type'])
                         )
                     except Exception as parse_err:
-                        print(f"Error parsing file: {parse_err}")
+                        logger.error(f"Error parsing file: {parse_err}")
 
         ai_result = generate_json_content(SYSTEM_PROMPT, contents, model_to_use)
         
@@ -118,12 +121,15 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
                 db.add(new_log)
                 db.commit()
             except Exception as log_err:
-                print(f"Failed to log chat activity: {log_err}")
+                logger.error(f"Failed to log chat activity: {log_err}")
 
         return ai_result
     except HTTPException as e:
         db.rollback()
         raise e
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Unhandled exception in chat_with_agent: {e}")
         raise HTTPException(status_code=500, detail=f"เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI: {str(e)}")
 
 @router.post("/stream")
@@ -159,9 +165,6 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
                 
             if current_user.credits < cost:
                 raise HTTPException(status_code=402, detail="เครดิตไม่เพียงพอ กรุณาเติมเครดิตเพื่อใช้งานต่อ")
-                
-            current_user.credits -= cost
-            db.commit()
 
         if current_user:
             org_vars = db.query(models.OrgPromptVariable).filter(
@@ -186,7 +189,7 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
                             types.Part.from_bytes(data=decoded_bytes, mime_type=file_obj['mime_type'])
                         )
                     except Exception as parse_err:
-                        print(f"Error parsing file: {parse_err}")
+                        logger.error(f"Error parsing file: {parse_err}")
 
         if getattr(payload, 'is_direct_run', False):
             stream_system_prompt = (
@@ -213,6 +216,13 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
                 yield f"data: {clean_chunk}\n\n"
                 
             try:
+                if current_user and not full_response.startswith("[ERROR]"):
+                    user_in_db = db.query(models.User).filter(models.User.id == current_user.id).first()
+                    if user_in_db:
+                        if user_in_db.credits is None:
+                            user_in_db.credits = 100
+                        user_in_db.credits -= cost
+
                 new_chat = models.ChatHistory(
                     session_id=payload.session_id or str(uuid.uuid4()),
                     user_message=payload.message,
@@ -226,12 +236,14 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
                 db.add(new_chat)
                 db.commit()
             except Exception as e:
-                print("Failed to save stream chat history:", e)
+                logger.error(f"Failed to save stream chat history: {e}")
+                db.rollback()
                 
             yield "data: [DONE]\n\n"
 
         return StreamingResponse(event_generator(), media_type="text/event-stream")
     except Exception as e:
+        logger.error(f"Error in stream_chat_with_agent: {e}")
         raise HTTPException(status_code=500, detail=f"เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI: {str(e)}")
 
 @router.post("/refine", response_model=AgentResponse)

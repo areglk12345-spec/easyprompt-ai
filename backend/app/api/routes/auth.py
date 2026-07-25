@@ -146,6 +146,7 @@ def update_password(
 
 
 @router.post("/social-login", response_model=TokenResponse)
+@limiter.limit("5/minute")
 def social_login(payload: SocialLoginRequest, request: Request, db: Session = Depends(get_db)):
     """เข้าสู่ระบบด้วย Google, Apple, Phone ผ่าน Firebase"""
     try:
@@ -167,12 +168,13 @@ def social_login(payload: SocialLoginRequest, request: Request, db: Session = De
         ).first()
 
         if not user:
-            # Auto-register new user from social login
+            # Auto-register new user from social login with unguessable random password hash
+            random_password = os.urandom(32).hex()
             user = models.User(
                 username=identifier,
                 email=email,
                 full_name=name or "Social User",
-                password_hash="social_login_no_password",
+                password_hash=auth.hash_password(random_password),
                 role="user",
                 organization="ทั่วไป",
                 is_2fa_enabled=False,

@@ -11,6 +11,20 @@ class ApiService {
       headers.set('Authorization', `Bearer ${activeToken}`);
     }
 
+    if (typeof window !== 'undefined') {
+      try {
+        const storedUser = localStorage.getItem('ep_user');
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          if (parsedUser.organization) {
+            headers.set('X-Workspace', encodeURIComponent(parsedUser.organization));
+          }
+        }
+      } catch (e) {
+        // ignore JSON parse errors
+      }
+    }
+
     return headers;
   }
 

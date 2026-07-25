@@ -255,8 +255,6 @@ def toggle_favorite(template_id: int, current_user: models.User = Depends(auth.g
     if not template:
         raise HTTPException(status_code=404, detail="ไม่พบเทมเพลต")
     
-    # Optional: check if they have access to this template
-    
     if current_user in template.favorited_by:
         template.favorited_by.remove(current_user)
         is_favorite = False
@@ -266,3 +264,27 @@ def toggle_favorite(template_id: int, current_user: models.User = Depends(auth.g
         
     db.commit()
     return {"status": "success", "is_favorite": is_favorite}
+
+@router.put("/{template_id}")
+def update_template(
+    template_id: int,
+    payload: TemplateCreate,
+    current_user: models.User = Depends(auth.get_required_user),
+    db: Session = Depends(get_db)
+):
+    template = db.query(models.PromptTemplate).filter(models.PromptTemplate.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="ไม่พบเทมเพลตที่ระบุ")
+    if template.user_id != current_user.id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="คุณไม่มีสิทธิ์แก้ไขเทมเพลตนี้")
+        
+    template.title = payload.title
+    template.prompt_text = payload.prompt_text
+    if payload.category:
+        template.category = payload.category
+    if payload.is_public is not None:
+        template.is_public = payload.is_public
+        
+    db.commit()
+    db.refresh(template)
+    return {"status": "success", "message": "อัปเดต Template สำเร็จ!", "template_id": template.id}

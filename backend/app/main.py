@@ -79,11 +79,13 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    import logging
-    logging.error(f"Global Exception on {request.url}: {exc}")
+    logger.error(f"Global Exception on {request.url}: {exc}", exc_info=True)
+    detail_msg = "เกิดข้อผิดพลาดภายในระบบ กรุณาลองใหม่อีกครั้งในภายหลัง"
+    if os.getenv("TESTING") == "true":
+        detail_msg += f" ({str(exc)})"
     return JSONResponse(
         status_code=500,
-        content={"detail": f"เกิดข้อผิดพลาดภายในระบบ: {str(exc)}"}
+        content={"detail": detail_msg}
     )
 
 raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001")
