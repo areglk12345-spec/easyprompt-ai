@@ -37,20 +37,46 @@ def delete_history(history_id: int, current_user: models.User = Depends(auth.get
     return {"status": "success"}
 
 @router.delete("/session/{session_id}")
-def delete_session(session_id: str, current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db)):
+def delete_session(session_id: str, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db)):
     # Find all history records for this session
     records = db.query(models.ChatHistory).filter(models.ChatHistory.session_id == session_id).all()
     if not records:
+        # Also check shared links in case session has no chat_history left
+        shared_links = db.query(models.SharedLink).filter(models.SharedLink.session_id == session_id).all()
+        if shared_links:
+            for link in shared_links:
+                db.delete(link)
+            db.commit()
+            return {"status": "success", "message": "ลบข้อมูลแชทเรียบร้อยแล้ว"}
         raise HTTPException(status_code=404, detail="ไม่พบประวัติแชทที่ระบุ")
         
-    # Check permissions (assuming all records in a session belong to the same user or are anonymous)
-    if any((record.user_id is not None and record.user_id != current_user.id) for record in records) and current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="คุณไม่มีสิทธิ์ลบประวัติแชทนี้")
+    # Check permissions if user is logged in
+    if current_user:
+        if any((record.user_id is not None and record.user_id != current_user.id) for record in records) and current_user.role != "admin":
+            raise HTTPException(status_code=403, detail="คุณไม่มีสิทธิ์ลบประวัติแชทนี้")
         
     for record in records:
         db.delete(record)
+
+    # Clean delete active shared links for this session
+    db.query(models.SharedLink).filter(models.SharedLink.session_id == session_id).delete()
+
     db.commit()
-    return {"status": "success", "message": "ลบแชทเรียบร้อยแล้ว"}
+    return {"status": "success", "message": "ลบแชทออกจากฐานข้อมูลเรียบร้อยแล้ว"}
+
+@router.post("/session/{session_id}/claim")
+def claim_guest_session(session_id: str, current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db)):
+    """ผูกแชทที่สร้างไว้ตอนเป็น Guest (user_id = NULL) ให้กับผู้ใช้ที่เพิ่ง Login"""
+    unclaimed = db.query(models.ChatHistory).filter(
+        models.ChatHistory.session_id == session_id,
+        models.ChatHistory.user_id.is_(None)
+    ).all()
+    
+    for record in unclaimed:
+        record.user_id = current_user.id
+        
+    db.commit()
+    return {"status": "success", "claimed_count": len(unclaimed)}
 
 # --- Feature 4: Chat Folders ---
 

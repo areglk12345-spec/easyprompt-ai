@@ -72,6 +72,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
     }, []);
 
+    const claimGuestSession = async (accessToken: string) => {
+        if (typeof window !== 'undefined') {
+            const currentSid = localStorage.getItem('ep_session_id');
+            if (currentSid) {
+                try {
+                    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+                    await fetch(`${API_URL}/api/history/session/${currentSid}/claim`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                } catch (e) {
+                    console.error("Failed to claim guest session:", e);
+                }
+            }
+        }
+    };
+
     const login = async (username: string, password: string) => {
         const data = await api.post<any>('/api/auth/login', { username, password });
 
@@ -89,6 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('ep_user', JSON.stringify(data.user));
         localStorage.removeItem('ep_guest_usage_count');
         setIsLoginModalOpen(false);
+        await claimGuestSession(data.access_token);
     };
 
     const login2fa = async (username: string, totpCode: string) => {
@@ -100,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('ep_user', JSON.stringify(data.user));
         localStorage.removeItem('ep_guest_usage_count');
         setIsLoginModalOpen(false);
+        await claimGuestSession(data.access_token);
     };
 
     const socialLogin = async (idToken: string) => {
@@ -111,6 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('ep_user', JSON.stringify(data.user));
         localStorage.removeItem('ep_guest_usage_count');
         setIsLoginModalOpen(false);
+        await claimGuestSession(data.access_token);
     };
 
     const register = async (username: string, password: string, fullName: string, organization: string = 'ทั่วไป') => {
