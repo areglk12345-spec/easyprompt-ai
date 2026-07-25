@@ -9,6 +9,7 @@ type Template = {
     prompt_text: string;
     category?: string;
     is_public?: boolean;
+    is_recommended?: boolean;
     user_id?: number | null;
     is_favorite?: boolean;
 };
@@ -16,7 +17,7 @@ type Template = {
 interface TemplateListProps {
     templates: Template[];
     isLarge: boolean;
-    ownershipFilter: 'all' | 'mine' | 'public' | 'favorites';
+    ownershipFilter: 'all' | 'mine' | 'public' | 'recommended' | 'favorites';
     currentUser?: any;
     onCopyToClipboard: (promptText: string) => void;
     onDownloadAsTxt: (promptText: string, title: string) => void;
@@ -44,6 +45,7 @@ export default function TemplateList({
         if (ownershipFilter === 'mine') return !t.is_public;
         if (ownershipFilter === 'public') return t.is_public;
         if (ownershipFilter === 'favorites') return t.is_favorite;
+        if (ownershipFilter === 'recommended') return t.is_recommended;
         return true;
     });
 
@@ -56,6 +58,11 @@ export default function TemplateList({
             emptyTitle = 'เทมเพลตส่วนตัวของคุณ';
             emptyMessage = 'คุณยังไม่ได้สร้างเทมเพลตส่วนตัวใดๆ ลองสร้างเทมเพลตแรกเพื่อประหยัดเวลาการทำงานของคุณดูสิ!';
             icon = 'edit_document';
+        }
+        if (ownershipFilter === 'recommended') {
+            emptyTitle = 'ยังไม่มีเทมเพลตแนะนำ';
+            emptyMessage = 'ผู้ดูแลระบบยังไม่ได้ตั้งค่าเทมเพลตแนะนำในขณะนี้';
+            icon = 'auto_awesome';
         }
         if (ownershipFilter === 'favorites') {
             emptyTitle = 'ยังไม่มีรายการโปรด';

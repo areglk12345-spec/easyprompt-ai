@@ -17,6 +17,7 @@ type Template = {
     prompt_text: string;
     category?: string;
     is_public?: boolean;
+    is_recommended?: boolean;
     user_id?: number | null;
     is_favorite?: boolean;
 };
@@ -44,6 +45,7 @@ const MOCK_FALLBACK_TEMPLATES: Template[] = [
         prompt_text: "ช่วยเขียนอีเมลเชิงธุรกิจถึงลูกค้าเพื่อแจ้งการอัปเดตระบบใหม่ โดยใช้ภาษาที่สุภาพและเป็นทางการ",
         category: "โหมดทำงาน",
         is_public: true,
+        is_recommended: true,
     },
     {
         id: 902,
@@ -51,6 +53,7 @@ const MOCK_FALLBACK_TEMPLATES: Template[] = [
         prompt_text: "ช่วยสรุปรายงานการประชุมจากข้อความต่อไปนี้เป็นหัวข้อย่อยๆ ให้เข้าใจง่าย: [ใส่เนื้อหาที่นี่]",
         category: "โหมดทำงาน",
         is_public: true,
+        is_recommended: true,
     },
     {
         id: 903,
@@ -58,6 +61,7 @@ const MOCK_FALLBACK_TEMPLATES: Template[] = [
         prompt_text: "กรุณาอธิบายโค้ดชุดนี้ให้ฟังหน่อยว่าทำงานอย่างไร และมีจุดไหนที่ควรปรับปรุงบ้าง: [ใส่โค้ดที่นี่]",
         category: "โหมดเรียนรู้",
         is_public: true,
+        is_recommended: true,
     },
     {
         id: 904,
@@ -65,6 +69,7 @@ const MOCK_FALLBACK_TEMPLATES: Template[] = [
         prompt_text: "ช่วยวางแผนทริปท่องเที่ยวประเทศญี่ปุ่นเป็นเวลา 5 วัน 4 คืน โดยเน้นเที่ยวในโตเกียวและรอบๆ สำหรับครอบครัวที่มีเด็ก",
         category: "ทั่วไป",
         is_public: true,
+        is_recommended: false,
     },
     {
         id: 905,
@@ -72,6 +77,7 @@ const MOCK_FALLBACK_TEMPLATES: Template[] = [
         prompt_text: "ช่วยคิดไอเดียโพสต์ลง Facebook จำนวน 3 โพสต์ เพื่อโปรโมทสินค้าใหม่เป็น 'กาแฟสกัดเย็น' โดยมีกลุ่มเป้าหมายเป็นวัยทำงาน",
         category: "โหมดสร้างสรรค์",
         is_public: true,
+        is_recommended: true,
     },
     {
         id: 906,
@@ -79,6 +85,7 @@ const MOCK_FALLBACK_TEMPLATES: Template[] = [
         prompt_text: "ช่วยเขียนสคริปต์สำหรับถ่าย TikTok ความยาวไม่เกิน 1 นาที หัวข้อ '3 ทริคประหยัดเงินมนุษย์เงินเดือน'",
         category: "โหมดสร้างสรรค์",
         is_public: true,
+        is_recommended: false,
     },
     {
         id: 907,
@@ -86,6 +93,7 @@ const MOCK_FALLBACK_TEMPLATES: Template[] = [
         prompt_text: "ช่วยจำลองการสัมภาษณ์งานในตำแหน่ง Marketing Executive โดยตั้งคำถามที่มักพบบ่อยมา 5 ข้อ พร้อมแนะนำแนวทางการตอบ",
         category: "โหมดทำงาน",
         is_public: true,
+        is_recommended: false,
     },
     {
         id: 908,
@@ -93,6 +101,7 @@ const MOCK_FALLBACK_TEMPLATES: Template[] = [
         prompt_text: "ช่วยอธิบายคำว่า 'Blockchain' ให้คนที่ไม่เก่งคอมพิวเตอร์ฟัง แล้วเข้าใจได้ภายใน 2 นาที",
         category: "โหมดเรียนรู้",
         is_public: true,
+        is_recommended: true,
     },
     {
         id: 909,
@@ -100,6 +109,7 @@ const MOCK_FALLBACK_TEMPLATES: Template[] = [
         prompt_text: "ช่วยแปลข้อความต่อไปนี้เป็นภาษาอังกฤษ โดยใช้ระดับภาษาที่เป็นทางการและเป็นธรรมชาติ: [ใส่ข้อความที่นี่]",
         category: "ทั่วไป",
         is_public: true,
+        is_recommended: true,
     },
     {
         id: 910,
@@ -107,6 +117,7 @@ const MOCK_FALLBACK_TEMPLATES: Template[] = [
         prompt_text: "ช่วยตรวจสอบไวยากรณ์ภาษาอังกฤษในประโยคต่อไปนี้ และแก้ไขให้ถูกต้องพร้อมอธิบายเหตุผล: [ใส่ประโยคที่นี่]",
         category: "โหมดเรียนรู้",
         is_public: true,
+        is_recommended: false,
     }
 ];
 
@@ -118,7 +129,7 @@ export default function TemplatesPage() {
     const [templates, setTemplates] = useState<Template[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('ทั้งหมด');
-    const [ownershipFilter, setOwnershipFilter] = useState<'all' | 'mine' | 'public' | 'favorites'>('all');
+    const [ownershipFilter, setOwnershipFilter] = useState<'all' | 'mine' | 'public' | 'recommended' | 'favorites'>('all');
 
     // Create Modal State
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -244,8 +255,6 @@ export default function TemplatesPage() {
         document.body.removeChild(element);
     };
 
-
-
     return (
         <div className={`min-h-screen bg-transparent transition-all duration-300 ${textSize}`}>
             <div className="flex min-h-screen">
@@ -290,7 +299,7 @@ export default function TemplatesPage() {
                             )}
                         </section>
 
-                        {/* Ownership Filter Bar (Private vs Public) */}
+                        {/* Ownership Filter Bar (Private vs Public vs Recommended) */}
                         {isLoggedIn && (
                             <div className="flex gap-2 bg-slate-100/60 dark:bg-slate-800/60 p-1.5 rounded-2xl w-fit max-w-full overflow-x-auto custom-scrollbar border border-slate-200/40 dark:border-slate-700/40" role="group" aria-label="กรองเทมเพลตตามสิทธิ์">
                                 <button
@@ -303,6 +312,17 @@ export default function TemplatesPage() {
                                     }`}
                                 >
                                     <Globe className="w-4 h-4 mr-1.5 shrink-0" /> {t('templates.filter.all')}
+                                </button>
+                                <button
+                                    onClick={() => setOwnershipFilter('recommended')}
+                                    aria-pressed={ownershipFilter === 'recommended'}
+                                    className={`flex-1 flex items-center justify-center whitespace-nowrap py-2 px-4 rounded-xl font-bold transition-all text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary ${
+                                        ownershipFilter === 'recommended'
+                                            ? 'bg-amber-500 text-white shadow-sm'
+                                            : 'text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-extrabold'
+                                    }`}
+                                >
+                                    <Star className="w-4 h-4 mr-1.5 shrink-0 fill-current" /> ⭐ เทมเพลตแนะนำ
                                 </button>
                                 <button
                                     onClick={() => setOwnershipFilter('public')}
