@@ -37,6 +37,79 @@ const CATEGORY_ICONS: Record<string, any> = {
     'โหมดสร้างสรรค์': Palette,
 };
 
+const MOCK_FALLBACK_TEMPLATES: Template[] = [
+    {
+        id: 901,
+        title: "เขียนอีเมลเชิงธุรกิจ",
+        prompt_text: "ช่วยเขียนอีเมลเชิงธุรกิจถึงลูกค้าเพื่อแจ้งการอัปเดตระบบใหม่ โดยใช้ภาษาที่สุภาพและเป็นทางการ",
+        category: "โหมดทำงาน",
+        is_public: true,
+    },
+    {
+        id: 902,
+        title: "สรุปรายงานการประชุม",
+        prompt_text: "ช่วยสรุปรายงานการประชุมจากข้อความต่อไปนี้เป็นหัวข้อย่อยๆ ให้เข้าใจง่าย: [ใส่เนื้อหาที่นี่]",
+        category: "โหมดทำงาน",
+        is_public: true,
+    },
+    {
+        id: 903,
+        title: "ช่วยอธิบายโค้ด",
+        prompt_text: "กรุณาอธิบายโค้ดชุดนี้ให้ฟังหน่อยว่าทำงานอย่างไร และมีจุดไหนที่ควรปรับปรุงบ้าง: [ใส่โค้ดที่นี่]",
+        category: "โหมดเรียนรู้",
+        is_public: true,
+    },
+    {
+        id: 904,
+        title: "วางแผนการเดินทาง",
+        prompt_text: "ช่วยวางแผนทริปท่องเที่ยวประเทศญี่ปุ่นเป็นเวลา 5 วัน 4 คืน โดยเน้นเที่ยวในโตเกียวและรอบๆ สำหรับครอบครัวที่มีเด็ก",
+        category: "ทั่วไป",
+        is_public: true,
+    },
+    {
+        id: 905,
+        title: "คิดคอนเทนต์ลง Social Media",
+        prompt_text: "ช่วยคิดไอเดียโพสต์ลง Facebook จำนวน 3 โพสต์ เพื่อโปรโมทสินค้าใหม่เป็น 'กาแฟสกัดเย็น' โดยมีกลุ่มเป้าหมายเป็นวัยทำงาน",
+        category: "โหมดสร้างสรรค์",
+        is_public: true,
+    },
+    {
+        id: 906,
+        title: "เขียนสคริปต์วิดีโอสั้น",
+        prompt_text: "ช่วยเขียนสคริปต์สำหรับถ่าย TikTok ความยาวไม่เกิน 1 นาที หัวข้อ '3 ทริคประหยัดเงินมนุษย์เงินเดือน'",
+        category: "โหมดสร้างสรรค์",
+        is_public: true,
+    },
+    {
+        id: 907,
+        title: "เตรียมตัวสัมภาษณ์งาน",
+        prompt_text: "ช่วยจำลองการสัมภาษณ์งานในตำแหน่ง Marketing Executive โดยตั้งคำถามที่มักพบบ่อยมา 5 ข้อ พร้อมแนะนำแนวทางการตอบ",
+        category: "โหมดทำงาน",
+        is_public: true,
+    },
+    {
+        id: 908,
+        title: "อธิบายศัพท์เทคนิค",
+        prompt_text: "ช่วยอธิบายคำว่า 'Blockchain' ให้คนที่ไม่เก่งคอมพิวเตอร์ฟัง แล้วเข้าใจได้ภายใน 2 นาที",
+        category: "โหมดเรียนรู้",
+        is_public: true,
+    },
+    {
+        id: 909,
+        title: "แปลภาษา (แบบสละสลวย)",
+        prompt_text: "ช่วยแปลข้อความต่อไปนี้เป็นภาษาอังกฤษ โดยใช้ระดับภาษาที่เป็นทางการและเป็นธรรมชาติ: [ใส่ข้อความที่นี่]",
+        category: "ทั่วไป",
+        is_public: true,
+    },
+    {
+        id: 910,
+        title: "ตรวจสอบ Grammar",
+        prompt_text: "ช่วยตรวจสอบไวยากรณ์ภาษาอังกฤษในประโยคต่อไปนี้ และแก้ไขให้ถูกต้องพร้อมอธิบายเหตุผล: [ใส่ประโยคที่นี่]",
+        category: "โหมดเรียนรู้",
+        is_public: true,
+    }
+];
+
 export default function TemplatesPage() {
     const { authFetch, isLoggedIn, user } = useAuth();
     const { t } = useLanguage();
@@ -65,9 +138,16 @@ export default function TemplatesPage() {
             const response = await authFetch(url);
             if (!response.ok) throw new Error('Failed to fetch');
             const data = await response.json();
-            setTemplates(data);
+            if (Array.isArray(data) && data.length > 0) {
+                setTemplates(data);
+            } else {
+                const filteredFallback = MOCK_FALLBACK_TEMPLATES.filter(t => activeCategory === 'ทั้งหมด' || t.category === activeCategory);
+                setTemplates(filteredFallback);
+            }
         } catch (error) {
             console.error("Error fetching templates:", error);
+            const filteredFallback = MOCK_FALLBACK_TEMPLATES.filter(t => activeCategory === 'ทั้งหมด' || t.category === activeCategory);
+            setTemplates(filteredFallback);
         } finally {
             setIsLoading(false);
         }
