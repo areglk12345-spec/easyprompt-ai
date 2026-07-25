@@ -406,16 +406,13 @@ function ChatContent() {
         const messageToSend = customText !== undefined ? customText : inputText;
         if (!messageToSend.trim() || isLoading) return;
 
-        // Guest Trial Quota Enforcement (Limit to 2 trial questions for unauthenticated users)
+        // Guest Trial Quota Enforcement (Limit to 3 successful prompt generations for unauthenticated users)
         if (!isLoggedIn && !user) {
             const currentCount = parseInt(localStorage.getItem('ep_guest_usage_count') || '0', 10);
-            if (currentCount >= 2) {
+            if (currentCount >= 3) {
                 setIsGuestLimitModalOpen(true);
                 return;
             }
-            const newCount = currentCount + 1;
-            localStorage.setItem('ep_guest_usage_count', String(newCount));
-            setGuestUsageCount(newCount);
         }
 
         // นำข้อความผู้ใช้ใส่เข้าไปในหน้าจอก่อน
@@ -519,10 +516,23 @@ function ChatContent() {
                                             };
                                             return newMessages;
                                         });
+
+                                        // Increment guest trial quota ONLY when a fitted prompt is successfully generated
+                                        if (refineData.fitted_prompt && refineData.fitted_prompt.trim() && !isLoggedIn && !user) {
+                                            const currentCount = parseInt(localStorage.getItem('ep_guest_usage_count') || '0', 10);
+                                            const newCount = currentCount + 1;
+                                            localStorage.setItem('ep_guest_usage_count', String(newCount));
+                                            setGuestUsageCount(newCount);
+                                        }
                                     }
                                 } catch (e) {
                                     console.error("Error refining prompt:", e);
                                 }
+                            } else if (isDirectRun && !isLoggedIn && !user) {
+                                const currentCount = parseInt(localStorage.getItem('ep_guest_usage_count') || '0', 10);
+                                const newCount = currentCount + 1;
+                                localStorage.setItem('ep_guest_usage_count', String(newCount));
+                                setGuestUsageCount(newCount);
                             }
                             
                             // อัปเดตข้อมูล User (เพื่อดึงยอดเครดิตล่าสุด)
@@ -1106,9 +1116,9 @@ function ChatContent() {
                         </div>
                         
                         <div className="space-y-2">
-                            <h3 className="text-2xl font-black text-slate-800 dark:text-white">ทดลองใช้งานครบ 2 คำถามแล้ว 🎉</h3>
+                            <h3 className="text-2xl font-black text-slate-800 dark:text-white">ทดลองสร้าง Prompt ฟรีครบ 3 ครั้งแล้ว 🎉</h3>
                             <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-                                สมัครสมาชิกหรือเข้าสู่ระบบฟรี เพื่อใช้งานสร้างและเกลา Prompt ได้แบบไม่จำกัด พร้อมบันทึกประวัติการใช้งานของคุณได้ทันที!
+                                สมัครสมาชิกหรือเข้าสู่ระบบฟรี เพื่อรับเพิ่มอีก 100 เครดิต ใช้งานสร้างและเกลา Prompt ได้แบบไม่จำกัด พร้อมบันทึกประวัติการใช้งานของคุณ!
                             </p>
                         </div>
 

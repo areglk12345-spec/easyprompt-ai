@@ -56,16 +56,13 @@ export default function DoctorPage() {
         e.preventDefault();
         if (!promptText.trim() || isLoading) return;
 
-        // Guest Trial Quota Enforcement
+        // Guest Trial Quota Enforcement (Limit to 3 successful prompt generations for unauthenticated users)
         if (!isLoggedIn && !user) {
             const currentCount = parseInt(localStorage.getItem('ep_guest_usage_count') || '0', 10);
-            if (currentCount >= 2) {
+            if (currentCount >= 3) {
                 setIsGuestLimitModalOpen(true);
                 return;
             }
-            const newCount = currentCount + 1;
-            localStorage.setItem('ep_guest_usage_count', String(newCount));
-            setGuestUsageCount(newCount);
         }
 
         setIsLoading(true);
@@ -87,6 +84,14 @@ export default function DoctorPage() {
 
             const data = await response.json();
             setResult(data);
+
+            // Increment guest trial usage ONLY when fitted prompt is successfully generated
+            if (data.fitted_prompt && !isLoggedIn && !user) {
+                const currentCount = parseInt(localStorage.getItem('ep_guest_usage_count') || '0', 10);
+                const newCount = currentCount + 1;
+                localStorage.setItem('ep_guest_usage_count', String(newCount));
+                setGuestUsageCount(newCount);
+            }
         } catch (err: any) {
             console.error("Diagnosis Error:", err);
             setError(err.message || t('doctor.error'));
@@ -467,9 +472,9 @@ export default function DoctorPage() {
                         </div>
                         
                         <div className="space-y-2">
-                            <h3 className="text-2xl font-black text-slate-800 dark:text-white">ทดลองใช้งานครบ 2 คำถามแล้ว 🎉</h3>
+                            <h3 className="text-2xl font-black text-slate-800 dark:text-white">ทดลองสร้าง Prompt ฟรีครบ 3 ครั้งแล้ว 🎉</h3>
                             <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-                                สมัครสมาชิกหรือเข้าสู่ระบบฟรี เพื่อใช้งานวิเคราะห์และเกลา Prompt ใน Prompt Doctor ได้แบบไม่จำกัด!
+                                สมัครสมาชิกหรือเข้าสู่ระบบฟรี เพื่อรับเพิ่มอีก 100 เครดิต ใช้งานวิเคราะห์และเกลา Prompt ใน Prompt Doctor ได้แบบไม่จำกัด!
                             </p>
                         </div>
 
