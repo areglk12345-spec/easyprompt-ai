@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Play, Check, ArrowRight, Sparkles } from 'lucide-react';
+import { Play, Check, ArrowRight, Sparkles, ChevronDown, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -15,12 +15,41 @@ const heroSubtitles = [
     "ช่วยร่างนิยาย เขียนบทความ สรุปเอกสาร และวิเคราะห์คำสั่ง AI ให้คุณในไม่กี่วินาที"
 ];
 
+const faqsData = [
+    {
+        question: "EZPrompt AI คืออะไร และช่วยเพิ่มประสิทธิภาพการทำงานอย่างไร?",
+        answer: "EZPrompt AI คือแพลตฟอร์มช่วยปรับแต่งและจัดการคำสั่ง AI (Prompt Optimizer & Management) ออกแบบมาเพื่อคนไทยโดยเฉพาะ มีระบบ Dr. Prompt ช่วยวิเคราะห์และปรับคำสั่งสั้นๆ ให้กลายเป็นคำสั่งระดับมืออาชีพโดยอัตโนมัติ ช่วยลดเวลาคิดคำสั่งลง 10 เท่า"
+    },
+    {
+        question: "ทดลองใช้งานฟรีมีเงื่อนไขอย่างไรบ้าง?",
+        answer: "คุณสามารถเริ่มใช้งานแพ็กเกจ Basic ฟรีได้ทันที โดยไม่มีค่าบริการ สามารถทดลองใช้ Dr. Prompt ในโหมด Guest ได้ 2 คำถาม และเข้าถึงคลังเทมเพลตคำสั่งสาธารณะได้ไม่จำกัด"
+    },
+    {
+        question: "Dr. Prompt ทำงานอย่างไร?",
+        answer: "เพียงพิมพ์ความต้องการหรือไอเดียของคุณสั้นๆ ระบบ Dr. Prompt จะวิเคราะห์บริบท ประเภทงาน และโครงสร้างคำสั่งที่เหมาะสม จากนั้นสร้างคำสั่งเชิงลึก (Structured Prompt) ที่มีทั้ง บทบาท (Role), บริบท (Context), และ รูปแบบผลลัพธ์ (Output Format) ให้ทันที"
+    },
+    {
+        question: "สามารถนำ Prompt ไปใช้วางบน ChatGPT, Claude หรือ Gemini ได้ไหม?",
+        answer: "ใช้ได้ครับ! คำสั่งที่สร้างจาก EZPrompt AI เป็นข้อความมาตรฐานที่ออกแบบมาให้รองรับกับ AI ชั้นนำทุกแบรนด์ ทั้ง ChatGPT, Claude, Gemini, Copilot และอื่นๆ โดยมีปุ่มคลิกเดียวเพื่อคัดลอกและเปิดเว็บไซต์เหล่านั้นทันที"
+    },
+    {
+        question: "แพ็กเกจ Business สำหรับองค์กร รองรับกี่คน และมีใบเสร็จหรือไม่?",
+        answer: "แพ็กเกจ Business รองรับสมาชิกในทีมเริ่มต้น 5 คน มีระบบ Shared Workspace สำหรับแชร์เทมเพลตคำสั่งและ Dashboard ดูสถิติการใช้งานร่วมกันในทีม พร้อมบริการออกใบเสร็จ/ใบกำกับภาษีในนามองค์กร"
+    },
+    {
+        question: "สามารถยกเลิกหรือเปลี่ยนแพ็กเกจเมื่อไหร่ก็ได้ใช่ไหม?",
+        answer: "ใช่ครับ คุณสามารถยกเลิก อัปเกรด หรือดาวน์เกรดแพ็กเกจได้ทุกเมื่อผ่านหน้าการตั้งค่าบัญชี โดยไม่มีข้อผูกมัดหรือสัญญาใดๆ"
+    }
+];
+
 export default function Home() {
     const router = useRouter();
     const { isLoggedIn, openLoginModal } = useAuth();
     const { isDarkMode } = useTheme();
     const [scrolled, setScrolled] = useState(false);
     const [subtitleIndex, setSubtitleIndex] = useState(0);
+    const [isYearly, setIsYearly] = useState(false);
+    const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -86,17 +115,17 @@ export default function Home() {
 
             <main>
                 {/* Hero Section (OpenAI Style) */}
-                <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 overflow-hidden flex flex-col items-center text-center">
+                <section className="relative pt-24 pb-12 md:pt-32 md:pb-16 px-6 overflow-hidden flex flex-col items-center text-center">
                     {/* Background glow effects */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/20 dark:bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none" />
                     
-                    <div className="relative z-10 max-w-4xl mx-auto space-y-8 animate-slide-up">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 text-sm font-bold border border-indigo-100 dark:border-indigo-500/20 mb-4 animate-fade-in-up">
+                    <div className="relative z-10 max-w-4xl mx-auto space-y-6 animate-slide-up">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 text-sm font-bold border border-indigo-100 dark:border-indigo-500/20 mb-2 animate-fade-in-up">
                             <Sparkles className="w-4 h-4" />
                             <span>แพลตฟอร์มจัดการคำสั่ง AI ที่ดีที่สุดของไทย</span>
                         </div>
                         
-                        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1] animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.15] animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                             สั่งงาน AI ให้ได้ดั่งใจด้วย <br className="hidden md:block" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-500 dark:from-indigo-400 dark:to-purple-400">
                                 EZPrompt
@@ -104,22 +133,22 @@ export default function Home() {
                         </h1>
                         
                         {/* Animated Rotating Subtitle under EZPrompt */}
-                        <div className="min-h-[90px] md:min-h-[70px] flex flex-col items-center justify-center max-w-2xl mx-auto px-4 relative my-2">
+                        <div className="min-h-[70px] md:min-h-[60px] flex flex-col items-center justify-center max-w-2xl mx-auto px-4 relative my-1">
                             <AnimatePresence mode="wait">
                                 <motion.p
                                     key={subtitleIndex}
-                                    initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
+                                    initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
                                     animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                                    exit={{ opacity: 0, y: -16, filter: "blur(4px)" }}
+                                    exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
                                     transition={{ duration: 0.45, ease: "easeInOut" }}
-                                    className="text-lg md:text-2xl text-slate-600 dark:text-slate-300 font-medium leading-relaxed"
+                                    className="text-base md:text-xl text-slate-600 dark:text-slate-300 font-medium leading-relaxed"
                                 >
                                     {heroSubtitles[subtitleIndex]}
                                 </motion.p>
                             </AnimatePresence>
 
                             {/* Indicator Dots */}
-                            <div className="flex justify-center items-center gap-2 mt-4">
+                            <div className="flex justify-center items-center gap-2 mt-3">
                                 {heroSubtitles.map((_, i) => (
                                     <button
                                         key={i}
@@ -132,19 +161,19 @@ export default function Home() {
                             </div>
                         </div>
                         
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                            <Link href="/chat" className="w-full sm:w-auto px-8 py-4 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-lg hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-2">
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                            <Link href="/chat" className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-base hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-2">
                                 ทดลองใช้งานฟรี
                             </Link>
-                            <a href="#video-demo" className="w-full sm:w-auto px-8 py-4 rounded-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2">
-                                <Play className="w-5 h-5 fill-current" /> ดูการทำงาน
+                            <a href="#video-demo" className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-base hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2">
+                                <Play className="w-4 h-4 fill-current" /> ดูการทำงาน
                             </a>
                         </div>
                     </div>
 
                     {/* Promo Video */}
-                    <div id="video-demo" className="relative z-10 w-full max-w-5xl mx-auto mt-16 animate-fade-in-up space-y-4" style={{ animationDelay: '0.5s' }}>
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-200/60 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-300/40 dark:border-slate-700/40">
+                    <div id="video-demo" className="relative z-10 w-full max-w-4xl mx-auto mt-8 md:mt-10 animate-fade-in-up space-y-3" style={{ animationDelay: '0.5s' }}>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-200/60 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-300/40 dark:border-slate-700/40">
                             <span className="material-symbols-outlined text-sm text-indigo-500">play_circle</span>
                             <span>วิดีโอแนะนำการใช้งาน EZPrompt AI</span>
                         </div>
@@ -163,12 +192,12 @@ export default function Home() {
                 </section>
 
                 {/* Why EZPrompt Section */}
-                <section id="features" className="py-24 bg-slate-50 dark:bg-[#0b0f19] px-6 border-t border-slate-200/50 dark:border-slate-800/50 relative overflow-hidden">
+                <section id="features" className="py-12 md:py-16 bg-slate-50 dark:bg-[#0b0f19] px-6 border-t border-slate-200/50 dark:border-slate-800/50 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 dark:bg-purple-500/5 blur-[100px] rounded-full pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/5 blur-[100px] rounded-full pointer-events-none" />
                     
                     <div className="max-w-7xl mx-auto relative z-10">
-                        <div className="text-center space-y-4 mb-16">
+                        <div className="text-center space-y-3 mb-10">
                             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-sm font-bold tracking-wide">
                                 <span className="material-symbols-outlined text-[18px]">psychology_alt</span>
                                 ทำไมต้อง EZPrompt?
@@ -241,121 +270,199 @@ export default function Home() {
                 </section>
 
                 {/* Pricing Section (Gemini Style) */}
-                <section id="pricing" className="py-24 bg-white dark:bg-[#0b0f19] px-6">
-                    <div className="max-w-7xl mx-auto space-y-16">
-                        <div className="text-center space-y-4">
-                            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                <section id="pricing" className="py-12 md:py-16 bg-white dark:bg-[#0b0f19] px-6">
+                    <div className="max-w-7xl mx-auto space-y-10">
+                        <div className="text-center space-y-3">
+                            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight">
                                 แพ็กเกจที่ตอบโจทย์ทุกการใช้งาน
                             </h2>
-                            <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-lg">
+                            <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-base md:text-lg">
                                 เลือกแพ็กเกจที่ใช่ เพื่อยกระดับการทำงานด้วย AI ของคุณ
                             </p>
+
+                            {/* Monthly / Yearly Toggle */}
+                            <div className="flex items-center justify-center gap-3 pt-4">
+                                <span className={`text-sm font-bold ${!isYearly ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500'}`}>รายเดือน</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsYearly(!isYearly)}
+                                    className="w-12 h-6 rounded-full bg-slate-200 dark:bg-slate-700 p-1 transition-colors relative flex items-center"
+                                    aria-label="Toggle Monthly/Yearly Billing"
+                                >
+                                    <div className={`w-4 h-4 rounded-full bg-indigo-600 dark:bg-indigo-400 transition-transform ${isYearly ? 'translate-x-6' : 'translate-x-0'}`} />
+                                </button>
+                                <span className={`text-sm font-bold flex items-center gap-1.5 ${isYearly ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500'}`}>
+                                    รายปี
+                                    <span className="px-2 py-0.5 text-xs bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-full font-bold">
+                                        ประหยัด 25%
+                                    </span>
+                                </span>
+                            </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch max-w-6xl mx-auto pt-2">
                             {/* Basic Tier */}
-                            <div className="rounded-3xl p-8 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
-                                <div className="space-y-4 mb-8">
+                            <div className="rounded-3xl p-6 md:p-7 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                                <div className="space-y-3 mb-6">
                                     <h3 className="text-2xl font-bold">Basic</h3>
-                                    <p className="text-slate-500 dark:text-slate-400 text-sm h-12">เหมาะสำหรับผู้เริ่มต้นใช้งาน AI และอยากทดลองใช้เทมเพลตพื้นฐาน</p>
-                                    <div className="pt-4">
+                                    <p className="text-slate-500 dark:text-slate-400 text-sm min-h-[40px]">เหมาะสำหรับผู้เริ่มต้นใช้งาน AI และอยากทดลองใช้เทมเพลตพื้นฐาน</p>
+                                    <div className="pt-2">
                                         <span className="text-4xl font-bold">฿0</span>
-                                        <span className="text-slate-500 dark:text-slate-400"> / เดือน</span>
+                                        <span className="text-slate-500 dark:text-slate-400 text-sm"> / เดือน</span>
                                     </div>
                                 </div>
                                 
-                                <Link href="/chat" className="w-full py-3 rounded-full border border-slate-300 dark:border-slate-700 font-bold text-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors mb-8">
+                                <Link href="/chat" className="w-full py-2.5 rounded-full border border-slate-300 dark:border-slate-700 font-bold text-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors mb-6 text-sm">
                                     เริ่มต้นใช้งานฟรี
                                 </Link>
                                 
-                                <ul className="space-y-4 mt-auto">
-                                    <li className="flex gap-3 text-slate-700 dark:text-slate-300 text-sm font-medium">
-                                        <Check className="w-5 h-5 text-indigo-500 shrink-0" />
+                                <ul className="space-y-3 mt-auto">
+                                    <li className="flex gap-2.5 text-slate-700 dark:text-slate-300 text-sm font-medium">
+                                        <Check className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
                                         <span>แชทถาม-ตอบกับ AI พื้นฐาน</span>
                                     </li>
-                                    <li className="flex gap-3 text-slate-700 dark:text-slate-300 text-sm font-medium">
-                                        <Check className="w-5 h-5 text-indigo-500 shrink-0" />
+                                    <li className="flex gap-2.5 text-slate-700 dark:text-slate-300 text-sm font-medium">
+                                        <Check className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
                                         <span>เข้าถึงคลังเทมเพลตส่วนกลาง (Public)</span>
                                     </li>
-                                    <li className="flex gap-3 text-slate-700 dark:text-slate-300 text-sm font-medium">
-                                        <Check className="w-5 h-5 text-indigo-500 shrink-0" />
+                                    <li className="flex gap-2.5 text-slate-700 dark:text-slate-300 text-sm font-medium">
+                                        <Check className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
                                         <span>เก็บประวัติการสนทนาย้อนหลัง 3 วัน</span>
                                     </li>
                                 </ul>
                             </div>
 
                             {/* Pro Tier (Highlighted) */}
-                            <div className="rounded-3xl p-8 border-2 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/10 flex flex-col relative transform md:-translate-y-4 shadow-2xl shadow-indigo-500/10">
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                            <div className="rounded-3xl p-6 md:p-7 border-2 border-indigo-500 bg-indigo-50/40 dark:bg-indigo-900/10 flex flex-col relative transform md:-translate-y-2 shadow-xl shadow-indigo-500/10">
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-600 text-white px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
                                     คุ้มค่าที่สุด
                                 </div>
-                                <div className="space-y-4 mb-8">
+                                <div className="space-y-3 mb-6">
                                     <h3 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Pro</h3>
-                                    <p className="text-slate-600 dark:text-slate-300 text-sm h-12">สำหรับมือโปรที่ต้องการเพิ่มประสิทธิภาพด้วย Dr. Prompt และเทมเพลตส่วนตัว</p>
-                                    <div className="pt-4">
-                                        <span className="text-4xl font-bold">฿199</span>
-                                        <span className="text-slate-500 dark:text-slate-400"> / เดือน</span>
+                                    <p className="text-slate-600 dark:text-slate-300 text-sm min-h-[40px]">สำหรับมือโปรที่ต้องการเพิ่มประสิทธิภาพด้วย Dr. Prompt และเทมเพลตส่วนตัว</p>
+                                    <div className="pt-2">
+                                        <span className="text-4xl font-bold">{isYearly ? '฿149' : '฿199'}</span>
+                                        <span className="text-slate-500 dark:text-slate-400 text-sm"> / เดือน</span>
+                                        {isYearly && <span className="block text-xs text-indigo-600 dark:text-indigo-400 font-semibold mt-1">ชำระรายปี ฿1,788/ปี</span>}
                                     </div>
                                 </div>
                                 
                                 <button 
                                     type="button" 
                                     onClick={openLoginModal} 
-                                    className="w-full py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-center transition-colors mb-8 shadow-md"
+                                    className="w-full py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-center transition-colors mb-6 shadow-md text-sm"
                                 >
                                     สมัครแพ็กเกจ Pro
                                 </button>
                                 
-                                <ul className="space-y-4 mt-auto">
-                                    <li className="flex gap-3 text-slate-700 dark:text-slate-200 text-sm font-medium">
-                                        <Check className="w-5 h-5 text-indigo-500 shrink-0" />
+                                <ul className="space-y-3 mt-auto">
+                                    <li className="flex gap-2.5 text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        <Check className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
                                         <span>สร้างและบันทึกเทมเพลตส่วนตัวได้ไม่จำกัด</span>
                                     </li>
-                                    <li className="flex gap-3 text-slate-700 dark:text-slate-200 text-sm font-medium">
-                                        <Check className="w-5 h-5 text-indigo-500 shrink-0" />
-                                        <span>เข้าถึง Dr. Prompt วิเคราะห์คำสั่ง</span>
+                                    <li className="flex gap-2.5 text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        <Check className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
+                                        <span>เข้าถึง Dr. Prompt วิเคราะห์คำสั่งขั้นสูง</span>
                                     </li>
-                                    <li className="flex gap-3 text-slate-700 dark:text-slate-200 text-sm font-medium">
-                                        <Check className="w-5 h-5 text-indigo-500 shrink-0" />
+                                    <li className="flex gap-2.5 text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                        <Check className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
                                         <span>เก็บประวัติการสนทนาได้ตลอดชีพ</span>
                                     </li>
                                 </ul>
                             </div>
 
                             {/* Business Tier */}
-                            <div className="rounded-3xl p-8 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
-                                <div className="space-y-4 mb-8">
+                            <div className="rounded-3xl p-6 md:p-7 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                                <div className="space-y-3 mb-6">
                                     <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-pink-500">Business</h3>
-                                    <p className="text-slate-500 dark:text-slate-400 text-sm h-12">ออกแบบมาสำหรับองค์กร เพื่อใช้งานและแชร์ Prompt ร่วมกันในทีม</p>
-                                    <div className="pt-4">
-                                        <span className="text-4xl font-bold">฿990</span>
-                                        <span className="text-slate-500 dark:text-slate-400"> / เดือน</span>
+                                    <p className="text-slate-500 dark:text-slate-400 text-sm min-h-[40px]">ออกแบบมาสำหรับองค์กร เพื่อใช้งานและแชร์ Prompt ร่วมกันในทีม</p>
+                                    <div className="pt-2">
+                                        <span className="text-4xl font-bold">{isYearly ? '฿790' : '฿990'}</span>
+                                        <span className="text-slate-500 dark:text-slate-400 text-sm"> / เดือน</span>
+                                        {isYearly && <span className="block text-xs text-purple-600 dark:text-purple-400 font-semibold mt-1">ชำระรายปี ฿9,480/ปี</span>}
                                     </div>
                                 </div>
                                 
                                 <button 
                                     type="button" 
                                     onClick={openLoginModal} 
-                                    className="w-full py-3 rounded-full border border-slate-300 dark:border-slate-700 font-bold text-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors mb-8"
+                                    className="w-full py-2.5 rounded-full border border-slate-300 dark:border-slate-700 font-bold text-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors mb-6 text-sm"
                                 >
                                     ติดต่อทีมขาย
                                 </button>
                                 
-                                <ul className="space-y-4 mt-auto">
-                                    <li className="flex gap-3 text-slate-700 dark:text-slate-300 text-sm font-medium">
-                                        <Check className="w-5 h-5 text-indigo-500 shrink-0" />
+                                <ul className="space-y-3 mt-auto">
+                                    <li className="flex gap-2.5 text-slate-700 dark:text-slate-300 text-sm font-medium">
+                                        <Check className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
                                         <span>สร้าง Workspace เฉพาะขององค์กรได้</span>
                                     </li>
-                                    <li className="flex gap-3 text-slate-700 dark:text-slate-300 text-sm font-medium">
-                                        <Check className="w-5 h-5 text-indigo-500 shrink-0" />
-                                        <span>เพิ่มสมาชิกในทีมได้ 5 คน</span>
+                                    <li className="flex gap-2.5 text-slate-700 dark:text-slate-300 text-sm font-medium">
+                                        <Check className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
+                                        <span>เพิ่มสมาชิกในทีมได้ 5 คน (เฉลี่ย ฿158-198/คน)</span>
                                     </li>
-                                    <li className="flex gap-3 text-slate-700 dark:text-slate-300 text-sm font-medium">
-                                        <Check className="w-5 h-5 text-indigo-500 shrink-0" />
+                                    <li className="flex gap-2.5 text-slate-700 dark:text-slate-300 text-sm font-medium">
+                                        <Check className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
                                         <span>Dashboard ดูสถิติการใช้งานของทีม</span>
                                     </li>
                                 </ul>
                             </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* FAQ Section */}
+                <section id="faq" className="py-12 md:py-16 bg-slate-50 dark:bg-[#0b0f19] px-6 border-t border-slate-200/50 dark:border-slate-800/50">
+                    <div className="max-w-4xl mx-auto space-y-8">
+                        <div className="text-center space-y-3">
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-sm font-bold tracking-wide">
+                                <HelpCircle className="w-4 h-4 text-indigo-500" />
+                                คำถามที่พบบ่อย (FAQ)
+                            </div>
+                            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-800 dark:text-white">
+                                มีข้อสงสัยเกี่ยวกับการใช้งาน?
+                            </h2>
+                            <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto text-base md:text-lg">
+                                รวมคำตอบสำหรับคำถามที่ผู้ใช้งานสอบถามเข้ามาบ่อยที่สุด
+                            </p>
+                        </div>
+
+                        <div className="space-y-3">
+                            {faqsData.map((faq, index) => {
+                                const isOpen = openFaqIndex === index;
+                                return (
+                                    <div
+                                        key={index}
+                                        className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 overflow-hidden transition-all duration-200 shadow-sm hover:border-indigo-300 dark:hover:border-indigo-700"
+                                    >
+                                        <button
+                                            type="button"
+                                            onClick={() => setOpenFaqIndex(isOpen ? null : index)}
+                                            className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 font-bold text-slate-800 dark:text-slate-100 text-base md:text-lg focus:outline-none"
+                                        >
+                                            <span>{faq.question}</span>
+                                            <ChevronDown
+                                                className={`w-5 h-5 text-indigo-500 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+                                            />
+                                        </button>
+
+                                        <AnimatePresence initial={false}>
+                                            {isOpen && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: "auto", opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                                                    className="overflow-hidden"
+                                                >
+                                                    <div className="px-6 pb-5 pt-1 text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed border-t border-slate-100 dark:border-slate-800/60">
+                                                        {faq.answer}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </section>
