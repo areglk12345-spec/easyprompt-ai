@@ -80,7 +80,6 @@ export default function Home() {
 
                     <nav className="hidden md:flex items-center gap-8 font-semibold text-sm">
                         <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">ฟีเจอร์</a>
-                        <a href="#pricing" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">แพ็กเกจราคา</a>
                         <a href="#faq" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">คำถามที่พบบ่อย</a>
                     </nav>
 

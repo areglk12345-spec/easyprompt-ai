@@ -12,7 +12,7 @@ import { useAccessibility } from '../context/AccessibilityContext';
 import UserMenu from './UserMenu';
 
 interface SidebarProps {
-    activePage?: 'chat' | 'templates' | 'doctor' | 'history' | 'admin' | 'home' | 'settings' | 'dashboard' | 'marketplace' | 'knowledge' | 'pricing';
+    activePage?: 'chat' | 'templates' | 'doctor' | 'history' | 'admin' | 'home' | 'settings' | 'dashboard' | 'marketplace' | 'knowledge';
     onNewChat?: () => void;
 }
 
@@ -326,10 +326,6 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                             <Link href="/knowledge" className={activePage === 'knowledge' ? activeClass : inactiveClass}>
                                 <BookOpen className="w-4 h-4 shrink-0 text-emerald-500" />
                                 <span className="whitespace-nowrap truncate">{t('sidebar.knowledge')}</span>
-                            </Link>
-                            <Link href="/pricing" className={activePage === 'pricing' ? activeClass : inactiveClass}>
-                                <span className="material-symbols-outlined text-base shrink-0 text-amber-500">sell</span>
-                                <span className="whitespace-nowrap truncate">ราคาแพ็กเกจ</span>
                             </Link>
                         </nav>
 
