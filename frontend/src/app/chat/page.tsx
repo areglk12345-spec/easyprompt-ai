@@ -693,7 +693,12 @@ function ChatContent() {
                                     position="bottom"
                                 />
                                 <button
+                                    type="button"
                                     onClick={() => setEasyLanguage(!easyLanguage)}
+                                    role="switch"
+                                    aria-checked={easyLanguage}
+                                    aria-label="โหมดภาษาง่าย (Easy Mode)"
+                                    title="โหมดภาษาง่าย (Easy Mode)"
                                     className={`w-12 h-6 rounded-full flex items-center transition-colors shadow-inner ${easyLanguage ? 'bg-primary' : 'bg-slate-300'}`}
                                 >
                                     <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${easyLanguage ? 'translate-x-6' : 'translate-x-1'}`} />
@@ -759,7 +764,7 @@ function ChatContent() {
                                         <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mb-6 border border-indigo-100 dark:border-indigo-800/50">
                                             <span className="material-symbols-outlined text-3xl text-indigo-500">forum</span>
                                         </div>
-                                        <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">เริ่มบทสนทนาใหม่</h3>
+                                        <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">เริ่มบทสนทนาใหม่</h2>
                                         <p className="text-slate-500 dark:text-slate-400 max-w-md text-sm leading-relaxed">
                                             พิมพ์คำสั่งของคุณในช่องด้านล่าง หรือใช้ไมโครโฟนเพื่อพูดคำสั่ง<br/>
                                             คุณสามารถอัปโหลดเอกสารเพื่อใช้อ้างอิงได้
@@ -934,15 +939,21 @@ function ChatContent() {
                             />
                             
                             <input 
+                                id="doc-file-input"
                                 type="file" 
                                 accept=".txt,.pdf" 
+                                aria-label="อัปโหลดไฟล์เอกสาร .txt หรือ .pdf"
+                                title="อัปโหลดไฟล์เอกสาร .txt หรือ .pdf"
                                 className="hidden" 
                                 ref={fileInputRef} 
                                 onChange={handleQuickUpload}
                             />
                             <input 
+                                id="attach-file-input"
                                 type="file" 
                                 multiple
+                                aria-label="แนบไฟล์ประกอบ"
+                                title="แนบไฟล์ประกอบ"
                                 className="hidden" 
                                 ref={attachFileInputRef} 
                                 onChange={handleAttachFile}
@@ -974,6 +985,8 @@ function ChatContent() {
                                 id="send-btn"
                                 type="submit"
                                 variant="primary"
+                                aria-label="ส่งข้อความ"
+                                title="ส่งข้อความ"
                                 disabled={isLoading || (!inputText.trim() && attachedFiles.length === 0)}
                                 className={`bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold shadow-md shadow-indigo-100 dark:shadow-indigo-900/30 disabled:opacity-50 !border-none hover-spring ${isLarge ? 'w-14 h-14 px-4' : 'w-11 h-11 md:w-10 md:h-10 px-2'}`}
                             >

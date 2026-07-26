@@ -159,7 +159,12 @@ export default function DoctorPage() {
                             <div className="flex items-center gap-2">
                                 <span className={`text-slate-600 dark:text-slate-400 font-semibold ${isLarge ? 'text-lg' : 'text-sm'}`}>โหมดภาษาง่าย</span>
                                 <button
+                                    type="button"
                                     onClick={() => setEasyLanguage(!easyLanguage)}
+                                    role="switch"
+                                    aria-checked={easyLanguage}
+                                    aria-label="โหมดภาษาง่าย"
+                                    title="โหมดภาษาง่าย"
                                     className={`w-12 h-6 rounded-full flex items-center transition-colors shadow-inner ${easyLanguage ? 'bg-primary' : 'bg-slate-300'}`}
                                 >
                                     <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${easyLanguage ? 'translate-x-6' : 'translate-x-1'}`} />
