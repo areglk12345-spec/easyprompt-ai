@@ -10,6 +10,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useAccessibility } from '../context/AccessibilityContext';
 import UserMenu from './UserMenu';
+import Logo from './Logo';
 
 interface SidebarProps {
     activePage?: 'chat' | 'templates' | 'doctor' | 'history' | 'admin' | 'home' | 'settings' | 'dashboard' | 'marketplace' | 'knowledge';
@@ -252,14 +253,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                         {/* Header: Logo & Collapse Button */}
                         <div className="flex items-center justify-between px-2 mb-4 shrink-0">
                             <Link href="/" className="flex items-center gap-2.5 group">
-                                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-amber-500 flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
-                                    <Sparkles className="w-4 h-4 fill-current animate-pulse" />
-                                </div>
-                                <div>
-                                    <h1 className="text-base font-black text-slate-800 dark:text-white tracking-tight flex items-center gap-1">
-                                        EasyPrompt <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-extrabold uppercase">AI</span>
-                                    </h1>
-                                </div>
+                                <Logo size="md" />
                             </Link>
 
                             <button

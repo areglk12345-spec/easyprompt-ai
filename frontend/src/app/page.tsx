@@ -7,6 +7,7 @@ import { Play, Check, ArrowRight, Sparkles, ChevronDown, HelpCircle } from 'luci
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import Logo from '../components/Logo';
 
 const heroSubtitles = [
     "รวมสุดยอดเทมเพลตคำสั่ง (Prompt) พร้อมระบบ Dr. Prompt ช่วยปรับแต่งคำสั่งให้คมชัด ทำงานเสร็จไวขึ้น 10 เท่าในคลิกเดียว",
@@ -72,10 +73,7 @@ export default function Home() {
             <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 dark:bg-[#0b0f19]/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50' : 'bg-transparent'}`}>
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2 group">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-                            <span className="material-symbols-outlined !font-bold">bolt</span>
-                        </div>
-                        <span className="text-xl font-bold tracking-tight">EZPrompt</span>
+                        <Logo size="lg" />
                     </Link>
 
                     <nav className="hidden md:flex items-center gap-8 font-semibold text-sm">

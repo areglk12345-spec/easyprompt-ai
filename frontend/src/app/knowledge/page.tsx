@@ -112,7 +112,7 @@ export default function KnowledgePage() {
 
                 <main className="flex-1 flex flex-col h-full overflow-hidden">
                     {/* Top AppBar */}
-                    <header className="sticky top-0 z-30 flex justify-between items-center px-6 md:px-12 w-full h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-700/30 shrink-0">
+                    <header className="sticky top-0 z-30 flex justify-between items-center pl-16 pr-6 md:px-12 w-full min-h-[5rem] py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/30 shrink-0 flex-wrap gap-2">
                         <div className="flex items-center gap-4">
                             <Link href="/" className="font-bold text-primary dark:text-indigo-400 hover:text-primary-dark transition-colors flex items-center gap-1">
                                 &larr; {t('menu.home')}

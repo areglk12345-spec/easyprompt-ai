@@ -808,7 +808,7 @@ function ChatContent() {
                     </main>
 
                     {/* Bottom Input Bar */}
-                    <footer className="p-4 pb-6 md:p-6 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/90 to-transparent dark:from-[#020617] dark:via-[#020617]/90 shrink-0 sticky bottom-0 z-20 pointer-events-none">
+                    <footer className="p-3 sm:p-4 pb-4 sm:pb-6 md:p-6 bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent dark:from-[#0b0f19] dark:via-[#0b0f19]/95 shrink-0 sticky bottom-0 z-20 pointer-events-none">
                         {/* Guest Trial Banner */}
                         {!isLoggedIn && !user && (
                             <div className="max-w-4xl mx-auto mb-3 pointer-events-auto bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-purple-500/10 border border-amber-500/30 dark:border-amber-500/40 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm shadow-sm">
