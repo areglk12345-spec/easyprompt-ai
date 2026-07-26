@@ -79,6 +79,8 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
         setIsTTSOn((prev) => {
             const next = !prev;
             localStorage.setItem('ep_tts_on', String(next));
+            localStorage.setItem('ep_auto_speak', String(next));
+            setIsAutoSpeakOn(next);
             return next;
         });
     };
@@ -87,6 +89,8 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
         setIsAutoSpeakOn((prev) => {
             const next = !prev;
             localStorage.setItem('ep_auto_speak', String(next));
+            localStorage.setItem('ep_tts_on', String(next));
+            setIsTTSOn(next);
             return next;
         });
     };

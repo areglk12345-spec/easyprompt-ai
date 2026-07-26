@@ -38,7 +38,7 @@ function ChatContent() {
     const { fontSize } = useFontSize();
     const isLarge = fontSize === 'large';
     const { logActivity, copyToClipboard, downloadAsTxt, downloadAsMarkdown, saveToTemplate, exportToPlatform, analyzeTextAccessibility } = usePromptActions();
-    const { speak, isAutoSpeakOn } = useTTS();
+    const { speak, isAutoSpeakOn, isTTSOn } = useTTS();
 
     // Guest Trial State (2 trial questions for unauthenticated users)
     const [guestUsageCount, setGuestUsageCount] = useState<number>(0);
@@ -486,7 +486,7 @@ function ChatContent() {
                             setAttachedFiles([]); // Clear after sending
                             
                             // Auto-Speak AI response if enabled
-                            if (isAutoSpeakOn && accumulatedText.trim()) {
+                            if ((isAutoSpeakOn || isTTSOn) && accumulatedText.trim()) {
                                 speak(accumulatedText);
                             }
                             
@@ -578,7 +578,7 @@ function ChatContent() {
         } finally {
             setIsLoading(false);
         }
-    }, [inputText, isLoading, sessionId, selectedTone, easyLanguage, authFetch, attachedFiles, selectedDocument, selectedModel, refreshUser, isAutoSpeakOn, speak, isLoggedIn, user]);
+    }, [inputText, isLoading, sessionId, selectedTone, easyLanguage, authFetch, attachedFiles, selectedDocument, selectedModel, refreshUser, isAutoSpeakOn, isTTSOn, speak, isLoggedIn, user]);
 
     const handleEditMessage = useCallback((index: number, newText: string) => {
         if (isLoading) return;

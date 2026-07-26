@@ -25,7 +25,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
     const isLarge = fontSize === 'large';
     const { isDarkMode, themeMode, setThemeMode } = useTheme();
     const { authFetch, isLoggedIn, user } = useAuth();
-    const { isHighContrast, isTTSOn, toggleHighContrast, toggleTTS } = useAccessibility();
+    const { isHighContrast, isTTSOn, isAutoSpeakOn, toggleHighContrast, toggleTTS } = useAccessibility();
     
     const activeClass = "flex items-center gap-3 py-2.5 px-3.5 bg-slate-200/80 dark:bg-slate-800 text-slate-900 dark:text-white rounded-2xl font-bold transition-all text-sm shadow-sm";
     const inactiveClass = "flex items-center gap-3 py-2.5 px-3.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 rounded-2xl font-medium transition-all text-sm hover:text-slate-900 dark:hover:text-white";
@@ -486,8 +486,8 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                                 </button>
                                 <button
                                     onClick={toggleTTS}
-                                    className={`p-1.5 rounded-lg transition-colors ${isTTSOn ? 'bg-primary text-white' : 'hover:bg-slate-200/50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'}`}
-                                    title="สลับระบบอ่านออกเสียง"
+                                    className={`p-1.5 rounded-lg transition-colors ${isTTSOn || isAutoSpeakOn ? 'bg-primary text-white' : 'hover:bg-slate-200/50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'}`}
+                                    title="สลับระบบอ่านคำตอบ AI อัตโนมัติ"
                                 >
                                     <Volume2 className="w-4 h-4" />
                                 </button>
