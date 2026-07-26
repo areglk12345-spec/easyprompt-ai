@@ -67,7 +67,19 @@ export default function RootLayout({
                 <AccessibilityProvider>
                   {children}
                   <LoginModal />
-                  <Toaster position="bottom-right" />
+                  <Toaster 
+                    position="bottom-right" 
+                    containerStyle={{
+                      position: 'fixed',
+                      bottom: '24px',
+                      right: '24px',
+                      top: 'auto',
+                      left: 'auto',
+                      width: 'auto',
+                      height: 'auto',
+                      pointerEvents: 'none'
+                    }}
+                  />
                   <MascotAgent />
                 </AccessibilityProvider>
               </ThemeProvider>

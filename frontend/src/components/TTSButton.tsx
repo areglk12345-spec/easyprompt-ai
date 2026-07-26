@@ -28,7 +28,7 @@ export default function TTSButton({ text, className = '' }: TTSButtonProps) {
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-primary hover:bg-slate-200 dark:hover:bg-slate-700'
             } ${className}`}
             title={isSpeaking ? 'หยุดอ่าน' : 'อ่านข้อความ'}
-            aria-label={isSpeaking ? 'Stop reading' : 'Read text aloud'}
+            aria-label={isSpeaking ? 'หยุดอ่าน' : 'อ่านข้อความ'}
         >
             <span className="material-symbols-outlined text-sm md:text-base">
                 {isSpeaking ? 'stop_circle' : 'volume_up'}
