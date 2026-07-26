@@ -62,7 +62,8 @@ function AdminPageContent() {
     const [error, setError] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const activeTab = searchParams.get('tab') || 'users';
-    const [orgModel, setOrgModel] = useState('gemini-3.1-flash-lite');
+    const [orgModel, setOrgModel] = useState('gemini-3.5-flash-lite');
+    const [apiPoolStatus, setApiPoolStatus] = useState<{total_keys: number; estimated_rpm: number; estimated_rpd: number; model: string} | null>(null);
 
     // Audit Logs state
     const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
@@ -92,12 +93,19 @@ function AdminPageContent() {
         setError(null);
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-            const response = await authFetch(`${API_URL}/api/admin/org-settings`);
-            if (!response.ok) {
+            const [settingsRes, poolRes] = await Promise.all([
+                authFetch(`${API_URL}/api/admin/org-settings`),
+                authFetch(`${API_URL}/api/admin/api-pool-status`).catch(() => null)
+            ]);
+            if (!settingsRes.ok) {
                 throw new Error('Failed to fetch org settings');
             }
-            const data = await response.json();
+            const data = await settingsRes.json();
             setOrgModel(data.ai_model);
+            if (poolRes && poolRes.ok) {
+                const poolData = await poolRes.json();
+                setApiPoolStatus(poolData);
+            }
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -523,9 +531,13 @@ function AdminPageContent() {
                                             onChange={(e) => setOrgModel(e.target.value)}
                                             className="w-full h-12 px-4 rounded-xl bg-slate-100/60 border border-slate-200/50 focus:bg-white focus:border-primary outline-none transition-all font-body-md text-slate-800 dark:text-white"
                                         >
-                                            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (ความเร็วสูงสุด, ประหยัดโควต้า)</option>
-                                            <option value="gemini-2.0-flash">Gemini 2.0 Flash (สมดุลความเร็ว/ความฉลาด)</option>
-                                            <option value="gemini-2.5-pro">Gemini 2.5 Pro (ฉลาดที่สุด, สำหรับงานซับซ้อน)</option>
+                                            <option value="gemini-3.5-flash-lite">⭐ Gemini 3.5 Flash Lite (แนะนำ — เร็ว, ฉลาด, ประหยัดโควต้า)</option>
+                                            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (ความเร็วสูง, ประหยัดโควต้า)</option>
+                                            <option value="gemini-3.6-flash">Gemini 3.6 Flash (ใหม่ล่าสุด, ฉลาดมาก — 5 RPM)</option>
+                                            <option value="gemini-3.5-flash">Gemini 3.5 Flash (ฉลาด — 5 RPM)</option>
+                                            <option value="gemini-3-flash">Gemini 3 Flash (สมดุล — 5 RPM)</option>
+                                            <option value="gemini-2.5-flash">Gemini 2.5 Flash (เสถียร — 5 RPM)</option>
+                                            <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (ประหยัด — 10 RPM)</option>
                                         </select>
                                     </div>
                                     <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -538,6 +550,34 @@ function AdminPageContent() {
                                         </button>
                                     </div>
                                 </div>
+
+                                {/* API Pool Status Card */}
+                                {apiPoolStatus && (
+                                    <div className="mt-8 p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200/50 dark:border-emerald-700/30">
+                                        <h3 className="font-bold text-emerald-800 dark:text-emerald-300 mb-3 flex items-center gap-2">
+                                            <span className="text-lg">🔑</span> API Key Pool Status
+                                        </h3>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                            <div className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-3 text-center">
+                                                <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{apiPoolStatus.total_keys}</div>
+                                                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">API Keys</div>
+                                            </div>
+                                            <div className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-3 text-center">
+                                                <div className="text-2xl font-black text-blue-600 dark:text-blue-400">{apiPoolStatus.estimated_rpm}</div>
+                                                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">RPM (req/min)</div>
+                                            </div>
+                                            <div className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-3 text-center">
+                                                <div className="text-2xl font-black text-purple-600 dark:text-purple-400">{apiPoolStatus.estimated_rpd.toLocaleString()}</div>
+                                                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">RPD (req/day)</div>
+                                            </div>
+                                            <div className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-3 text-center">
+                                                <div className="text-sm font-bold text-slate-700 dark:text-slate-300 mt-1">{apiPoolStatus.model}</div>
+                                                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">Default Model</div>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-emerald-600/70 dark:text-emerald-400/50 mt-3">ระบบจะวนสลับ API Key อัตโนมัติ (Round-Robin) พร้อม Fallback เมื่อ key ใดถูก rate limit</p>
+                                    </div>
+                                )}
                             </div>
                         )}
 

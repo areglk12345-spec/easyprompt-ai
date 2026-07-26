@@ -2,6 +2,7 @@ import os
 import json
 import re
 import logging
+import threading
 from fastapi import HTTPException
 from dotenv import load_dotenv
 
@@ -15,14 +16,43 @@ from google.genai import types
 
 load_dotenv()
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    raise ValueError("❌ ไม่พบ GEMINI_API_KEY ในไฟล์ .env กรุณาตั้งค่าก่อเริ่มต้นเซิร์ฟเวอร์")
+# ===== Multi-API Key Pool (Round-Robin with Fallback) =====
+# รองรับทั้ง GEMINI_API_KEYS (หลาย key คั่นด้วย ,) และ GEMINI_API_KEY (key เดี่ยว แบบเดิม)
+_raw_keys = os.getenv("GEMINI_API_KEYS", "")
+if _raw_keys:
+    GEMINI_API_KEYS = [k.strip() for k in _raw_keys.split(",") if k.strip()]
+else:
+    single_key = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_API_KEYS = [single_key] if single_key else []
+
+if not GEMINI_API_KEYS:
+    raise ValueError("❌ ไม่พบ GEMINI_API_KEY หรือ GEMINI_API_KEYS ในไฟล์ .env กรุณาตั้งค่าก่อนเริ่มต้นเซิร์ฟเวอร์")
+
+# สร้าง Gemini client pool
+clients = [genai.Client(api_key=key) for key in GEMINI_API_KEYS]
+_client_lock = threading.Lock()
+_client_index = 0
 
 logger = logging.getLogger("easyprompt.ai")
+logger.info(f"🔑 API Key Pool initialized: {len(clients)} keys loaded (est. {len(clients) * 15} RPM)")
 
-# สร้าง Gemini client
-client = genai.Client(api_key=GEMINI_API_KEY)
+def get_next_client() -> genai.Client:
+    """Round-robin เลือก client ถัดไปจาก pool"""
+    global _client_index
+    with _client_lock:
+        client = clients[_client_index % len(clients)]
+        _client_index += 1
+    return client
+
+def get_pool_status() -> dict:
+    """คืนค่าสถานะของ API Key Pool สำหรับ Admin"""
+    return {
+        "total_keys": len(clients),
+        "estimated_rpm": len(clients) * 15,
+        "estimated_rpd": len(clients) * 500,
+        "model": MODEL_NAME,
+        "current_index": _client_index % len(clients)
+    }
 
 def get_org_model(db: Session, organization_name: str) -> str:
     setting = db.query(models.OrganizationSetting).filter(models.OrganizationSetting.org_name == organization_name).first()
@@ -31,44 +61,67 @@ def get_org_model(db: Session, organization_name: str) -> str:
     return MODEL_NAME
 
 def generate_stream_content(system_instruction: str, contents: any, model_name: str):
-    """Helper method to call Gemini and stream response"""
-    try:
-        response = client.models.generate_content_stream(
-            model=model_name,
-            config=types.GenerateContentConfig(system_instruction=system_instruction),
-            contents=contents
-        )
-        for chunk in response:
-            if chunk.text:
-                yield chunk.text
-    except Exception as e:
-        err_str = str(e)
-        logger.error(f"Gemini API Stream Error: {err_str}")
-        yield f"[ERROR] เกิดข้อผิดพลาด: {err_str}"
+    """Helper method to call Gemini and stream response with round-robin + fallback"""
+    errors = []
+    for attempt in range(min(len(clients), 3)):  # ลองสูงสุด 3 key
+        client = get_next_client()
+        try:
+            response = client.models.generate_content_stream(
+                model=model_name,
+                config=types.GenerateContentConfig(system_instruction=system_instruction),
+                contents=contents
+            )
+            for chunk in response:
+                if chunk.text:
+                    yield chunk.text
+            return  # สำเร็จ — หยุดลูป
+        except Exception as e:
+            err_str = str(e)
+            errors.append(err_str)
+            if "429" in err_str or "quota" in err_str.lower() or "limit" in err_str.lower():
+                logger.warning(f"⚠️ Key #{(_client_index - 1) % len(clients)} hit rate limit, trying next key...")
+                continue  # ลอง key ถัดไป
+            else:
+                logger.error(f"Gemini API Stream Error: {err_str}")
+                yield f"[ERROR] เกิดข้อผิดพลาด: {err_str}"
+                return
+    
+    # ทุก key โดน rate limit
+    logger.error(f"All {len(errors)} API keys exhausted: {errors[-1]}")
+    yield f"[ERROR] ขณะนี้ AI มีผู้ใช้งานเกินกำหนดชั่วคราว กรุณารอสักครู่แล้วลองอีกครั้ง ⏳"
 
 def generate_json_content(system_instruction: str, contents: any, model_name: str) -> dict:
-    """Helper method to call Gemini and parse JSON response reliably"""
-    try:
-        response = client.models.generate_content(
-            model=model_name,
-            config=types.GenerateContentConfig(system_instruction=system_instruction),
-            contents=contents
-        )
-        
-        # คลีนข้อมูล: ตัด ```json และ ``` ออกในกรณีที่ AI แถมมาให้
-        raw_text = response.text.strip()
-        raw_text = re.sub(r'^```json\s*', '', raw_text)
-        raw_text = re.sub(r'\s*```$', '', raw_text)
+    """Helper method to call Gemini and parse JSON response with round-robin + fallback"""
+    errors = []
+    for attempt in range(min(len(clients), 3)):  # ลองสูงสุด 3 key
+        client = get_next_client()
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                config=types.GenerateContentConfig(system_instruction=system_instruction),
+                contents=contents
+            )
             
-        # แปลงข้อความที่คลีนแล้วให้อยู่ในรูป Dictionary
-        return json.loads(raw_text.strip())
-        
-    except Exception as e:
-        err_str = str(e)
-        logger.error(f"Gemini API Error: {err_str}")
-        if "429" in err_str or "quota" in err_str.lower() or "limit" in err_str.lower():
-            raise HTTPException(status_code=429, detail="ขณะนี้ความต้องการใช้ AI สูงเกินกำหนดชั่วคราว (ฟรีโควตา 15 ครั้งต่อนาที) กรุณารอสักครู่แล้วลองอีกครั้ง ⏳")
-        raise HTTPException(status_code=500, detail=f"เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI: {err_str}")
+            # คลีนข้อมูล: ตัด ```json และ ``` ออกในกรณีที่ AI แถมมาให้
+            raw_text = response.text.strip()
+            raw_text = re.sub(r'^```json\s*', '', raw_text)
+            raw_text = re.sub(r'\s*```$', '', raw_text)
+                
+            # แปลงข้อความที่คลีนแล้วให้อยู่ในรูป Dictionary
+            return json.loads(raw_text.strip())
+            
+        except Exception as e:
+            err_str = str(e)
+            errors.append(err_str)
+            if "429" in err_str or "quota" in err_str.lower() or "limit" in err_str.lower():
+                logger.warning(f"⚠️ Key #{(_client_index - 1) % len(clients)} hit rate limit, trying next key...")
+                continue  # ลอง key ถัดไป
+            else:
+                logger.error(f"Gemini API Error: {err_str}")
+                raise HTTPException(status_code=500, detail=f"เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI: {err_str}")
+    
+    # ทุก key โดน rate limit
+    raise HTTPException(status_code=429, detail="ขณะนี้ AI มีผู้ใช้งานเกินกำหนดชั่วคราว กรุณารอสักครู่แล้วลองอีกครั้ง ⏳")
 
 async def analyze_reading_level(text: str) -> dict:
     system_instruction = """

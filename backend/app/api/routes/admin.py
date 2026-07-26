@@ -75,13 +75,20 @@ def delete_user(user_id: int, request: Request, current_admin: models.User = Dep
     return {"status": "success", "message": "ลบผู้ใช้เรียบร้อยแล้ว"}
 
 
+@router.get("/api-pool-status")
+def get_api_pool_status(current_admin: models.User = Depends(get_admin_user)):
+    """แสดงสถานะ API Key Pool สำหรับ Admin"""
+    from app.services.ai_service import get_pool_status
+    return get_pool_status()
+
+
 @router.get("/org-settings", response_model=schemas.OrgSettingResponse)
 def get_org_settings(current_admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     org_name = current_admin.organization
     setting = db.query(models.OrganizationSetting).filter(models.OrganizationSetting.org_name == org_name).first()
     if not setting:
         # Create default if not exists
-        setting = models.OrganizationSetting(org_name=org_name, ai_model="gemini-3.1-flash-lite")
+        setting = models.OrganizationSetting(org_name=org_name, ai_model="gemini-3.5-flash-lite")
         db.add(setting)
         db.commit()
         db.refresh(setting)
