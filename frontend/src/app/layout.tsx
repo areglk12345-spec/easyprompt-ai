@@ -70,7 +70,7 @@ export default function RootLayout({
                   <Toaster 
                     position="bottom-right" 
                     containerStyle={{
-                      position: 'fixed',
+                      position: 'absolute',
                       bottom: '24px',
                       right: '24px',
                       top: 'auto',
