@@ -104,11 +104,17 @@ def generate_json_content(system_instruction: str, contents: any, model_name: st
             
             # คลีนข้อมูล: ตัด ```json และ ``` ออกในกรณีที่ AI แถมมาให้
             raw_text = response.text.strip()
-            raw_text = re.sub(r'^```json\s*', '', raw_text)
-            raw_text = re.sub(r'\s*```$', '', raw_text)
+            clean_text = re.sub(r'^```json\s*', '', raw_text)
+            clean_text = re.sub(r'\s*```$', '', clean_text).strip()
                 
-            # แปลงข้อความที่คลีนแล้วให้อยู่ในรูป Dictionary
-            return json.loads(raw_text.strip())
+            # แปลงข้อความที่คลีนแล้วให้อยู่ในรูป Dictionary พร้อม fallback ด้วย regex
+            try:
+                return json.loads(clean_text)
+            except json.JSONDecodeError:
+                match = re.search(r'\{.*\}', raw_text, re.DOTALL)
+                if match:
+                    return json.loads(match.group(0))
+                raise
             
         except Exception as e:
             err_str = str(e)

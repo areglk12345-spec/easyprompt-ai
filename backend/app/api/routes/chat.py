@@ -216,7 +216,7 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
                 yield f"data: {clean_chunk}\n\n"
                 
             try:
-                if current_user and not full_response.startswith("[ERROR]"):
+                if current_user and "[ERROR]" not in full_response and full_response.strip() != "":
                     user_in_db = db.query(models.User).filter(models.User.id == current_user.id).first()
                     if user_in_db:
                         if user_in_db.credits is None:
