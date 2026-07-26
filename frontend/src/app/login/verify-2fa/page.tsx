@@ -26,7 +26,7 @@ export default function Verify2FAPage() {
         }
         // Focus first input
         inputRefs.current[0]?.focus();
-    }, [router]);
+    }, [router, openLoginModal]);
 
     const handleChange = (index: number, value: string) => {
         if (!/^\d*$/.test(value)) return; // Only allow digits

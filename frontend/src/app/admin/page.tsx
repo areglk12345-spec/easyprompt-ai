@@ -381,7 +381,7 @@ function AdminPageContent() {
         } else if (activeTab === 'pending') {
             fetchPendingTemplates();
         }
-    }, [isLoggedIn, user, authLoading, router, activeTab, fetchUsers, fetchOrgSettings, fetchAuditLogs, fetchPromptVars, fetchAdminTemplates, fetchAnalytics, fetchPendingTemplates]);
+    }, [isLoggedIn, user, authLoading, router, openLoginModal, activeTab, fetchUsers, fetchOrgSettings, fetchAuditLogs, fetchPromptVars, fetchAdminTemplates, fetchAnalytics, fetchPendingTemplates]);
 
     const handleAddVariable = async () => {
         if (!newVarKey.trim() || !newVarValue.trim()) {
