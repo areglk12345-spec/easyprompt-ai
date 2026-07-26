@@ -8,7 +8,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 
 interface AdminSidebarProps {
-    activePage?: 'dashboard' | 'users' | 'settings' | 'audit' | 'variables' | 'templates' | 'analytics';
+    activePage?: 'dashboard' | 'users' | 'settings' | 'audit' | 'variables' | 'templates' | 'analytics' | 'pending';
 }
 
 export default function AdminSidebar({ activePage }: AdminSidebarProps) {
@@ -66,6 +66,10 @@ export default function AdminSidebar({ activePage }: AdminSidebarProps) {
                 </Link>
                 
                 <div className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-6 mb-4 px-2 uppercase tracking-wider">Content</div>
+                <Link href="/admin?tab=pending" className={activePage === 'pending' ? activeClass : inactiveClass}>
+                    <span className="material-symbols-outlined">inbox</span>
+                    <span className="text-[15px]">คิวรออนุมัติ</span>
+                </Link>
                 <Link href="/admin?tab=templates" className={activePage === 'templates' ? activeClass : inactiveClass}>
                     <span className="material-symbols-outlined">auto_awesome</span>
                     <span className="text-[15px]">จัดการ Template</span>

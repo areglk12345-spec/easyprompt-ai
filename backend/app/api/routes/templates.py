@@ -27,6 +27,28 @@ def save_template(payload: TemplateCreate, current_user: Optional[models.User] =
         db.rollback()
         raise HTTPException(status_code=500, detail="ไม่สามารถบันทึก Template ได้")
 
+@router.post("/submit-community", response_model=dict)
+def submit_community_template(payload: TemplateCreate, current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db), x_workspace: str = Depends(auth.get_workspace)):
+    """ส่ง Template เข้าคิวรอการตรวจสอบและอนุมัติจากแอดมิน เพื่อเผยแพร่สู่คลังสาธารณะ"""
+    try:
+        new_template = models.PromptTemplate(
+            title=payload.title,
+            prompt_text=payload.prompt_text,
+            category=payload.category or "ทั่วไป",
+            user_id=current_user.id,
+            is_public=False,  # ยังไม่สาธารณะจนกว่าแอดมินจะอนุมัติ
+            status="pending",  # รออนุมัติ
+            organization=current_user.organization,
+            workspace=x_workspace
+        )
+        db.add(new_template)
+        db.commit()
+        db.refresh(new_template)
+        return {"status": "success", "message": "ส่งข้อความเข้าคิวเรียบร้อย! แอดมินจะทำการตรวจสอบและอนุมัติขึ้นคลังสาธารณะเร็วๆ นี้", "template_id": new_template.id}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="ไม่สามารถส่งข้อความเข้าคิวอนุมัติได้")
+
 def seed_default_templates_if_empty(db: Session):
     try:
         existing_titles = {t.title for t in db.query(models.PromptTemplate).all()}

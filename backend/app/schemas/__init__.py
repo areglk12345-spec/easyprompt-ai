@@ -46,6 +46,7 @@ class TemplateResponse(BaseModel):
     organization: Optional[str] = "ทั่วไป"
     is_favorite: Optional[bool] = False
     likes_count: int = 0
+    status: Optional[str] = "approved"
     class Config:
         from_attributes = True
 
@@ -149,6 +150,10 @@ class DoctorRequest(BaseModel):
     prompt_text: str
     easy_language: Optional[bool] = False
     document_id: Optional[int] = None
+    mode: Optional[str] = "text"  # "text" or "image"
+    style: Optional[str] = None  # e.g., "Realistic Photo", "Anime", "Cinematic", "3D Pixar"
+    aspect_ratio: Optional[str] = None  # e.g., "16:9", "1:1", "9:16"
+    target_ai: Optional[str] = None  # e.g., "Midjourney v6", "DALL-E 3", "Stable Diffusion XL"
 
 class DoctorResponse(BaseModel):
     prompt_fit_score: int

@@ -330,3 +330,35 @@ def get_analytics(current_admin: models.User = Depends(get_admin_user), db: Sess
         },
         "chart_data": chart_data
     }
+
+
+@router.get("/pending-templates", response_model=List[schemas.TemplateResponse])
+def list_pending_templates(current_admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    """ดึงคิว Template ที่รออนุมัติขึ้นคลังสาธารณะ"""
+    pending = db.query(models.PromptTemplate).filter(
+        models.PromptTemplate.status == "pending"
+    ).order_by(models.PromptTemplate.id.desc()).all()
+    return pending
+
+
+@router.post("/approve-template/{template_id}")
+def approve_or_reject_template(template_id: int, action: str, current_admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    """อนุมัติ (action=approve) หรือปฏิเสธ (action=reject) Template ให้ขึ้นคลังสาธารณะ"""
+    tpl = db.query(models.PromptTemplate).filter(models.PromptTemplate.id == template_id).first()
+    if not tpl:
+        raise HTTPException(status_code=404, detail="ไม่พบ Template ที่ระบุ")
+    
+    if action == "approve":
+        tpl.status = "approved"
+        tpl.is_public = True
+        msg = "อนุมัติ Template ขึ้นคลังสาธารณะเรียบร้อยแล้ว"
+    elif action == "reject":
+        tpl.status = "rejected"
+        tpl.is_public = False
+        msg = "ปฏิเสธ Template เรียบร้อยแล้ว"
+    else:
+        raise HTTPException(status_code=400, detail="Action ไม่ถูกต้อง (ต้องเป็น approve หรือ reject)")
+        
+    db.commit()
+    return {"status": "success", "message": msg}
+

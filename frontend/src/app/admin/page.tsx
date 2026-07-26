@@ -88,6 +88,10 @@ function AdminPageContent() {
     const [analyticsData, setAnalyticsData] = useState<any>(null);
     const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
+    // Pending Templates Queue state
+    const [pendingTemplates, setPendingTemplates] = useState<any[]>([]);
+    const [pendingLoading, setPendingLoading] = useState(false);
+
     const fetchOrgSettings = useCallback(async () => {
         setIsLoading(true);
         setError(null);
@@ -316,6 +320,40 @@ function AdminPageContent() {
         }
     }, [authFetch]);
 
+    // --- Pending Templates Queue ---
+    const fetchPendingTemplates = useCallback(async () => {
+        setPendingLoading(true);
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            const response = await authFetch(`${API_URL}/api/admin/pending-templates`);
+            if (response.ok) {
+                const data = await response.json();
+                setPendingTemplates(data);
+            }
+        } catch (err) {
+            console.error("Pending Templates Error:", err);
+        } finally {
+            setPendingLoading(false);
+        }
+    }, [authFetch]);
+
+    const handleApproveTemplate = async (templateId: number, action: 'approve' | 'reject') => {
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            const response = await authFetch(`${API_URL}/api/admin/approve-template/${templateId}?action=${action}`, {
+                method: 'POST'
+            });
+            if (response.ok) {
+                fetchPendingTemplates();
+            } else {
+                const data = await response.json().catch(() => ({}));
+                alert(data.detail || 'เกิดข้อผิดพลาด');
+            }
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
     useEffect(() => {
         if (authLoading) return;
         if (!isLoggedIn || !user) {
@@ -340,8 +378,10 @@ function AdminPageContent() {
             fetchAdminTemplates();
         } else if (activeTab === 'analytics') {
             fetchAnalytics();
+        } else if (activeTab === 'pending') {
+            fetchPendingTemplates();
         }
-    }, [isLoggedIn, user, authLoading, router, activeTab, fetchUsers, fetchOrgSettings, fetchAuditLogs, fetchPromptVars, fetchAdminTemplates, fetchAnalytics]);
+    }, [isLoggedIn, user, authLoading, router, activeTab, fetchUsers, fetchOrgSettings, fetchAuditLogs, fetchPromptVars, fetchAdminTemplates, fetchAnalytics, fetchPendingTemplates]);
 
     const handleAddVariable = async () => {
         if (!newVarKey.trim() || !newVarValue.trim()) {
@@ -823,6 +863,61 @@ function AdminPageContent() {
                                                 </ResponsiveContainer>
                                             </div>
                                         </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Pending Templates Tab */}
+                        {activeTab === 'pending' && (
+                            <div className="space-y-6 animate-slide-up">
+                                <div>
+                                    <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>📬 คิวรออนุมัติเทมเพลตสาธารณะ</h2>
+                                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">รายการ Prompt ที่ผู้ใช้ส่งเข้ามาเพื่อขอเผยแพร่สู่คลังสาธารณะ</p>
+                                </div>
+
+                                {pendingLoading ? (
+                                    <div className="text-center py-12 text-slate-400">กำลังโหลดรายการรออนุมัติ...</div>
+                                ) : pendingTemplates.length === 0 ? (
+                                    <div className="glass-panel text-center py-16 rounded-3xl bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                                        <div className="text-4xl mb-2">🎉</div>
+                                        <h3 className="font-bold text-slate-700 dark:text-slate-200 text-lg">ไม่มีเทมเพลตที่รอการอนุมัติในขณะนี้</h3>
+                                        <p className="text-slate-400 text-xs mt-1">รายการใหม่จะแสดงขึ้นมาเมื่อมีผู้ใช้กด &quot;ส่งคลังสาธารณะ&quot;</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {pendingTemplates.map(tpl => (
+                                            <div key={tpl.id} className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4 flex flex-col justify-between">
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="px-2.5 py-1 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold text-[10px] uppercase">
+                                                            {tpl.category || 'ทั่วไป'}
+                                                        </span>
+                                                        <span className="text-xs text-slate-400">User ID: #{tpl.user_id}</span>
+                                                    </div>
+                                                    <h3 className="font-bold text-slate-800 dark:text-white text-base">{tpl.title}</h3>
+                                                    <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl text-xs font-mono text-slate-600 dark:text-slate-300 line-clamp-4 whitespace-pre-wrap">
+                                                        {tpl.prompt_text}
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+                                                    <button
+                                                        onClick={() => handleApproveTemplate(tpl.id, 'approve')}
+                                                        className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition-all shadow-sm"
+                                                    >
+                                                        <span className="material-symbols-outlined text-sm">check_circle</span>
+                                                        <span>อนุมัติ (Approve)</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleApproveTemplate(tpl.id, 'reject')}
+                                                        className="flex-1 py-2 px-3 bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition-all"
+                                                    >
+                                                        <span className="material-symbols-outlined text-sm">cancel</span>
+                                                        <span>ปฏิเสธ (Reject)</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </div>

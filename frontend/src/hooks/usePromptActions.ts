@@ -99,10 +99,11 @@ export function usePromptActions() {
 
 
 
-    const exportToPlatform = (platform: 'chatgpt' | 'claude' | 'copilot' | 'gemini', promptText: string, source: string = 'chat') => {
+    const exportToPlatform = (platform: 'chatgpt' | 'claude' | 'copilot' | 'gemini' | 'deepseek' | 'perplexity' | 'midjourney', promptText: string, source: string = 'chat') => {
         logActivity(`export_${platform}`, source);
         try {
-            navigator.clipboard.writeText(promptText);
+            const copyText = platform === 'midjourney' && !promptText.startsWith('/imagine') ? `/imagine prompt: ${promptText}` : promptText;
+            navigator.clipboard.writeText(copyText);
         } catch (e) {
             console.error("Clipboard copy error:", e);
         }
@@ -111,7 +112,10 @@ export function usePromptActions() {
             chatgpt: 'ChatGPT',
             claude: 'Claude AI',
             copilot: 'Microsoft Copilot',
-            gemini: 'Google Gemini'
+            gemini: 'Google Gemini',
+            deepseek: 'DeepSeek',
+            perplexity: 'Perplexity AI',
+            midjourney: 'Midjourney (Discord)'
         };
 
         toast.success(`คัดลอก Prompt แล้ว! กำลังนำคุณไปยัง ${platformNames[platform] || platform}`, {
@@ -123,7 +127,32 @@ export function usePromptActions() {
         else if (platform === 'claude') url = `https://claude.ai/new?q=${encodeURIComponent(promptText)}`;
         else if (platform === 'copilot') url = `https://copilot.microsoft.com/?q=${encodeURIComponent(promptText)}`;
         else if (platform === 'gemini') url = `https://gemini.google.com/app?q=${encodeURIComponent(promptText)}`;
+        else if (platform === 'deepseek') url = `https://chat.deepseek.com/?q=${encodeURIComponent(promptText)}`;
+        else if (platform === 'perplexity') url = `https://www.perplexity.ai/?q=${encodeURIComponent(promptText)}`;
+        else if (platform === 'midjourney') url = `https://discord.com/app`;
         window.open(url, '_blank');
+    };
+
+    const submitToCommunity = async (title: string, promptText: string, category: string = 'ทั่วไป') => {
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            const response = await authFetch(`${API_URL}/api/templates/submit-community`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, prompt_text: promptText, category, is_public: false })
+            });
+
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.detail || 'Failed to submit template');
+            }
+
+            toast.success("ส่งเข้าคลังสาธารณะสำเร็จ! แอดมินจะทำการตรวจสอบเร็วๆ นี้", { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
+            logActivity('submit_community', 'community', category);
+        } catch (error: any) {
+            console.error("Error submitting community template:", error);
+            toast.error(error.message || "เกิดข้อผิดพลาดในการส่งเข้าคลังสาธารณะ", { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
+        }
     };
 
     const analyzeTextAccessibility = async (text: string) => {
@@ -150,6 +179,7 @@ export function usePromptActions() {
         downloadAsTxt,
         downloadAsMarkdown,
         saveToTemplate,
+        submitToCommunity,
         exportToPlatform
     };
 }

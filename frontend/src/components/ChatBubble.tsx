@@ -26,7 +26,7 @@ interface ChatBubbleProps {
     onDownloadAsMarkdown?: (promptText: string) => void;
     onSendOption?: (option: string) => void;
     onRunPrompt?: (promptText: string) => void;
-    onExportToPlatform?: (platform: 'chatgpt' | 'claude' | 'copilot' | 'gemini', promptText: string) => void;
+    onExportToPlatform?: (platform: 'chatgpt' | 'claude' | 'copilot' | 'gemini' | 'deepseek' | 'perplexity' | 'midjourney', promptText: string) => void;
     onEdit?: (newText: string) => void;
     onRegenerate?: () => void;
 }
@@ -257,6 +257,30 @@ export default function ChatBubble({
                                         title="Copilot"
                                     >
                                         <Code className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => onExportToPlatform ? onExportToPlatform('deepseek', displayPrompt!) : window.open(`https://chat.deepseek.com/?q=${encodeURIComponent(displayPrompt!)}`, '_blank')}
+                                        className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors font-bold text-xs"
+                                        title="DeepSeek"
+                                    >
+                                        DS
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => onExportToPlatform ? onExportToPlatform('perplexity', displayPrompt!) : window.open(`https://www.perplexity.ai/?q=${encodeURIComponent(displayPrompt!)}`, '_blank')}
+                                        className="p-1.5 text-slate-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/30 rounded-lg transition-colors font-bold text-xs"
+                                        title="Perplexity"
+                                    >
+                                        PX
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => onExportToPlatform ? onExportToPlatform('midjourney', displayPrompt!) : window.open('https://discord.com/app', '_blank')}
+                                        className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors font-bold text-xs"
+                                        title="Midjourney (Discord)"
+                                    >
+                                        MJ
                                     </button>
                                 </div>
                                 <div className="ml-auto">

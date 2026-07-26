@@ -31,23 +31,10 @@ export default function MarketplacePage() {
     const [sortBy, setSortBy] = useState<'likes' | 'newest'>('likes');
 
     useEffect(() => {
-        const fetchMarketplace = async () => {
-            setIsLoading(true);
-            try {
-                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-                const response = await authFetch(`${API_URL}/api/templates/marketplace?category=${encodeURIComponent(categoryFilter)}&sort_by=${sortBy}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setTemplates(data);
-                }
-            } catch (error) {
-                console.error("Error fetching marketplace:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchMarketplace();
-    }, [categoryFilter, sortBy, authFetch]);
+        if (typeof window !== 'undefined') {
+            window.location.replace('/templates?filter=recommended');
+        }
+    }, []);
 
     const handleCopyTemplate = async (templateId: number, promptText: string) => {
         try {

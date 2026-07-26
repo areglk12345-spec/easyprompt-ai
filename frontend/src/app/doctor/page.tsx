@@ -28,7 +28,7 @@ export default function DoctorPage() {
     const { t } = useLanguage();
     const { fontSize } = useFontSize();
     const isLarge = fontSize === 'large';
-    const { logActivity, copyToClipboard, downloadAsTxt, downloadAsMarkdown, saveToTemplate, exportToPlatform } = usePromptActions();
+    const { logActivity, copyToClipboard, downloadAsTxt, downloadAsMarkdown, saveToTemplate, submitToCommunity, exportToPlatform } = usePromptActions();
     const router = useRouter();
 
     const [promptText, setPromptText] = useState('');
@@ -36,6 +36,12 @@ export default function DoctorPage() {
     const [result, setResult] = useState<DiagnosticResult | null>(null);
     const [easyLanguage, setEasyLanguage] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Doctor Mode & Image Presets
+    const [doctorMode, setDoctorMode] = useState<'text' | 'image'>('text');
+    const [imageStyle, setImageStyle] = useState<string>('Realistic Photo');
+    const [imageAspectRatio, setImageAspectRatio] = useState<string>('16:9');
+    const [imageTargetAi, setImageTargetAi] = useState<string>('Midjourney v6');
 
     // Guest Trial State
     const [guestUsageCount, setGuestUsageCount] = useState<number>(0);
@@ -74,7 +80,14 @@ export default function DoctorPage() {
             const response = await authFetch(`${API_URL}/api/doctor`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt_text: promptText, easy_language: easyLanguage }),
+                body: JSON.stringify({
+                    prompt_text: promptText,
+                    easy_language: easyLanguage,
+                    mode: doctorMode,
+                    style: imageStyle,
+                    aspect_ratio: imageAspectRatio,
+                    target_ai: imageTargetAi
+                }),
             });
 
             if (!response.ok) {
@@ -187,8 +200,103 @@ export default function DoctorPage() {
                                 )}
 
                                 <div className="glass-panel-heavy p-6 md:p-7 rounded-[24px] border border-slate-200/60 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 shadow-sm space-y-5">
+                                    {/* Mode Selector Tabs */}
+                                    <div className="flex rounded-2xl bg-slate-100 dark:bg-slate-900 p-1.5 border border-slate-200/50 dark:border-slate-700/50">
+                                        <button
+                                            type="button"
+                                            onClick={() => setDoctorMode('text')}
+                                            className={`flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
+                                                doctorMode === 'text'
+                                                    ? 'bg-white dark:bg-slate-800 text-primary dark:text-indigo-400 shadow-sm'
+                                                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                                            }`}
+                                        >
+                                            <span className="material-symbols-outlined text-base">description</span>
+                                            <span>📝 Text Prompt (ข้อความ)</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setDoctorMode('image')}
+                                            className={`flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
+                                                doctorMode === 'image'
+                                                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm'
+                                                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                                            }`}
+                                        >
+                                            <span className="material-symbols-outlined text-base">palette</span>
+                                            <span>🎨 Image Prompt (AI วาดภาพ)</span>
+                                        </button>
+                                    </div>
+
+                                    {/* Image Mode Presets */}
+                                    {doctorMode === 'image' && (
+                                        <div className="p-4 rounded-2xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/30 space-y-3 text-xs">
+                                            <div>
+                                                <label className="font-bold text-purple-900 dark:text-purple-300 block mb-1.5">🎯 เลือก AI Target</label>
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {['Midjourney v6', 'DALL-E 3', 'Stable Diffusion XL'].map(ai => (
+                                                        <button
+                                                            key={ai}
+                                                            type="button"
+                                                            onClick={() => setImageTargetAi(ai)}
+                                                            className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+                                                                imageTargetAi === ai
+                                                                    ? 'bg-purple-600 text-white shadow-sm'
+                                                                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                                                            }`}
+                                                        >
+                                                            {ai}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="font-bold text-purple-900 dark:text-purple-300 block mb-1.5">🎨 เลือกสไตล์ภาพ (Art Style)</label>
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {['Realistic Photo', 'Anime/Manga', 'Cinematic', '3D Pixar', 'Oil Painting', 'Cyberpunk'].map(st => (
+                                                        <button
+                                                            key={st}
+                                                            type="button"
+                                                            onClick={() => setImageStyle(st)}
+                                                            className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+                                                                imageStyle === st
+                                                                    ? 'bg-indigo-600 text-white shadow-sm'
+                                                                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                                                            }`}
+                                                        >
+                                                            {st}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="font-bold text-purple-900 dark:text-purple-300 block mb-1.5">📐 อัตราส่วนภาพ (Aspect Ratio)</label>
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {['16:9', '1:1', '9:16', '4:3'].map(ar => (
+                                                        <button
+                                                            key={ar}
+                                                            type="button"
+                                                            onClick={() => setImageAspectRatio(ar)}
+                                                            className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+                                                                imageAspectRatio === ar
+                                                                    ? 'bg-blue-600 text-white shadow-sm'
+                                                                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                                                            }`}
+                                                        >
+                                                            {ar}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="flex justify-between items-center">
-                                        <label className="font-label-sm text-xs font-bold text-primary dark:text-indigo-400 uppercase tracking-wider">{t('doctor.input_label')}</label>
+                                        <label className="font-label-sm text-xs font-bold text-primary dark:text-indigo-400 uppercase tracking-wider">
+                                            {doctorMode === 'image' ? 'อธิบายภาพที่คุณต้องการสร้าง (ภาษาไทยหรืออังกฤษก็ได้)' : t('doctor.input_label')}
+                                        </label>
                                         <span className="text-slate-400 dark:text-slate-500 text-xs font-semibold">{promptText.length} / 2000 {t('doctor.chars')}</span>
                                     </div>
                                     
@@ -322,29 +430,29 @@ export default function DoctorPage() {
                                                     className="py-2 px-3 bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                                                 >
                                                     <span className="material-symbols-outlined text-sm">bookmark</span>
-                                                    <span>บันทึกเทมเพลต</span>
+                                                    <span>บันทึกส่วนตัว</span>
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={() => exportToPlatform('chatgpt', result.fitted_prompt, 'doctor')}
-                                                    className="py-2 px-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-emerald-200/50"
+                                                    onClick={() => submitToCommunity(promptText.slice(0, 30) || "Prompt แนะนำ", result.fitted_prompt, doctorMode === 'image' ? 'โหมดสร้างสรรค์' : 'ทั่วไป')}
+                                                    className="py-2 px-3 bg-emerald-500 text-white hover:bg-emerald-600 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
                                                 >
-                                                    <MessageSquare className="w-3.5 h-3.5" /> ChatGPT
+                                                    <span className="material-symbols-outlined text-sm">public</span>
+                                                    <span>ส่งคลังสาธารณะ</span>
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={() => exportToPlatform('claude', result.fitted_prompt, 'doctor')}
-                                                    className="py-2 px-3 bg-orange-50 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 hover:bg-orange-100 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-orange-200/50"
+                                                    onClick={() => exportToPlatform('deepseek', result.fitted_prompt, 'doctor')}
+                                                    className="py-2 px-3 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 hover:bg-blue-100 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-blue-200/50"
                                                 >
-                                                    <Brain className="w-3.5 h-3.5" /> Claude
+                                                    DeepSeek
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={() => downloadAsMarkdown(result.fitted_prompt, "polished_prompt")}
+                                                    onClick={() => exportToPlatform('midjourney', result.fitted_prompt, 'doctor')}
                                                     className="py-2 px-3 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-indigo-200/50"
                                                 >
-                                                    <span className="material-symbols-outlined text-sm">download</span>
-                                                    <span>.md</span>
+                                                    Midjourney
                                                 </button>
                                             </div>
                                         </div>

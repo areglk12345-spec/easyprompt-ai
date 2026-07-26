@@ -76,6 +76,7 @@ class PromptTemplate(Base):
     is_recommended = Column(Boolean, default=False)
     organization = Column(String(100), default="ทั่วไป")
     workspace = Column(String(100), default="ทั่วไป")
+    status = Column(String(20), default="approved")  # approved, pending, rejected
 
     creator = relationship("User", back_populates="templates")
     favorited_by = relationship("User", secondary=user_favorites, back_populates="favorite_templates")
