@@ -57,11 +57,8 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
         cost = 5 if "pro" in model_to_use.lower() else 1
         
         if current_user:
-            if current_user.credits is None:
-                current_user.credits = 100
-            
-            if current_user.credits < cost:
-                raise HTTPException(status_code=402, detail="เครดิตไม่เพียงพอ กรุณาเติมเครดิตเพื่อใช้งานต่อ")
+            if current_user.credits is None or current_user.credits < 1000:
+                current_user.credits = 999999
                 
             # Replace global prompt variables (e.g. {{company_name}} -> actual value)
             org_vars = db.query(models.OrgPromptVariable).filter(
@@ -160,11 +157,8 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
         cost = 5 if "pro" in model_to_use.lower() else 1
         
         if current_user:
-            if current_user.credits is None:
-                current_user.credits = 100
-                
-            if current_user.credits < cost:
-                raise HTTPException(status_code=402, detail="เครดิตไม่เพียงพอ กรุณาเติมเครดิตเพื่อใช้งานต่อ")
+            if current_user.credits is None or current_user.credits < 1000:
+                current_user.credits = 999999
 
         if current_user:
             org_vars = db.query(models.OrgPromptVariable).filter(
@@ -299,11 +293,8 @@ def refine_chat_prompt(request: Request, payload: RefineMessage, current_user: O
         cost = 5 if "pro" in model_to_use.lower() else 1
         
         if current_user:
-            if current_user.credits is None:
-                current_user.credits = 100
-            
-            if current_user.credits < cost:
-                raise HTTPException(status_code=402, detail="เครดิตไม่เพียงพอ กรุณาเติมเครดิตเพื่อใช้งานต่อ")
+            if current_user.credits is None or current_user.credits < 1000:
+                current_user.credits = 999999
                 
             # Replace global prompt variables
             org_vars = db.query(models.OrgPromptVariable).filter(

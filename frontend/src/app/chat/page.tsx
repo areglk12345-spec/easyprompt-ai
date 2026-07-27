@@ -406,14 +406,7 @@ function ChatContent() {
         const messageToSend = customText !== undefined ? customText : inputText;
         if (!messageToSend.trim() || isLoading) return;
 
-        // Guest Trial Quota Enforcement (Limit to 3 successful prompt generations for unauthenticated users)
-        if (!isLoggedIn && !user) {
-            const currentCount = parseInt(localStorage.getItem('ep_guest_usage_count') || '0', 10);
-            if (currentCount >= 3) {
-                setIsGuestLimitModalOpen(true);
-                return;
-            }
-        }
+        // Guest Trial Quota Enforcement Disabled (Unlimited Trial Access Enabled)
 
         // นำข้อความผู้ใช้ใส่เข้าไปในหน้าจอก่อน
         setMessages((prev) => [...prev, { role: 'user', text: messageToSend }]);
@@ -811,17 +804,17 @@ function ChatContent() {
                     <footer className="p-3 sm:p-4 pb-4 sm:pb-6 md:p-6 bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent dark:from-[#0b0f19] dark:via-[#0b0f19]/95 shrink-0 sticky bottom-0 z-20 pointer-events-none">
                         {/* Guest Trial Banner */}
                         {!isLoggedIn && !user && (
-                            <div className="max-w-4xl mx-auto mb-3 pointer-events-auto bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-purple-500/10 border border-amber-500/30 dark:border-amber-500/40 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm shadow-sm">
+                            <div className="max-w-4xl mx-auto mb-3 pointer-events-auto bg-gradient-to-r from-emerald-500/10 via-indigo-500/10 to-purple-500/10 border border-emerald-500/30 dark:border-emerald-500/40 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm shadow-sm">
                                 <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 font-semibold">
-                                    <span className="material-symbols-outlined text-amber-500 text-lg">stars</span>
-                                    <span>โหมดทดลองใช้งานฟรี: สิทธิ์คงเหลือ <strong className="text-amber-600 dark:text-amber-400 font-extrabold text-base">{Math.max(0, 2 - guestUsageCount)}</strong> / 2 คำถาม</span>
+                                    <span className="material-symbols-outlined text-emerald-500 text-lg">auto_awesome</span>
+                                    <span>โหมดทดลองใช้งานฟรี: <strong className="text-emerald-600 dark:text-emerald-400 font-extrabold text-base">เปิดใช้งานฟรีไม่จำกัดคำถาม</strong></span>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={openLoginModal}
                                     className="px-3.5 py-1.5 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold transition-transform hover:scale-105 shadow-sm text-xs shrink-0"
                                 >
-                                    เข้าสู่ระบบเพื่อใช้ไม่จำกัด (ฟรี)
+                                    เข้าสู่ระบบเพื่อบันทึกประวัติ
                                 </button>
                             </div>
                         )}

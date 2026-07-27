@@ -62,14 +62,7 @@ export default function DoctorPage() {
         e.preventDefault();
         if (!promptText.trim() || isLoading) return;
 
-        // Guest Trial Quota Enforcement (Limit to 3 successful prompt generations for unauthenticated users)
-        if (!isLoggedIn && !user) {
-            const currentCount = parseInt(localStorage.getItem('ep_guest_usage_count') || '0', 10);
-            if (currentCount >= 3) {
-                setIsGuestLimitModalOpen(true);
-                return;
-            }
-        }
+        // Guest Trial Quota Enforcement Disabled (Unlimited Trial Access Enabled)
 
         setIsLoading(true);
         setError(null);
@@ -189,17 +182,17 @@ export default function DoctorPage() {
                             <div className="lg:col-span-6 space-y-5">
                                 {/* Guest Trial Banner */}
                                 {!isLoggedIn && !user && (
-                                    <div className="bg-amber-500/10 border border-amber-500/30 dark:border-amber-500/40 rounded-2xl p-3.5 flex items-center justify-between gap-3 text-xs sm:text-sm shadow-sm">
+                                    <div className="bg-emerald-500/10 border border-emerald-500/30 dark:border-emerald-500/40 rounded-2xl p-3.5 flex items-center justify-between gap-3 text-xs sm:text-sm shadow-sm">
                                         <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 font-semibold">
-                                            <span className="material-symbols-outlined text-amber-500 text-lg">stars</span>
-                                            <span>สิทธิ์ทดลองฟรีคงเหลือ <strong className="text-amber-600 dark:text-amber-400 font-extrabold text-base">{Math.max(0, 3 - guestUsageCount)}</strong> / 3 ครั้ง</span>
+                                            <span className="material-symbols-outlined text-emerald-500 text-lg">auto_awesome</span>
+                                            <span>สิทธิ์ทดลองฟรี: <strong className="text-emerald-600 dark:text-emerald-400 font-extrabold text-base">เปิดใช้งานฟรีไม่จำกัดครั้ง</strong></span>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={openLoginModal}
                                             className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold transition-transform hover:scale-105 shadow-sm text-xs shrink-0"
                                         >
-                                            เข้าสู่ระบบฟรี
+                                            เข้าสู่ระบบเพื่อบันทึกประวัติ
                                         </button>
                                     </div>
                                 )}
