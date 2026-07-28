@@ -815,17 +815,17 @@ function ChatContent() {
                     <footer className="p-3 sm:p-4 pb-4 sm:pb-6 md:p-6 bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent dark:from-[#0b0f19] dark:via-[#0b0f19]/95 shrink-0 z-20">
                         {/* Guest Trial Banner */}
                         {!isLoggedIn && !user && (
-                            <div className="max-w-4xl mx-auto mb-3 bg-gradient-to-r from-emerald-500/10 via-indigo-500/10 to-purple-500/10 border border-emerald-500/30 dark:border-emerald-500/40 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm shadow-sm">
-                                <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 font-semibold">
-                                    <span className="material-symbols-outlined text-emerald-500 text-lg">auto_awesome</span>
-                                    <span>โหมดทดลองใช้งานฟรี: <strong className="text-emerald-600 dark:text-emerald-400 font-extrabold text-base">เปิดใช้งานฟรีไม่จำกัดคำถาม</strong></span>
+                            <div className="max-w-4xl mx-auto mb-2 bg-emerald-500/10 dark:bg-emerald-950/20 border border-emerald-500/20 dark:border-emerald-500/30 rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 text-[11px] sm:text-xs shadow-sm">
+                                <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-200 font-medium truncate">
+                                    <span className="material-symbols-outlined text-emerald-500 text-base shrink-0">auto_awesome</span>
+                                    <span className="truncate">โหมดทดลองฟรี: <strong className="text-emerald-600 dark:text-emerald-400 font-bold">ไม่จำกัดคำถาม</strong></span>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={openLoginModal}
-                                    className="px-3.5 py-1.5 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold transition-transform hover:scale-105 shadow-sm text-xs shrink-0"
+                                    className="px-2.5 py-1 bg-primary hover:bg-primary/90 text-white rounded-lg font-semibold shadow-sm text-[10px] sm:text-xs shrink-0 transition-transform active:scale-95"
                                 >
-                                    เข้าสู่ระบบเพื่อบันทึกประวัติ
+                                    เข้าสู่ระบบ
                                 </button>
                             </div>
                         )}
@@ -847,7 +847,7 @@ function ChatContent() {
                             </div>
                         )}
 
-                        <form onSubmit={sendMessage} className="max-w-4xl mx-auto flex gap-2 items-end bg-white/60 dark:bg-slate-800/40 backdrop-blur-xl p-2.5 rounded-3xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg shadow-slate-200/20 dark:shadow-slate-900/50 relative focus-within:ring-2 focus-within:ring-primary/40 focus-within:shadow-ai-glow transition-all duration-300">
+                        <form onSubmit={sendMessage} className="max-w-4xl mx-auto flex gap-2 items-end bg-slate-100/90 dark:bg-[#1e2330] backdrop-blur-xl p-2 sm:p-2.5 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 shadow-lg shadow-black/5 relative focus-within:ring-2 focus-within:ring-primary/40 focus-within:shadow-ai-glow transition-all duration-300">
                             {/* Stop Generating Button */}
                             {isLoading && (
                                 <div className="absolute left-1/2 -top-14 -translate-x-1/2">
