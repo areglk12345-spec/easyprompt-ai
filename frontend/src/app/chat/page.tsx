@@ -80,6 +80,17 @@ function ChatContent() {
     // Auto-scroll and abort refs
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    // Auto-adjust textarea height when inputText changes
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            if (inputText) {
+                textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`;
+            }
+        }
+    }, [inputText]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -653,7 +664,7 @@ function ChatContent() {
                         </div>
                     )}
                     {/* Top AppBar */}
-                    <header className="sticky top-0 z-30 flex justify-between items-center pl-16 pr-4 md:px-12 w-full h-auto min-h-[5rem] py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-700/30 shrink-0 gap-2 flex-wrap">
+                    <header className="flex justify-between items-center pl-16 pr-4 md:px-12 w-full h-auto min-h-[4rem] py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-700/30 shrink-0 gap-2 flex-wrap z-30">
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 via-purple-600 to-cyan-500 flex items-center justify-center text-white shadow-md border border-white/30 relative overflow-hidden group">
                                 <svg width="24" height="24" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform group-hover:scale-110 transition-transform">
@@ -719,7 +730,7 @@ function ChatContent() {
                     </header>
 
                     {/* Chat History Area */}
-                    <main className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-slate-50/30 dark:bg-slate-900/50">
+                    <main className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar bg-slate-50/30 dark:bg-slate-900/50">
                         {isLoadingHistory ? (
                             <div className="flex flex-col items-center justify-center mt-12 mb-8 h-64">
                                 <div className="dot-flashing"></div>
@@ -801,10 +812,10 @@ function ChatContent() {
                     </main>
 
                     {/* Bottom Input Bar */}
-                    <footer className="p-3 sm:p-4 pb-4 sm:pb-6 md:p-6 bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent dark:from-[#0b0f19] dark:via-[#0b0f19]/95 shrink-0 sticky bottom-0 z-20 pointer-events-none">
+                    <footer className="p-3 sm:p-4 pb-4 sm:pb-6 md:p-6 bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent dark:from-[#0b0f19] dark:via-[#0b0f19]/95 shrink-0 z-20">
                         {/* Guest Trial Banner */}
                         {!isLoggedIn && !user && (
-                            <div className="max-w-4xl mx-auto mb-3 pointer-events-auto bg-gradient-to-r from-emerald-500/10 via-indigo-500/10 to-purple-500/10 border border-emerald-500/30 dark:border-emerald-500/40 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm shadow-sm">
+                            <div className="max-w-4xl mx-auto mb-3 bg-gradient-to-r from-emerald-500/10 via-indigo-500/10 to-purple-500/10 border border-emerald-500/30 dark:border-emerald-500/40 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm shadow-sm">
                                 <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 font-semibold">
                                     <span className="material-symbols-outlined text-emerald-500 text-lg">auto_awesome</span>
                                     <span>โหมดทดลองใช้งานฟรี: <strong className="text-emerald-600 dark:text-emerald-400 font-extrabold text-base">เปิดใช้งานฟรีไม่จำกัดคำถาม</strong></span>
@@ -821,7 +832,7 @@ function ChatContent() {
 
                         {/* Active Listening Indicator */}
                         {isListening && (
-                            <div className="max-w-4xl mx-auto mb-2 pointer-events-auto flex items-center justify-center animate-fade-in-up">
+                            <div className="max-w-4xl mx-auto mb-2 flex items-center justify-center animate-fade-in-up">
                                 <div className="px-4 py-2 bg-rose-500 text-white rounded-full text-xs md:text-sm font-bold flex items-center gap-2 shadow-lg shadow-rose-500/20 animate-pulse">
                                     <AudioLines className="w-4 h-4" />
                                     <span>กำลังฟังเสียงของคุณ (Speech Input Active)... พูดแล้วกดส่งได้เลย</span>
@@ -836,7 +847,7 @@ function ChatContent() {
                             </div>
                         )}
 
-                        <form onSubmit={sendMessage} className="max-w-4xl mx-auto flex gap-2 items-center bg-white/60 dark:bg-slate-800/40 backdrop-blur-xl p-2 rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 shadow-lg shadow-slate-200/20 dark:shadow-slate-900/50 pointer-events-auto relative focus-within:ring-2 focus-within:ring-primary/40 focus-within:shadow-ai-glow transition-all duration-300">
+                        <form onSubmit={sendMessage} className="max-w-4xl mx-auto flex gap-2 items-end bg-white/60 dark:bg-slate-800/40 backdrop-blur-xl p-2.5 rounded-3xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg shadow-slate-200/20 dark:shadow-slate-900/50 relative focus-within:ring-2 focus-within:ring-primary/40 focus-within:shadow-ai-glow transition-all duration-300">
                             {/* Stop Generating Button */}
                             {isLoading && (
                                 <div className="absolute left-1/2 -top-14 -translate-x-1/2">
@@ -852,7 +863,7 @@ function ChatContent() {
                             )}
 
                             {/* Plus Menu (More Actions) */}
-                            <div className="relative flex items-center" ref={plusMenuRef}>
+                            <div className="relative flex items-center mb-0.5" ref={plusMenuRef}>
                                 <Button
                                     type="button"
                                     variant="ghost"
@@ -919,16 +930,22 @@ function ChatContent() {
                                 )}
                             </div>
 
-                            <input
+                            <textarea
                                 id="chat-input"
-                                type="text"
+                                ref={textareaRef}
+                                rows={1}
                                 value={inputText}
                                 onChange={(e) => setInputText(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        sendMessage(e);
+                                    }
+                                }}
                                 disabled={isLoading}
                                 placeholder={isListening ? t('chat.placeholder_listening') : t('chat.placeholder')}
                                 aria-label={t('chat.placeholder')}
-                                aria-invalid={false}
-                                className={`flex-1 bg-transparent border-none rounded-full px-4 focus:outline-none focus:ring-0 disabled:opacity-50 transition-all text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 ${isLarge ? 'py-4 text-xl' : 'py-3'}`}
+                                className={`flex-1 bg-transparent border-none px-3 focus:outline-none focus:ring-0 disabled:opacity-50 transition-all text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none overflow-y-auto max-h-40 custom-scrollbar ${isLarge ? 'py-3 text-xl' : 'py-2.5 text-base'}`}
                             />
                             
                             <input 
@@ -965,7 +982,7 @@ function ChatContent() {
                                     title={isListening ? 'หยุดฟัง' : 'กดพูดแทนพิมพ์ (ภาษาไทย)'}
                                     aria-label={isListening ? 'หยุดฟัง' : 'พูดด้วยเสียง'}
                                     aria-pressed={isListening}
-                                    className={`rounded-full transition-all shrink-0 cursor-pointer hover-spring ${isLarge ? 'w-14 h-14' : 'w-11 h-11 md:w-10 md:h-10'} ${
+                                    className={`rounded-full transition-all shrink-0 cursor-pointer hover-spring mb-0.5 ${isLarge ? 'w-14 h-14' : 'w-11 h-11 md:w-10 md:h-10'} ${
                                         isListening
                                             ? 'bg-rose-500 text-white animate-pulse shadow-md shadow-rose-200 dark:shadow-rose-900/50'
                                             : 'bg-transparent hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
@@ -981,7 +998,7 @@ function ChatContent() {
                                 aria-label="ส่งข้อความ"
                                 title="ส่งข้อความ"
                                 disabled={isLoading || (!inputText.trim() && attachedFiles.length === 0)}
-                                className={`bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold shadow-md shadow-indigo-100 dark:shadow-indigo-900/30 disabled:opacity-50 !border-none hover-spring ${isLarge ? 'w-14 h-14 px-4' : 'w-11 h-11 md:w-10 md:h-10 px-2'}`}
+                                className={`bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold shadow-md shadow-indigo-100 dark:shadow-indigo-900/30 disabled:opacity-50 !border-none hover-spring mb-0.5 ${isLarge ? 'w-14 h-14 px-4' : 'w-11 h-11 md:w-10 md:h-10 px-2'}`}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 mx-auto">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />

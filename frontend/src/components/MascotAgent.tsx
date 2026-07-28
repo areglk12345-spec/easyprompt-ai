@@ -152,12 +152,10 @@ export default function MascotAgent({
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500/30 via-purple-500/30 to-cyan-500/30 blur-xl mascot-aura"></div>
 
         <svg
-          width="96"
-          height="96"
           viewBox="0 0 100 100"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="relative drop-shadow-2xl hover:scale-105 transition-transform duration-300"
+          className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 relative drop-shadow-2xl hover:scale-105 transition-transform duration-300"
         >
           <defs>
             {/* Robot Head & Body Gradients */}

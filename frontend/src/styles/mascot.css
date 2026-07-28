@@ -69,13 +69,20 @@
 
 .mascot-container {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 9999;
+  bottom: 90px;
+  right: 16px;
+  z-index: 40;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .mascot-container {
+    bottom: 24px;
+    right: 24px;
+  }
 }
 
 .mascot-interactive {
