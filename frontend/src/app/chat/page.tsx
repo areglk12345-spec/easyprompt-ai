@@ -618,7 +618,7 @@ function ChatContent() {
     }, [sessionId, sendMessage]);
 
     return (
-        <div className={`h-[100dvh] max-h-[100dvh] w-full overflow-hidden bg-transparent transition-all duration-300 ${isLarge ? 'text-base' : 'text-sm'}`}>
+        <div className={`fixed inset-0 overflow-hidden bg-transparent transition-all duration-300 ${isLarge ? 'text-base' : 'text-sm'}`}>
             <div className="flex h-full w-full overflow-hidden">
                 <Sidebar activePage="chat" onNewChat={startNewChat} />
 
@@ -812,7 +812,7 @@ function ChatContent() {
                     </main>
 
                     {/* Bottom Input Bar */}
-                    <footer className="p-2.5 sm:p-4 pb-2.5 sm:pb-6 md:p-6 bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent dark:from-[#0b0f19] dark:via-[#0b0f19]/95 shrink-0 z-20">
+                    <footer className="p-2.5 sm:p-4 pb-[calc(10px+env(safe-area-inset-bottom))] sm:pb-6 md:p-6 bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent dark:from-[#0b0f19] dark:via-[#0b0f19]/95 shrink-0 z-20">
                         {/* Guest Trial Banner */}
                         {!isLoggedIn && !user && (
                             <div className="max-w-4xl mx-auto mb-2 bg-emerald-500/10 dark:bg-emerald-950/20 border border-emerald-500/20 dark:border-emerald-500/30 rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 text-[11px] sm:text-xs shadow-sm">
