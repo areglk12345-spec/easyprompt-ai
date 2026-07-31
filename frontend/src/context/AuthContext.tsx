@@ -47,12 +47,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-    const openLoginModal = () => {
+    const openLoginModal = React.useCallback(() => {
         setIsLoginModalOpen(true);
-    };
-    const closeLoginModal = () => {
+    }, []);
+    const closeLoginModal = React.useCallback(() => {
         setIsLoginModalOpen(false);
-    };
+    }, []);
 
     useEffect(() => {
         // Load token and user from localStorage on mount

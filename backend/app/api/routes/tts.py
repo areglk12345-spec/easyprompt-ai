@@ -1,18 +1,25 @@
+import os
 import re
 import io
 import edge_tts
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, HTTPException, Query, Request, Response
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter(
     prefix="/tts",
     tags=["tts"]
 )
 
+limiter = Limiter(key_func=get_remote_address, enabled=os.getenv("TESTING") != "true")
+
+MAX_TTS_LENGTH = 2000
+
 class TTSRequest(BaseModel):
-    text: str
+    text: str = Field(..., max_length=MAX_TTS_LENGTH)
     voice: Optional[str] = "th-TH-PremwadeeNeural"
     rate: Optional[float] = 1.0  # 0.5 to 2.0
     pitch: Optional[float] = 1.0 # 0.5 to 1.5
@@ -58,7 +65,8 @@ def format_pitch_string(pitch: float) -> str:
     return f"{hz}Hz"
 
 @router.post("")
-async def generate_speech_post(payload: TTSRequest):
+@limiter.limit("20/minute")
+async def generate_speech_post(request: Request, payload: TTSRequest):
     text_to_speak = clean_text_for_speech(payload.text)
     if not text_to_speak:
         raise HTTPException(status_code=400, detail="ข้อความที่ต้องการให้อ่านว่างเปล่า")
@@ -82,8 +90,10 @@ async def generate_speech_post(payload: TTSRequest):
         raise HTTPException(status_code=500, detail=f"เกิดข้อผิดพลาดในการสร้างเสียง Neural: {str(e)}")
 
 @router.get("")
+@limiter.limit("20/minute")
 async def generate_speech_get(
-    text: str = Query(..., description="Text to convert to speech"),
+    request: Request,
+    text: str = Query(..., max_length=MAX_TTS_LENGTH, description="Text to convert to speech"),
     voice: Optional[str] = Query("th-TH-PremwadeeNeural", description="Voice identifier"),
     rate: Optional[float] = Query(1.0, description="Speech rate"),
     pitch: Optional[float] = Query(1.0, description="Speech pitch")

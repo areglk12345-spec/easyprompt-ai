@@ -42,7 +42,7 @@ export default function TemplateList({
     onCreateNew,
 }: TemplateListProps) {
     const filteredTemplates = templates.filter((t) => {
-        if (ownershipFilter === 'mine') return !t.is_public;
+        if (ownershipFilter === 'mine') return currentUser && t.user_id === currentUser.id;
         if (ownershipFilter === 'public') return t.is_public;
         if (ownershipFilter === 'favorites') return t.is_favorite;
         if (ownershipFilter === 'recommended') return t.is_recommended;

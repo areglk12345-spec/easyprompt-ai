@@ -34,9 +34,13 @@ export function usePromptActions() {
     };
 
     const copyToClipboard = (text: string, source: string = 'chat') => {
-        navigator.clipboard.writeText(text);
-        toast.success("คัดลอก Prompt แล้ว!", { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
-        logActivity('copy_prompt', source);
+        navigator.clipboard.writeText(text).then(() => {
+            toast.success("คัดลอก Prompt แล้ว!", { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
+            logActivity('copy_prompt', source);
+        }).catch((e) => {
+            console.error("Clipboard copy error:", e);
+            toast.error("ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง", { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
+        });
     };
 
     const downloadAsTxt = (text: string, title: string = "ezprompt") => {

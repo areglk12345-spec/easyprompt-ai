@@ -95,7 +95,7 @@ export default function LoginPage() {
             if (err.message === '2FA_REQUIRED') {
                 sessionStorage.setItem('ep_2fa_pending', err.pendingUsername);
                 router.push('/login/verify-2fa');
-            } else if (err.message === 'Incorrect username or password' || err.message?.includes('401')) {
+            } else if (err.status === 401) {
                 setError('ไม่พบบัญชีหรือรหัสผ่านไม่ถูกต้อง (หากคุณเป็นผู้ใช้ใหม่ กรุณาสร้างบัญชี)');
                 setStep('register_details');
             } else {
@@ -119,9 +119,14 @@ export default function LoginPage() {
             await register(username, password, fullName, organization || 'ทั่วไป');
             setSuccess('สมัครสมาชิกสำเร็จแล้ว! กำลังเข้าสู่ระบบ...');
             setTimeout(async () => {
-                await login(username, password);
-                router.push('/dashboard');
-                router.refresh();
+                try {
+                    await login(username, password);
+                    router.push('/dashboard');
+                    router.refresh();
+                } catch (loginErr: any) {
+                    setSuccess('');
+                    setError('สมัครสมาชิกสำเร็จ แต่เข้าสู่ระบบอัตโนมัติไม่สำเร็จ กรุณาเข้าสู่ระบบด้วยตนเอง');
+                }
             }, 1000);
         } catch (err: any) {
             setError(err.message || 'เกิดข้อผิดพลาดในการลงทะเบียน');

@@ -9,6 +9,7 @@ from app.schemas import (
     TwoFactorLoginRequest, TwoFactorLoginResponse,
     SocialLoginRequest
 )
+import firebase_admin
 from firebase_admin import auth as firebase_auth
 from datetime import datetime, timezone
 from slowapi import Limiter
@@ -149,6 +150,11 @@ def update_password(
 @limiter.limit("5/minute")
 def social_login(payload: SocialLoginRequest, request: Request, db: Session = Depends(get_db)):
     """เข้าสู่ระบบด้วย Google, Apple, Phone ผ่าน Firebase"""
+    try:
+        firebase_admin.get_app()
+    except ValueError:
+        raise HTTPException(status_code=503, detail="Social Login ยังไม่พร้อมใช้งานในขณะนี้ (Firebase ไม่ได้ตั้งค่า)")
+
     try:
         # Verify the Firebase ID token
         decoded_token = firebase_auth.verify_id_token(payload.id_token)

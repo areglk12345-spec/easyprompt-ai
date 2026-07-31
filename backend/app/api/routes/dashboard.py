@@ -1,13 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func, cast, Date
+from sqlalchemy import func
 from app.database import get_db
 from app import models, auth
 from app.services.ai_service import generate_json_content, MODEL_NAME
 from app.core.config import TREND_SYSTEM_PROMPT
 from datetime import datetime, timedelta, timezone
+from collections import Counter
 
 router = APIRouter()
+
+
+def _daily_usage_counts(chats):
+    """Bucket ChatHistory rows by day in Python instead of SQL CAST(...,Date),
+    which mis-parses (truncates to just the year) on SQLite's NUMERIC-affinity DATE type."""
+    counts = Counter(chat.created_at.strftime("%Y-%m-%d") for chat in chats)
+    return [{"day": day, "count": count} for day, count in sorted(counts.items())]
 
 @router.get("/trends")
 def get_dashboard_trends(current_user: models.User = Depends(auth.get_required_user), db: Session = Depends(get_db)):
@@ -60,15 +68,11 @@ def get_dashboard_stats(current_user: models.User = Depends(auth.get_required_us
         
         # Daily usage for last 7 days
         seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
-        daily_usage = db.query(
-            cast(models.ChatHistory.created_at, Date).label('day'),
-            func.count(models.ChatHistory.id).label('count')
-        ).filter(
+        recent_chats = db.query(models.ChatHistory).filter(
             models.ChatHistory.created_at >= seven_days_ago
-        ).group_by(
-            cast(models.ChatHistory.created_at, Date)
-        ).order_by(cast(models.ChatHistory.created_at, Date)).all()
-        
+        ).all()
+        daily_usage = _daily_usage_counts(recent_chats)
+
     else:
         total_prompts = db.query(models.ChatHistory).filter(models.ChatHistory.user_id == current_user.id).count()
         total_templates = db.query(models.PromptTemplate).filter(models.PromptTemplate.user_id == current_user.id).count()
@@ -87,19 +91,15 @@ def get_dashboard_stats(current_user: models.User = Depends(auth.get_required_us
         ).filter(models.ChatHistory.user_id == current_user.id).group_by(models.ChatHistory.tone).all()
         
         seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
-        daily_usage = db.query(
-            cast(models.ChatHistory.created_at, Date).label('day'),
-            func.count(models.ChatHistory.id).label('count')
-        ).filter(
+        recent_chats = db.query(models.ChatHistory).filter(
             models.ChatHistory.user_id == current_user.id,
             models.ChatHistory.created_at >= seven_days_ago
-        ).group_by(
-            cast(models.ChatHistory.created_at, Date)
-        ).order_by(cast(models.ChatHistory.created_at, Date)).all()
-        
+        ).all()
+        daily_usage = _daily_usage_counts(recent_chats)
+
     pie_data = [{"name": t[0] or "ไม่มีหมวดหมู่", "value": t[1]} for t in templates_by_category]
     bar_data = [{"name": t[0] or "ทั่วไป", "prompts": t[1]} for t in prompts_by_tone]
-    line_data = [{"date": str(d[0]), "prompts": d[1]} for d in daily_usage]
+    line_data = [{"date": d["day"], "prompts": d["count"]} for d in daily_usage]
         
     return {
         "total_prompts": total_prompts,

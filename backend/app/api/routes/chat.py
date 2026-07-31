@@ -2,6 +2,7 @@ import uuid
 from typing import Optional
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request, Header
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, auth
@@ -19,11 +20,25 @@ router = APIRouter()
 import logging
 logger = logging.getLogger("easyprompt.chat")
 
+
+def _session_owned_by(session_id: str, current_user: Optional[models.User]):
+    """Restrict a session's history to its guest (unowned) or the requesting user's own records,
+    so a logged-in caller can't read/append to another authenticated user's session by guessing session_id."""
+    conditions = [models.ChatHistory.session_id == session_id]
+    if current_user:
+        conditions.append(or_(
+            models.ChatHistory.user_id.is_(None),
+            models.ChatHistory.user_id == current_user.id
+        ))
+    return conditions
+
 @router.post("/", response_model=AgentResponse)
 @limiter.limit("20/minute")
 def chat_with_agent(request: Request, payload: UserMessage, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db), x_workspace: str = Depends(auth.get_workspace)):
     try:
-        past_chats = db.query(models.ChatHistory).filter(models.ChatHistory.session_id == payload.session_id).order_by(models.ChatHistory.id.desc()).limit(10).all()
+        past_chats = db.query(models.ChatHistory).filter(
+            *_session_owned_by(payload.session_id, current_user)
+        ).order_by(models.ChatHistory.id.desc()).limit(10).all()
         past_chats.reverse()
         history_context = ""
         document_context = ""
@@ -57,9 +72,6 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
         cost = 5 if "pro" in model_to_use.lower() else 1
         
         if current_user:
-            if current_user.credits is None or current_user.credits < 1000:
-                current_user.credits = 999999
-                
             # Replace global prompt variables (e.g. {{company_name}} -> actual value)
             org_vars = db.query(models.OrgPromptVariable).filter(
                 models.OrgPromptVariable.org_name == current_user.organization
@@ -133,9 +145,11 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
 @limiter.limit("20/minute")
 def stream_chat_with_agent(request: Request, payload: UserMessage, current_user: Optional[models.User] = Depends(auth.get_current_user), db: Session = Depends(get_db), x_workspace: str = Depends(auth.get_workspace)):
     try:
-        past_chats = db.query(models.ChatHistory).filter(models.ChatHistory.session_id == payload.session_id).order_by(models.ChatHistory.id.desc()).limit(10).all()
+        past_chats = db.query(models.ChatHistory).filter(
+            *_session_owned_by(payload.session_id, current_user)
+        ).order_by(models.ChatHistory.id.desc()).limit(10).all()
         past_chats.reverse()
-        
+
         history_context = ""
         if past_chats:
             history_context = "ประวัติการสนทนาก่อนหน้า:\n"
@@ -156,10 +170,6 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
             
         cost = 5 if "pro" in model_to_use.lower() else 1
         
-        if current_user:
-            if current_user.credits is None or current_user.credits < 1000:
-                current_user.credits = 999999
-
         if current_user:
             org_vars = db.query(models.OrgPromptVariable).filter(
                 models.OrgPromptVariable.org_name == current_user.organization
@@ -246,7 +256,7 @@ def refine_chat_prompt(request: Request, payload: RefineMessage, current_user: O
     try:
         # Get the latest chat message in this session
         last_chat = db.query(models.ChatHistory).filter(
-            models.ChatHistory.session_id == payload.session_id,
+            *_session_owned_by(payload.session_id, current_user),
             models.ChatHistory.workspace == x_workspace
         ).order_by(models.ChatHistory.id.desc()).first()
 
@@ -255,7 +265,7 @@ def refine_chat_prompt(request: Request, payload: RefineMessage, current_user: O
 
         # Get previous context
         past_chats = db.query(models.ChatHistory).filter(
-            models.ChatHistory.session_id == payload.session_id,
+            *_session_owned_by(payload.session_id, current_user),
             models.ChatHistory.id < last_chat.id
         ).order_by(models.ChatHistory.id.desc()).limit(10).all()
         past_chats.reverse()
@@ -293,9 +303,6 @@ def refine_chat_prompt(request: Request, payload: RefineMessage, current_user: O
         cost = 5 if "pro" in model_to_use.lower() else 1
         
         if current_user:
-            if current_user.credits is None or current_user.credits < 1000:
-                current_user.credits = 999999
-                
             # Replace global prompt variables
             org_vars = db.query(models.OrgPromptVariable).filter(
                 models.OrgPromptVariable.org_name == current_user.organization

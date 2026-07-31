@@ -62,8 +62,13 @@ def delete_user(user_id: int, request: Request, current_admin: models.User = Dep
     # Clean up related records
     db.query(models.PromptActivityLog).filter(models.PromptActivityLog.user_id == user.id).delete()
     db.query(models.ChatHistory).filter(models.ChatHistory.user_id == user.id).delete()
+    db.query(models.ChatFolder).filter(models.ChatFolder.user_id == user.id).delete()
     db.query(models.PromptTemplate).filter(models.PromptTemplate.user_id == user.id).delete()
-    
+    db.query(models.SharedLink).filter(models.SharedLink.user_id == user.id).delete()
+    db.query(models.KnowledgeDocument).filter(models.KnowledgeDocument.user_id == user.id).delete()
+    # Preserve audit history, but detach it from the user being removed
+    db.query(models.AuditLog).filter(models.AuditLog.user_id == user.id).update({"user_id": None})
+
     db.delete(user)
     db.commit()
 
@@ -88,7 +93,7 @@ def get_org_settings(current_admin: models.User = Depends(get_admin_user), db: S
     setting = db.query(models.OrganizationSetting).filter(models.OrganizationSetting.org_name == org_name).first()
     if not setting:
         # Create default if not exists
-        setting = models.OrganizationSetting(org_name=org_name, ai_model="gemini-3.5-flash-lite")
+        setting = models.OrganizationSetting(org_name=org_name, ai_model="gemini-3.1-flash-lite")
         db.add(setting)
         db.commit()
         db.refresh(setting)
@@ -234,6 +239,8 @@ def toggle_template_recommendation(
     template = db.query(models.PromptTemplate).filter(models.PromptTemplate.id == template_id).first()
     if not template:
         raise HTTPException(status_code=404, detail="ไม่พบเทมเพลตที่ระบุ")
+    if template.organization != current_admin.organization:
+        raise HTTPException(status_code=403, detail="ไม่สามารถแก้ไขเทมเพลตนอกองค์กรได้")
 
     template.is_recommended = not template.is_recommended
     db.commit()
@@ -251,7 +258,9 @@ def list_all_templates_admin(
     db: Session = Depends(get_db)
 ):
     """List all templates for admin management."""
-    templates = db.query(models.PromptTemplate).order_by(models.PromptTemplate.id.desc()).all()
+    templates = db.query(models.PromptTemplate).filter(
+        models.PromptTemplate.organization == current_admin.organization
+    ).order_by(models.PromptTemplate.id.desc()).all()
     results = []
     for tpl in templates:
         results.append({
@@ -277,25 +286,29 @@ def get_analytics(current_admin: models.User = Depends(get_admin_user), db: Sess
     end_date = datetime.now(timezone.utc)
     start_date = end_date - timedelta(days=7)
     
+    org_logs = db.query(models.PromptActivityLog).join(
+        models.User, models.PromptActivityLog.user_id == models.User.id
+    ).filter(models.User.organization == current_admin.organization)
+
     # Total prompts generated
-    total_prompts = db.query(models.PromptActivityLog).filter(
+    total_prompts = org_logs.filter(
         models.PromptActivityLog.action.like("generate%")
     ).count()
-    
+
     # Average score
-    avg_score_result = db.query(func.avg(models.PromptActivityLog.score)).filter(
+    avg_score_result = org_logs.filter(
         models.PromptActivityLog.score.isnot(None)
-    ).scalar()
+    ).with_entities(func.avg(models.PromptActivityLog.score)).scalar()
     avg_score = round(avg_score_result, 1) if avg_score_result else 0
-    
+
     # Active users (who generated prompt in last 30 days)
-    active_users = db.query(models.PromptActivityLog.user_id).filter(
+    active_users = org_logs.filter(
         models.PromptActivityLog.created_at >= (end_date - timedelta(days=30))
-    ).distinct().count()
-    
+    ).with_entities(models.PromptActivityLog.user_id).distinct().count()
+
     # Chart Data (Last 7 days)
     # Using python to group to avoid dialect-specific date formatting issues
-    recent_logs = db.query(models.PromptActivityLog).filter(
+    recent_logs = org_logs.filter(
         models.PromptActivityLog.created_at >= start_date,
         models.PromptActivityLog.action.like("generate%")
     ).all()
@@ -336,7 +349,8 @@ def get_analytics(current_admin: models.User = Depends(get_admin_user), db: Sess
 def list_pending_templates(current_admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     """ดึงคิว Template ที่รออนุมัติขึ้นคลังสาธารณะ"""
     pending = db.query(models.PromptTemplate).filter(
-        models.PromptTemplate.status == "pending"
+        models.PromptTemplate.status == "pending",
+        models.PromptTemplate.organization == current_admin.organization
     ).order_by(models.PromptTemplate.id.desc()).all()
     return pending
 
@@ -347,7 +361,9 @@ def approve_or_reject_template(template_id: int, action: str, current_admin: mod
     tpl = db.query(models.PromptTemplate).filter(models.PromptTemplate.id == template_id).first()
     if not tpl:
         raise HTTPException(status_code=404, detail="ไม่พบ Template ที่ระบุ")
-    
+    if tpl.organization != current_admin.organization:
+        raise HTTPException(status_code=403, detail="ไม่สามารถจัดการเทมเพลตนอกองค์กรได้")
+
     if action == "approve":
         tpl.status = "approved"
         tpl.is_public = True

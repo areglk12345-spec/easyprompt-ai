@@ -35,45 +35,51 @@ export function useTTS() {
         // Stop any currently playing audio
         stop();
 
-        // 1. Try Neural AI Audio Stream from FastAPI Backend (/api/tts)
-        try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-            const voiceToUse = customVoiceURI || preferredVoiceURI || (typeof window !== 'undefined' ? localStorage.getItem('preferred_voice') : null) || 'th-TH-PremwadeeNeural';
+        const NEURAL_VOICES = ['th-TH-PremwadeeNeural', 'th-TH-NiwatNeural', 'en-US-AvaNeural', 'en-US-AndrewNeural'];
+        const voiceToUse = customVoiceURI || preferredVoiceURI || (typeof window !== 'undefined' ? localStorage.getItem('preferred_voice') : null) || 'th-TH-PremwadeeNeural';
+        const isNeuralVoice = NEURAL_VOICES.includes(voiceToUse);
 
-            const response = await fetch(`${API_URL}/api/tts`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    text: text,
-                    voice: voiceToUse.includes('Niwat') ? 'th-TH-NiwatNeural' : voiceToUse.includes('Ava') ? 'en-US-AvaNeural' : voiceToUse.includes('Andrew') ? 'en-US-AndrewNeural' : 'th-TH-PremwadeeNeural',
-                    rate: ttsRate || 1.0,
-                    pitch: ttsPitch || 1.0
-                })
-            });
+        // 1. Try Neural AI Audio Stream from FastAPI Backend (/api/tts) — only when a Neural preset is selected.
+        // A browser voiceURI selected in Settings should go straight to the Web Speech API fallback below.
+        if (isNeuralVoice) {
+            try {
+                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
-            if (response.ok) {
-                const blob = await response.blob();
-                const audioUrl = URL.createObjectURL(blob);
-                const audio = new Audio(audioUrl);
-                audioRef.current = audio;
+                const response = await fetch(`${API_URL}/api/tts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: text,
+                        voice: voiceToUse,
+                        rate: ttsRate || 1.0,
+                        pitch: ttsPitch || 1.0
+                    })
+                });
 
-                audio.onplay = () => setIsSpeaking(true);
-                audio.onended = () => {
-                    setIsSpeaking(false);
-                    URL.revokeObjectURL(audioUrl);
-                    audioRef.current = null;
-                };
-                audio.onerror = () => {
-                    setIsSpeaking(false);
-                    URL.revokeObjectURL(audioUrl);
-                    audioRef.current = null;
-                };
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const audioUrl = URL.createObjectURL(blob);
+                    const audio = new Audio(audioUrl);
+                    audioRef.current = audio;
 
-                await audio.play();
-                return; // Successfully played Neural audio!
+                    audio.onplay = () => setIsSpeaking(true);
+                    audio.onended = () => {
+                        setIsSpeaking(false);
+                        URL.revokeObjectURL(audioUrl);
+                        audioRef.current = null;
+                    };
+                    audio.onerror = () => {
+                        setIsSpeaking(false);
+                        URL.revokeObjectURL(audioUrl);
+                        audioRef.current = null;
+                    };
+
+                    await audio.play();
+                    return; // Successfully played Neural audio!
+                }
+            } catch (error) {
+                console.warn("Neural TTS backend failed, falling back to Web Speech API:", error);
             }
-        } catch (error) {
-            console.warn("Neural TTS backend failed, falling back to Web Speech API:", error);
         }
 
         // 2. Web Speech API Fallback
