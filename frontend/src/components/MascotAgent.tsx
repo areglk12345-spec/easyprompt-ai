@@ -56,13 +56,21 @@ export default function MascotAgent({
     return () => clearInterval(interval);
   }, [customTip, tipsList.length]);
 
+  // Auto-collapse the speech bubble after a while so it doesn't sit indefinitely
+  // over page content it happens to be positioned above (it's fixed + click-through blocking).
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSpeechBubble(false), 8000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleMascotClick = () => {
     if (onMascotClick) {
       onMascotClick();
     } else {
-      // Cycle through moods & tips on click
+      // Cycle through moods & tips on click, and bring the bubble back if it auto-collapsed
       setInternalMood('happy');
       setTipIndex((prev) => (prev + 1) % tipsList.length);
+      setShowSpeechBubble(true);
       setTimeout(() => setInternalMood('idle'), 2500);
     }
   };

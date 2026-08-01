@@ -26,7 +26,7 @@ def update_user_role(user_id: int, payload: schemas.UserRoleUpdate, request: Req
         raise HTTPException(status_code=404, detail="ไม่พบผู้ใช้งานที่ระบุ")
     
     if user.organization != current_admin.organization:
-        raise HTTPException(status_code=403, detail="คุณไม่สามารถแก้ไขสิทธิ์ผู้ใช้นอกองค์กรได้")
+        raise HTTPException(status_code=403, detail="ไม่สามารถแก้ไขสิทธิ์ผู้ใช้นอกองค์กรได้")
         
     if user.id == current_admin.id and payload.role != "admin":
         raise HTTPException(status_code=400, detail="ไม่สามารถลดสิทธิ์ตัวเองได้")
@@ -52,7 +52,7 @@ def delete_user(user_id: int, request: Request, current_admin: models.User = Dep
         raise HTTPException(status_code=404, detail="ไม่พบผู้ใช้งานที่ระบุ")
         
     if user.organization != current_admin.organization:
-        raise HTTPException(status_code=403, detail="คุณไม่สามารถลบผู้ใช้นอกองค์กรได้")
+        raise HTTPException(status_code=403, detail="ไม่สามารถลบผู้ใช้นอกองค์กรได้")
         
     if user.id == current_admin.id:
         raise HTTPException(status_code=400, detail="ไม่สามารถลบบัญชีตัวเองผ่านหน้านี้ได้")
