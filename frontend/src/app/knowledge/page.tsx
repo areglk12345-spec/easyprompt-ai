@@ -126,7 +126,7 @@ export default function KnowledgePage() {
 
                     <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                         <div className="max-w-4xl mx-auto space-y-8">
-                            <div className="flex justify-between items-end">
+                            <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
                                 <div>
                                     <h1 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-4xl' : 'text-2xl'} mb-2`}>
                                         📚 ฐานข้อมูลส่วนตัว
@@ -135,16 +135,16 @@ export default function KnowledgePage() {
                                         อัปโหลดเอกสาร กฎระเบียบ หรือนโยบายบริษัท เพื่อให้ AI ใช้อ้างอิงและแต่ง Prompt ได้ตรงกับบริบทของคุณมากที่สุด
                                     </p>
                                 </div>
-                                <input 
-                                    type="file" 
-                                    accept=".txt,.pdf" 
-                                    className="hidden" 
-                                    ref={fileInputRef} 
+                                <input
+                                    type="file"
+                                    accept=".txt,.pdf"
+                                    className="hidden"
+                                    ref={fileInputRef}
                                     onChange={handleFileUpload}
                                 />
-                                <Button 
-                                    variant="primary" 
-                                    className="rounded-full font-bold shadow-md shadow-primary/20"
+                                <Button
+                                    variant="primary"
+                                    className="rounded-full font-bold shadow-md shadow-primary/20 self-start md:self-auto shrink-0"
                                     onClick={() => fileInputRef.current?.click()}
                                     disabled={isUploading}
                                 >
