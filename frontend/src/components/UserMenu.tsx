@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -15,7 +16,14 @@ export default function UserMenu() {
     const { fontSize } = useFontSize();
     const { themeMode, setThemeMode } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+    const [menuPos, setMenuPos] = useState<{ left: number; bottom: number } | null>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const menuRef = useRef<HTMLDivElement>(null);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         if (activeWorkspace) {
@@ -23,9 +31,23 @@ export default function UserMenu() {
         }
     }, [activeWorkspace]);
 
+    // Recompute position whenever the menu opens — the trigger sits inside the
+    // sidebar's overflow-hidden container (needed for its collapse animation),
+    // so the dropdown is portaled to <body> and positioned via fixed coords
+    // instead of relying on `position: absolute` relative to that ancestor.
+    useEffect(() => {
+        if (!isOpen || !triggerRef.current) return;
+        const rect = triggerRef.current.getBoundingClientRect();
+        setMenuPos({ left: rect.left, bottom: window.innerHeight - rect.top + 8 });
+    }, [isOpen]);
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+            const target = event.target as Node;
+            if (
+                triggerRef.current && !triggerRef.current.contains(target) &&
+                menuRef.current && !menuRef.current.contains(target)
+            ) {
                 setIsOpen(false);
             }
         };
@@ -34,28 +56,18 @@ export default function UserMenu() {
     }, []);
 
     if (isLoggedIn && user) {
-        return (
-            <div className="relative" ref={dropdownRef}>
-                <button
-                    onClick={() => setIsOpen(!isOpen)}
-                    className="flex items-center gap-2 px-2 py-1.5 sm:px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full font-bold text-slate-700 dark:text-slate-300 shadow-sm hover:shadow-md transition-all focus:outline-none"
-                >
-                    <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                        <User className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="hidden sm:inline-block max-w-[100px] truncate text-sm">{user.full_name || user.username}</span>
-                    <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                <AnimatePresence>
-                    {isOpen && (
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.95, y: 10, transformOrigin: 'bottom left' }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                            transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                            className="absolute left-2 bottom-full mb-2 w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-premium dark:shadow-premium-dark border border-slate-100 dark:border-slate-800 z-50 overflow-hidden"
-                        >
+        const menu = (
+            <AnimatePresence>
+                {isOpen && menuPos && (
+                    <motion.div
+                        ref={menuRef}
+                        initial={{ opacity: 0, scale: 0.95, y: 10, transformOrigin: 'bottom left' }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                        style={{ position: 'fixed', left: menuPos.left, bottom: menuPos.bottom }}
+                        className="w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-premium dark:shadow-premium-dark border border-slate-100 dark:border-slate-800 z-[100] overflow-hidden"
+                    >
                             {/* Header Profile Info */}
                             <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
                                 <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{user.full_name || user.username}</p>
@@ -133,9 +145,26 @@ export default function UserMenu() {
                                     {t('menu.logout')}
                                 </button>
                             </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        );
+
+        return (
+            <div className="relative">
+                <button
+                    ref={triggerRef}
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="flex items-center gap-2 px-2 py-1.5 sm:px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full font-bold text-slate-700 dark:text-slate-300 shadow-sm hover:shadow-md transition-all focus:outline-none"
+                >
+                    <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                        <User className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="hidden sm:inline-block max-w-[100px] truncate text-sm">{user.full_name || user.username}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {mounted && createPortal(menu, document.body)}
             </div>
         );
     }
