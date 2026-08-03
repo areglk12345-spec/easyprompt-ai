@@ -12,7 +12,7 @@ import { Toaster } from 'react-hot-toast';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://easyprompt.piravat.space'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://verbaqo.piravat.space'),
   title: 'Verbaqo | เครื่องมือสร้าง Prompt ฉบับเข้าใจง่าย',
   description: 'AI Accessibility Agent ที่ช่วยให้ทุกคนและผู้สูงอายุเข้าถึง AI ได้ง่ายขึ้น เปลี่ยนคำพูดธรรมดาให้เป็น Prompt ที่สมบูรณ์แบบ',
   openGraph: {
@@ -20,7 +20,7 @@ export const metadata = {
     description: 'AI Accessibility Agent ที่ช่วยให้ทุกคนและผู้สูงอายุเข้าถึง AI ได้ง่ายขึ้น เปลี่ยนคำพูดธรรมดาให้เป็น Prompt ที่สมบูรณ์แบบ',
     type: 'website',
     locale: 'th_TH',
-    url: 'https://easyprompt.piravat.space',
+    url: 'https://verbaqo.piravat.space',
     siteName: 'Verbaqo',
     images: [
       {
