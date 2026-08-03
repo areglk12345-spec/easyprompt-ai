@@ -1,4 +1,4 @@
-name: EasyPrompt AI CI
+name: Verbaqo CI
 
 on:
   push:

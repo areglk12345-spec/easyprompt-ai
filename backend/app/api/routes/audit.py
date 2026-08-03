@@ -7,7 +7,7 @@ from app.database import get_db
 from app import models, auth
 from app.schemas import AuditLogResponse
 
-logger = logging.getLogger("easyprompt.audit")
+logger = logging.getLogger("verbaqo.audit")
 router = APIRouter()
 
 def create_audit_log(

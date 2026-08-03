@@ -121,7 +121,7 @@ export function useTTS() {
         window.speechSynthesis.speak(utterance);
     }, [ttsRate, ttsPitch, preferredVoiceURI, stop]);
 
-    const previewVoice = useCallback((voiceURI?: string, testText: string = 'สวัสดีครับ นี่คือระบบทดสอบอ่านออกเสียง Neural AI จาก EasyPrompt AI ช่วยสร้างคำสั่งการตลาดบน Facebook ได้อย่างไหลลื่น') => {
+    const previewVoice = useCallback((voiceURI?: string, testText: string = 'สวัสดีครับ นี่คือระบบทดสอบอ่านออกเสียง Neural AI จาก Verbaqo ช่วยสร้างคำสั่งการตลาดบน Facebook ได้อย่างไหลลื่น') => {
         speak(testText, voiceURI);
     }, [speak]);
 

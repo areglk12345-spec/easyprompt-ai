@@ -33,7 +33,7 @@ clients = [genai.Client(api_key=key) for key in GEMINI_API_KEYS]
 _client_lock = threading.Lock()
 _client_index = 0
 
-logger = logging.getLogger("easyprompt.ai")
+logger = logging.getLogger("verbaqo.ai")
 logger.info(f"🔑 API Key Pool initialized: {len(clients)} keys loaded (est. {len(clients) * 15} RPM)")
 
 def get_next_client() -> genai.Client:

@@ -43,7 +43,7 @@ export function usePromptActions() {
         });
     };
 
-    const downloadAsTxt = (text: string, title: string = "ezprompt") => {
+    const downloadAsTxt = (text: string, title: string = "verbaqo") => {
         const element = document.createElement("a");
         const file = new Blob([text], { type: 'text/plain;charset=utf-8' });
         element.href = URL.createObjectURL(file);
@@ -54,7 +54,7 @@ export function usePromptActions() {
         toast.success("ดาวน์โหลดไฟล์ .txt แล้ว", { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
     };
 
-    const downloadAsMarkdown = (text: string, title: string = "ezprompt") => {
+    const downloadAsMarkdown = (text: string, title: string = "verbaqo") => {
         const element = document.createElement("a");
         const file = new Blob([text], { type: 'text/markdown;charset=utf-8' });
         element.href = URL.createObjectURL(file);

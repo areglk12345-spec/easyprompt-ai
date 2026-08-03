@@ -72,7 +72,7 @@ def update_pwd(username: str, pwd: str):
         print(f"Error: User '{username}' not found.")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Manage EasyPrompt Users")
+    parser = argparse.ArgumentParser(description="Manage Verbaqo Users")
     subparsers = parser.add_subparsers(dest="command")
 
     # list

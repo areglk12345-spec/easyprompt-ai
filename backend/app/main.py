@@ -20,7 +20,7 @@ load_dotenv()
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logger = logging.getLogger("easyprompt")
+logger = logging.getLogger("verbaqo")
 
 # Initialize Firebase Admin
 try:
@@ -68,7 +68,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="EZPrompt AI Backend (Powered by Gemini)",
+    title="Verbaqo Backend (Powered by Gemini)",
     description="API สำหรับ AI Accessibility Agent / Prompt Fitter Agent",
     version="2.0.0",
     lifespan=lifespan
