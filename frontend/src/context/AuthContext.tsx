@@ -54,23 +54,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoginModalOpen(false);
     }, []);
 
+    const logout = React.useCallback(() => {
+        setUser(null);
+        setToken(null);
+        setActiveWorkspace('ทั่วไป');
+        localStorage.removeItem('ep_token');
+        localStorage.removeItem('ep_user');
+        localStorage.removeItem('ep_onboarding_completed');
+        localStorage.removeItem('ep_session_id');
+    }, []);
+
     useEffect(() => {
         // Load token and user from localStorage on mount
         const storedToken = localStorage.getItem('ep_token');
         const storedUser = localStorage.getItem('ep_user');
-        
-        if (storedToken && storedUser) {
-            setToken(storedToken);
-            try {
-                const parsedUser = JSON.parse(storedUser);
-                setUser(parsedUser);
-                setActiveWorkspace(parsedUser.organization || 'ทั่วไป');
-            } catch (e) {
-                console.error("Failed to parse user from localStorage", e);
-            }
+
+        if (!storedToken || !storedUser) {
+            setIsLoading(false);
+            return;
         }
-        setIsLoading(false);
-    }, []);
+
+        setToken(storedToken);
+        try {
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+            setActiveWorkspace(parsedUser.organization || 'ทั่วไป');
+        } catch (e) {
+            console.error("Failed to parse user from localStorage", e);
+        }
+
+        // The cached profile only proves we were logged in once — confirm the
+        // token is still accepted by the server, otherwise every protected
+        // page would keep rendering a "logged in" UI while every API call
+        // silently 401s underneath it. Only a confirmed 401 forces logout;
+        // network hiccups keep the cached session so the user isn't kicked
+        // out just because the backend was briefly unreachable.
+        api.get<any>('/api/auth/me', storedToken)
+            .then((data) => {
+                setUser(data);
+                setActiveWorkspace(data.organization || 'ทั่วไป');
+                localStorage.setItem('ep_user', JSON.stringify(data));
+            })
+            .catch((err: any) => {
+                if (err?.status === 401) {
+                    logout();
+                }
+            })
+            .finally(() => setIsLoading(false));
+    }, [logout]);
 
     const claimGuestSession = async (accessToken: string) => {
         if (typeof window !== 'undefined') {
@@ -138,16 +169,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const register = async (username: string, password: string, fullName: string, organization: string = 'ทั่วไป') => {
         await api.post('/api/auth/register', { username, password, full_name: fullName, organization });
-    };
-
-    const logout = () => {
-        setUser(null);
-        setToken(null);
-        setActiveWorkspace('ทั่วไป');
-        localStorage.removeItem('ep_token');
-        localStorage.removeItem('ep_user');
-        localStorage.removeItem('ep_onboarding_completed');
-        localStorage.removeItem('ep_session_id');
     };
 
     const switchWorkspace = (workspace: string) => {

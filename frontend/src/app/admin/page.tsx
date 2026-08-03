@@ -102,7 +102,8 @@ function AdminPageContent() {
                 authFetch(`${API_URL}/api/admin/api-pool-status`).catch(() => null)
             ]);
             if (!settingsRes.ok) {
-                throw new Error('Failed to fetch org settings');
+                const errData = await settingsRes.json().catch(() => ({}));
+                throw new Error(errData.detail || 'ไม่สามารถโหลดการตั้งค่าองค์กรได้');
             }
             const data = await settingsRes.json();
             setOrgModel(data.ai_model);
@@ -206,12 +207,15 @@ function AdminPageContent() {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
             const response = await authFetch(`${API_URL}/api/admin/audit-logs?limit=100`);
-            if (response.ok) {
-                const data = await response.json();
-                setAuditLogs(data);
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.detail || 'ไม่สามารถโหลด Audit Logs ได้');
             }
-        } catch (err) {
+            const data = await response.json();
+            setAuditLogs(data);
+        } catch (err: any) {
             console.error("Audit Logs Error:", err);
+            setError(err.message || 'ไม่สามารถโหลด Audit Logs ได้');
         } finally {
             setAuditLoading(false);
         }
@@ -236,12 +240,15 @@ function AdminPageContent() {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
             const response = await authFetch(`${API_URL}/api/admin/prompt-variables`);
-            if (response.ok) {
-                const data = await response.json();
-                setPromptVars(data);
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.detail || 'ไม่สามารถโหลดตัวแปร Prompt ได้');
             }
-        } catch (err) {
+            const data = await response.json();
+            setPromptVars(data);
+        } catch (err: any) {
             console.error("Prompt Vars Error:", err);
+            setError(err.message || 'ไม่สามารถโหลดตัวแปร Prompt ได้');
         } finally {
             setVarsLoading(false);
         }
@@ -253,12 +260,15 @@ function AdminPageContent() {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
             const response = await authFetch(`${API_URL}/api/admin/templates`);
-            if (response.ok) {
-                const data = await response.json();
-                setAdminTemplates(data);
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.detail || 'ไม่สามารถโหลด Template ได้');
             }
-        } catch (err) {
+            const data = await response.json();
+            setAdminTemplates(data);
+        } catch (err: any) {
             console.error("Admin Templates Error:", err);
+            setError(err.message || 'ไม่สามารถโหลด Template ได้');
         } finally {
             setTemplatesLoading(false);
         }
@@ -309,12 +319,15 @@ function AdminPageContent() {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
             const response = await authFetch(`${API_URL}/api/admin/analytics`);
-            if (response.ok) {
-                const data = await response.json();
-                setAnalyticsData(data);
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.detail || 'ไม่สามารถโหลดข้อมูล Analytics ได้');
             }
-        } catch (err) {
+            const data = await response.json();
+            setAnalyticsData(data);
+        } catch (err: any) {
             console.error("Analytics Error:", err);
+            setError(err.message || 'ไม่สามารถโหลดข้อมูล Analytics ได้');
         } finally {
             setAnalyticsLoading(false);
         }
@@ -326,12 +339,15 @@ function AdminPageContent() {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
             const response = await authFetch(`${API_URL}/api/admin/pending-templates`);
-            if (response.ok) {
-                const data = await response.json();
-                setPendingTemplates(data);
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.detail || 'ไม่สามารถโหลดคิวรออนุมัติได้');
             }
-        } catch (err) {
+            const data = await response.json();
+            setPendingTemplates(data);
+        } catch (err: any) {
             console.error("Pending Templates Error:", err);
+            setError(err.message || 'ไม่สามารถโหลดคิวรออนุมัติได้');
         } finally {
             setPendingLoading(false);
         }
@@ -366,6 +382,7 @@ function AdminPageContent() {
             return;
         }
 
+        setError(null);
         if (activeTab === 'users') {
             fetchUsers();
         } else if (activeTab === 'settings') {
@@ -382,6 +399,19 @@ function AdminPageContent() {
             fetchPendingTemplates();
         }
     }, [isLoggedIn, user, authLoading, router, openLoginModal, activeTab, fetchUsers, fetchOrgSettings, fetchAuditLogs, fetchPromptVars, fetchAdminTemplates, fetchAnalytics, fetchPendingTemplates]);
+
+    const retryCurrentTab = () => {
+        switch (activeTab) {
+            case 'users': fetchUsers(); break;
+            case 'settings': fetchOrgSettings(); break;
+            case 'audit': fetchAuditLogs(); break;
+            case 'variables': fetchPromptVars(); break;
+            case 'templates': fetchAdminTemplates(); break;
+            case 'analytics': fetchAnalytics(); break;
+            case 'pending': fetchPendingTemplates(); break;
+            default: fetchUsers();
+        }
+    };
 
     const handleAddVariable = async () => {
         if (!newVarKey.trim() || !newVarValue.trim()) {
@@ -433,21 +463,6 @@ function AdminPageContent() {
         );
     }
 
-    if (error) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
-                <div className="glass-panel max-w-md w-full p-8 rounded-3xl text-center space-y-4 border border-rose-200 dark:border-rose-900 shadow-xl bg-white/70 dark:bg-slate-800/70">
-                    <div className="text-4xl">⚠️</div>
-                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white">เกิดข้อผิดพลาด</h2>
-                    <p className="text-rose-600 dark:text-rose-400 font-medium">{error}</p>
-                    <button onClick={fetchUsers} className="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-6 py-2.5 rounded-xl transition-all shadow-sm">
-                        🔄 ลองใหม่อีกครั้ง
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className={`min-h-screen bg-transparent dark:bg-slate-900 transition-all duration-300 ${textSize}`}>
             <div className="flex min-h-screen">
@@ -467,9 +482,21 @@ function AdminPageContent() {
                     </header>
 
                     <div className={`p-6 md:p-12 max-w-6xl mx-auto w-full space-y-8 ${isLarge ? 'pb-32' : 'pb-20'}`}>
-                        
+
+                        {/* Inline error banner — stays scoped to the current tab so the sidebar/nav remain usable */}
+                        {error && (
+                            <div className="glass-panel max-w-2xl w-full p-6 rounded-3xl text-center space-y-3 border border-rose-200 dark:border-rose-900 shadow-sm bg-white/70 dark:bg-slate-800/70 mx-auto animate-slide-up">
+                                <div className="text-3xl">⚠️</div>
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-white">เกิดข้อผิดพลาด</h2>
+                                <p className="text-rose-600 dark:text-rose-400 font-medium text-sm">{error}</p>
+                                <button onClick={retryCurrentTab} className="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-6 py-2.5 rounded-xl transition-all shadow-sm text-sm">
+                                    🔄 ลองใหม่อีกครั้ง
+                                </button>
+                            </div>
+                        )}
+
                         {/* Users Tab */}
-                        {activeTab === 'users' && (
+                        {!error && activeTab === 'users' && (
                             <div className="space-y-6 animate-slide-up">
                                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200/50 dark:border-slate-700/50 pb-6">
                                     <div className="space-y-1">
@@ -557,7 +584,7 @@ function AdminPageContent() {
                         )}
 
                         {/* Organization Settings Tab */}
-                        {activeTab === 'settings' && (
+                        {!error && activeTab === 'settings' && (
                             <div className={`glass-panel border-0 shadow-lg dark:shadow-none bg-white dark:bg-slate-800 rounded-3xl ${cardPadding} space-y-6 animate-slide-up`}>
                                 <div>
                                     <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>การตั้งค่าองค์กร</h2>
@@ -622,7 +649,7 @@ function AdminPageContent() {
                         )}
 
                         {/* Audit Logs Tab */}
-                        {activeTab === 'audit' && (
+                        {!error && activeTab === 'audit' && (
                             <div className="space-y-6 animate-slide-up">
                                 <div className="flex items-center justify-between">
                                     <div>
@@ -680,7 +707,7 @@ function AdminPageContent() {
                         )}
 
                         {/* Prompt Variables Tab */}
-                        {activeTab === 'variables' && (
+                        {!error && activeTab === 'variables' && (
                             <div className="space-y-6 animate-slide-up">
                                 <div>
                                     <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>🏷️ ตัวแปร Prompt ขององค์กร</h2>
@@ -759,7 +786,7 @@ function AdminPageContent() {
                         )}
 
                         {/* Templates Tab */}
-                        {activeTab === 'templates' && (
+                        {!error && activeTab === 'templates' && (
                             <div className="space-y-6 animate-slide-up">
                                 <div className="border-b border-slate-200/50 dark:border-slate-700/50 pb-6">
                                     <h1 className="text-4xl font-extrabold text-slate-800 dark:text-white">จัดการ Template แนะนำ</h1>
@@ -768,6 +795,11 @@ function AdminPageContent() {
 
                                 {templatesLoading ? (
                                     <div className="text-center py-10 text-slate-400 animate-pulse">กำลังโหลด...</div>
+                                ) : adminTemplates.length === 0 ? (
+                                    <div className="text-center py-10 text-slate-400 dark:text-slate-500">
+                                        <div className="text-3xl mb-2">📄</div>
+                                        <div className="font-semibold">ยังไม่มี Template ในองค์กรนี้</div>
+                                    </div>
                                 ) : (
                                     <div className="space-y-3">
                                         {adminTemplates.map(tpl => (
@@ -798,7 +830,7 @@ function AdminPageContent() {
                         )}
 
                         {/* Analytics Tab */}
-                        {activeTab === 'analytics' && (
+                        {!error && activeTab === 'analytics' && (
                             <div className="space-y-6 animate-slide-up">
                                 <div>
                                     <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>📊 Analytics Report</h2>
@@ -869,7 +901,7 @@ function AdminPageContent() {
                         )}
 
                         {/* Pending Templates Tab */}
-                        {activeTab === 'pending' && (
+                        {!error && activeTab === 'pending' && (
                             <div className="space-y-6 animate-slide-up">
                                 <div>
                                     <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>📬 คิวรออนุมัติเทมเพลตสาธารณะ</h2>
