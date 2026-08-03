@@ -92,7 +92,7 @@ raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localho
 ALLOWED_ORIGINS = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 
 # Hardcode the custom domains to guarantee it works regardless of Railway env vars
-for domain in ["https://easyprompt.piravat.space", "https://ezprompt.piravat.space", "https://verbaqo.piravat.space"]:
+for domain in ["https://easyprompt.piravat.space", "https://ezprompt.piravat.space", "https://verbaqo.piravat.space", "https://verbaqo.com", "https://www.verbaqo.com"]:
     if domain not in ALLOWED_ORIGINS:
         ALLOWED_ORIGINS.append(domain)
 
