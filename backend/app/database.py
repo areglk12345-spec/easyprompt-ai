@@ -27,7 +27,19 @@ elif raw_db_url.startswith("mysql://"):
 
 SQLALCHEMY_DATABASE_URL = raw_db_url
 # สร้าง Engine สำหรับเชื่อมต่อ MySQL
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    # pool_pre_ping ป้องกัน error จาก stale connection (เช่นตอน pgbouncer/Supabase ตัดการเชื่อมต่อที่ idle นานเกินไป)
+    # pool_recycle รีไซเคิล connection ก่อนที่ Supabase pooler จะตัดทิ้งเอง
+    # pool_size/max_overflow จำกัดจำนวน connection พร้อมกันไม่ให้ชนเพดาน connection ของ Supabase free tier
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL,
+        pool_pre_ping=True,
+        pool_recycle=300,
+        pool_size=5,
+        max_overflow=5,
+    )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
