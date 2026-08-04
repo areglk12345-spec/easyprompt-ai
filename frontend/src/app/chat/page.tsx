@@ -110,7 +110,7 @@ function ChatContent() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const attachFileInputRef = useRef<HTMLInputElement>(null);
 
-    const [selectedModel, setSelectedModel] = useState<string>('gemini-3.5-flash-lite');
+    const [selectedModel, setSelectedModel] = useState<string>('gemini-3.1-flash-lite');
     const [attachedFiles, setAttachedFiles] = useState<{mime_type: string, data: string, name: string}[]>([]);
 
     const handleAttachFile = (e: React.ChangeEvent<HTMLInputElement>) => {

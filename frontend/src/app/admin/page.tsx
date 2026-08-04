@@ -62,7 +62,7 @@ function AdminPageContent() {
     const [error, setError] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const activeTab = searchParams.get('tab') || 'users';
-    const [orgModel, setOrgModel] = useState('gemini-3.5-flash-lite');
+    const [orgModel, setOrgModel] = useState('gemini-3.1-flash-lite');
     const [apiPoolStatus, setApiPoolStatus] = useState<{total_keys: number; estimated_rpm: number; estimated_rpd: number; model: string} | null>(null);
 
     // Audit Logs state
@@ -598,8 +598,8 @@ function AdminPageContent() {
                                             onChange={(e) => setOrgModel(e.target.value)}
                                             className="w-full h-12 px-4 rounded-xl bg-slate-100/60 border border-slate-200/50 focus:bg-white focus:border-primary outline-none transition-all font-body-md text-slate-800 dark:text-white"
                                         >
-                                            <option value="gemini-3.5-flash-lite">⭐ Gemini 3.5 Flash Lite (แนะนำ — เร็ว, ฉลาด, ประหยัดโควต้า)</option>
-                                            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (ความเร็วสูง, ประหยัดโควต้า)</option>
+                                            <option value="gemini-3.1-flash-lite">⭐ Gemini 3.1 Flash Lite (แนะนำ — เร็ว, ฉลาด, ประหยัดโควต้า)</option>
+                                            <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite (ความเร็วสูง, ประหยัดโควต้า)</option>
                                             <option value="gemini-3.6-flash">Gemini 3.6 Flash (ใหม่ล่าสุด, ฉลาดมาก — 5 RPM)</option>
                                             <option value="gemini-3.5-flash">Gemini 3.5 Flash (ฉลาด — 5 RPM)</option>
                                             <option value="gemini-3-flash">Gemini 3 Flash (สมดุล — 5 RPM)</option>
