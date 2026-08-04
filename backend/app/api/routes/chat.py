@@ -9,7 +9,7 @@ from app import models, auth
 from app.schemas import UserMessage, AgentResponse, RefineMessage
 from app.core.config import SYSTEM_PROMPT, MODEL_NAME
 from fastapi.responses import StreamingResponse
-from app.services.ai_service import generate_json_content, get_org_model, generate_stream_content
+from app.services.ai_service import generate_json_content, get_explicit_org_model, generate_stream_content
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -66,8 +66,10 @@ def chat_with_agent(request: Request, payload: UserMessage, current_user: Option
         
         # 1. Model Selection
         model_to_use = payload.model or MODEL_NAME
-        if not payload.model and current_user:
-            model_to_use = get_org_model(db, current_user.organization)
+        if current_user:
+            org_model = get_explicit_org_model(db, current_user.organization)
+            if org_model:
+                model_to_use = org_model
             
         cost = 5 if "pro" in model_to_use.lower() else 1
         
@@ -165,8 +167,10 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
         
         # 1. Model Selection
         model_to_use = payload.model or MODEL_NAME
-        if not payload.model and current_user:
-            model_to_use = get_org_model(db, current_user.organization)
+        if current_user:
+            org_model = get_explicit_org_model(db, current_user.organization)
+            if org_model:
+                model_to_use = org_model
             
         cost = 5 if "pro" in model_to_use.lower() else 1
         
@@ -297,8 +301,10 @@ def refine_chat_prompt(request: Request, payload: RefineMessage, current_user: O
 
         # 1. Model Selection
         model_to_use = payload.model or MODEL_NAME
-        if not payload.model and current_user:
-            model_to_use = get_org_model(db, current_user.organization)
+        if current_user:
+            org_model = get_explicit_org_model(db, current_user.organization)
+            if org_model:
+                model_to_use = org_model
             
         cost = 5 if "pro" in model_to_use.lower() else 1
         

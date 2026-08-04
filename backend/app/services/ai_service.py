@@ -60,6 +60,13 @@ def get_org_model(db: Session, organization_name: str) -> str:
         return setting.ai_model
     return MODEL_NAME
 
+def get_explicit_org_model(db: Session, organization_name: str) -> str | None:
+    """คืนค่า ai_model ที่แอดมินตั้งไว้จริงเท่านั้น (None หากยังไม่ได้ตั้งค่า) เพื่อให้ค่านี้มีสิทธิ์เหนือกว่าโมเดลที่ผู้ใช้เลือกเอง"""
+    setting = db.query(models.OrganizationSetting).filter(models.OrganizationSetting.org_name == organization_name).first()
+    if setting and setting.ai_model:
+        return setting.ai_model
+    return None
+
 def generate_stream_content(system_instruction: str, contents: any, model_name: str):
     """Helper method to call Gemini and stream response with round-robin + fallback"""
     errors = []
@@ -78,7 +85,7 @@ def generate_stream_content(system_instruction: str, contents: any, model_name: 
         except Exception as e:
             err_str = str(e)
             errors.append(err_str)
-            if "429" in err_str or "quota" in err_str.lower() or "limit" in err_str.lower():
+            if "429" in err_str or "503" in err_str or "quota" in err_str.lower() or "limit" in err_str.lower() or "unavailable" in err_str.lower() or "overloaded" in err_str.lower():
                 logger.warning(f"⚠️ Key #{(_client_index - 1) % len(clients)} hit rate limit, trying next key...")
                 continue  # ลอง key ถัดไป
             else:
@@ -119,7 +126,7 @@ def generate_json_content(system_instruction: str, contents: any, model_name: st
         except Exception as e:
             err_str = str(e)
             errors.append(err_str)
-            if "429" in err_str or "quota" in err_str.lower() or "limit" in err_str.lower():
+            if "429" in err_str or "503" in err_str or "quota" in err_str.lower() or "limit" in err_str.lower() or "unavailable" in err_str.lower() or "overloaded" in err_str.lower():
                 logger.warning(f"⚠️ Key #{(_client_index - 1) % len(clients)} hit rate limit, trying next key...")
                 continue  # ลอง key ถัดไป
             else:
