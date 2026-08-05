@@ -36,12 +36,15 @@ def test_save_and_get_templates(client, auth_headers):
     titles = [t["title"] for t in data]
     assert "Test Template" in titles
 
-@patch('app.services.ai_service.client.models.generate_content')
-def test_chat_with_agent(mock_generate, client, auth_headers):
-    # Mock Gemini API Response
+@patch('app.services.ai_service.clients')
+def test_chat_with_agent(mock_clients, client, auth_headers):
+    # Mock Gemini API Response (multi-key pool: mock the first client in the list)
     mock_response = MagicMock()
     mock_response.text = '```json\n{"status": "completed", "next_question": "...", "fitted_prompt": "Mocked Prompt", "prompt_fit_score": 90, "score_explanation": "Mock"}\n```'
-    mock_generate.return_value = mock_response
+    mock_client = MagicMock()
+    mock_client.models.generate_content.return_value = mock_response
+    mock_clients.__getitem__.return_value = mock_client
+    mock_clients.__len__.return_value = 1
 
     resp = client.post(
         "/api/chat",
