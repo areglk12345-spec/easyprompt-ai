@@ -44,13 +44,27 @@ def get_next_client() -> genai.Client:
         _client_index += 1
     return client
 
-def get_pool_status() -> dict:
-    """คืนค่าสถานะของ API Key Pool สำหรับ Admin"""
+# โควต้าโดยประมาณต่อ 1 API key ต่อโมเดล (ตรงกับป้าย RPM ที่แสดงในหน้า Admin dropdown)
+MODEL_RATE_LIMITS = {
+    "gemini-3.1-flash-lite": (15, 500),
+    "gemini-3.5-flash-lite": (15, 500),
+    "gemini-3.6-flash": (5, 250),
+    "gemini-3.5-flash": (5, 250),
+    "gemini-3-flash": (5, 250),
+    "gemini-2.5-flash": (5, 250),
+    "gemini-2.5-flash-lite": (10, 500),
+}
+DEFAULT_RATE_LIMIT = (15, 500)
+
+def get_pool_status(model_name: str | None = None) -> dict:
+    """คืนค่าสถานะของ API Key Pool สำหรับ Admin (โควต้าอิงตามโมเดลที่ระบุ)"""
+    model = model_name or MODEL_NAME
+    rpm_per_key, rpd_per_key = MODEL_RATE_LIMITS.get(model, DEFAULT_RATE_LIMIT)
     return {
         "total_keys": len(clients),
-        "estimated_rpm": len(clients) * 15,
-        "estimated_rpd": len(clients) * 500,
-        "model": MODEL_NAME,
+        "estimated_rpm": len(clients) * rpm_per_key,
+        "estimated_rpd": len(clients) * rpd_per_key,
+        "model": model,
         "current_index": _client_index % len(clients)
     }
 

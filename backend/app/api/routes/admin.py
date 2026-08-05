@@ -81,10 +81,11 @@ def delete_user(user_id: int, request: Request, current_admin: models.User = Dep
 
 
 @router.get("/api-pool-status")
-def get_api_pool_status(current_admin: models.User = Depends(get_admin_user)):
-    """แสดงสถานะ API Key Pool สำหรับ Admin"""
-    from app.services.ai_service import get_pool_status
-    return get_pool_status()
+def get_api_pool_status(current_admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    """แสดงสถานะ API Key Pool สำหรับ Admin (โควต้าอิงตามโมเดลที่องค์กรตั้งค่าไว้จริง)"""
+    from app.services.ai_service import get_pool_status, get_org_model
+    model = get_org_model(db, current_admin.organization)
+    return get_pool_status(model)
 
 
 @router.get("/org-settings", response_model=schemas.OrgSettingResponse)

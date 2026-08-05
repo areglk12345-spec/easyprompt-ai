@@ -2,6 +2,12 @@ from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import Optional, List
 from datetime import datetime
 import re
+from app.core.config import ALLOWED_MODELS
+
+def _validate_model_name(v: Optional[str]) -> Optional[str]:
+    if v is not None and v not in ALLOWED_MODELS:
+        raise ValueError(f"โมเดล '{v}' ไม่ได้รับอนุญาต")
+    return v
 
 class UserMessage(BaseModel):
     message: str
@@ -13,12 +19,22 @@ class UserMessage(BaseModel):
     files: Optional[List[dict]] = None
     is_direct_run: Optional[bool] = False
 
+    @field_validator('model')
+    @classmethod
+    def validate_model(cls, v):
+        return _validate_model_name(v)
+
 class RefineMessage(BaseModel):
     session_id: str
     tone: Optional[str] = "ทั่วไป"
     easy_language: Optional[bool] = False
     document_id: Optional[int] = None
     model: Optional[str] = None
+
+    @field_validator('model')
+    @classmethod
+    def validate_model(cls, v):
+        return _validate_model_name(v)
 
 class AgentResponse(BaseModel):
     status: str
@@ -113,6 +129,13 @@ class OrgSettingResponse(BaseModel):
 
 class OrgSettingUpdate(BaseModel):
     ai_model: str
+
+    @field_validator('ai_model')
+    @classmethod
+    def validate_ai_model(cls, v):
+        if v not in ALLOWED_MODELS:
+            raise ValueError(f"โมเดล '{v}' ไม่ได้รับอนุญาต")
+        return v
 
 class TokenResponse(BaseModel):
     access_token: str

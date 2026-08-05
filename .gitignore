@@ -56,5 +56,8 @@ yarn-error.log*
 # OS Files
 .DS_Store
 Thumbs.db
-backend/firebase-service-account.json 
+backend/firebase-service-account.json
 backend/add_columns.py
+
+# TypeScript build cache
+*.tsbuildinfo
