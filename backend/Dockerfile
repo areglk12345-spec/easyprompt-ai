@@ -11,4 +11,4 @@ COPY . .
 EXPOSE 8080
 
 # Use shell form to allow environment variable expansion (useful for Railway)
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080} --proxy-headers --forwarded-allow-ips='*'
