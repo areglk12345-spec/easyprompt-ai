@@ -93,7 +93,16 @@
 *   อัปเดต CORS allowlist ฝั่ง backend และ `metadataBase`/OG url ฝั่ง frontend ที่ยังชี้ไปโดเมนเก่า ทำให้ปุ่ม "เข้าสู่ระบบด้วย Google" ขึ้น error "Failed to fetch" บนโดเมนใหม่
 *   บีบอัดวิดีโอโปรโมชั่นหน้าแรกด้วย ffmpeg (H.264, CRF 26, ความละเอียดเท่าเดิม) จาก 57MB เหลือ 10MB (ลด ~82%) เพื่อลดการใช้ bandwidth ของ Vercel ต่อการเปิดดู 1 ครั้ง
 *   เสริมความทนทานของการเชื่อมต่อฐานข้อมูล (`pool_pre_ping`, `pool_recycle`, จำกัด `pool_size`/`max_overflow`) ป้องกัน connection ค้าง (stale) และการใช้ connection เกินโควตาฟรีของ Supabase เมื่อ traffic เพิ่มขึ้น
-*   ตรวจสอบ usage ของ Vercel (Hobby) และ Supabase (Free) แล้วพบว่ายังเพียงพอกับ traffic ปัจจุบัน ไม่จำเป็นต้องอัปเกรด ยกเว้น **Railway** ที่หมดช่วง Trial แล้วต้องอัปเกรดเป็น **Hobby plan** เพื่อให้ backend ออนไลน์ต่อเนื่อง
+*   ตรวจสอบ usage ของ Vercel (Hobby) และ Supabase (Free) แล้วพบว่ายังเพียงพอกับ traffic ปัจจุบัน ไม่จำเป็นต้องอัปเกรด
+
+### 14. 🚚 ย้าย Backend จาก Railway ไป Render — สิงหาคม 2026
+Railway Trial หมดอายุและบัตร prepaid ที่ผูกไว้ตัดเงินไม่ผ่าน จึงย้าย backend ทั้งหมดไป **Render** แทน:
+
+*   Deploy backend service ใหม่บน Render จาก `backend/Dockerfile` เดิม (ไม่ต้องแก้โค้ด เพราะ config อ่านค่าจาก environment variable อยู่แล้ว)
+*   ผูก custom domain ใหม่ **`api.verbaqo.com`** (แยกจากโดเมนหน้าเว็บ `verbaqo.com` ที่ยังอยู่บน Vercel) ผ่าน CNAME record ที่ Hostinger DNS
+*   อัปเดต environment variable ฝั่ง frontend (Vercel) ให้เรียก API ที่โดเมนใหม่แทน Railway URL เดิม
+*   อัปเกรดเป็น Render **Starter plan** ($7/เดือน) เพื่อตัดปัญหา cold start/spin-down ของ Free tier (ที่ทำให้ request แรกหลัง idle ช้าได้ถึง 50+ วินาที)
+*   ฐานข้อมูล (Supabase) และ Firebase ไม่ได้รับผลกระทบ เพราะไม่เคยผูกกับ Railway โดยตรงอยู่แล้ว
 
 ---
 
