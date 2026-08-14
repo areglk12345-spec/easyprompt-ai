@@ -346,6 +346,56 @@ def get_analytics(current_admin: models.User = Depends(get_admin_user), db: Sess
     }
 
 
+@router.get("/prompt-insights")
+def get_prompt_insights(current_admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    """สรุป pattern ของ Prompt Doctor ที่ได้ Fit Score ต่ำ เพื่อเอาไปปรับปรุง system prompt"""
+    from sqlalchemy import func
+
+    # Guest (non-logged-in) prompts aren't attached to any organization, so they're
+    # excluded here to avoid leaking cross-org guest content into a single org's view.
+    org_doctor_logs = db.query(models.PromptActivityLog).join(
+        models.User, models.PromptActivityLog.user_id == models.User.id
+    ).filter(
+        models.PromptActivityLog.prompt_type == "doctor",
+        models.PromptActivityLog.score.isnot(None),
+        models.User.organization == current_admin.organization
+    )
+
+    # Average score by category
+    category_stats = org_doctor_logs.with_entities(
+        models.PromptActivityLog.category,
+        func.avg(models.PromptActivityLog.score).label("avg_score"),
+        func.count(models.PromptActivityLog.id).label("count")
+    ).group_by(models.PromptActivityLog.category).all()
+
+    category_breakdown = [
+        {"category": cat or "ทั่วไป", "avg_score": round(avg, 1), "count": cnt}
+        for cat, avg, cnt in category_stats
+    ]
+
+    # Lowest-scoring prompts (worth reviewing for system prompt improvements)
+    lowest_scoring = org_doctor_logs.filter(
+        models.PromptActivityLog.raw_prompt.isnot(None)
+    ).order_by(models.PromptActivityLog.score.asc()).limit(20).all()
+
+    low_score_prompts = [
+        {
+            "id": log.id,
+            "score": log.score,
+            "category": log.category,
+            "raw_prompt": log.raw_prompt,
+            "polished_prompt": log.polished_prompt,
+            "created_at": log.created_at
+        }
+        for log in lowest_scoring
+    ]
+
+    return {
+        "category_breakdown": category_breakdown,
+        "low_score_prompts": low_score_prompts
+    }
+
+
 @router.get("/pending-templates", response_model=List[schemas.TemplateResponse])
 def list_pending_templates(current_admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     """ดึงคิว Template ที่รออนุมัติขึ้นคลังสาธารณะ"""

@@ -92,6 +92,10 @@ function AdminPageContent() {
     const [pendingTemplates, setPendingTemplates] = useState<any[]>([]);
     const [pendingLoading, setPendingLoading] = useState(false);
 
+    // Prompt Insights state
+    const [insightsData, setInsightsData] = useState<any>(null);
+    const [insightsLoading, setInsightsLoading] = useState(false);
+
     const fetchOrgSettings = useCallback(async () => {
         setIsLoading(true);
         setError(null);
@@ -353,6 +357,26 @@ function AdminPageContent() {
         }
     }, [authFetch]);
 
+    // --- Prompt Insights ---
+    const fetchInsights = useCallback(async () => {
+        setInsightsLoading(true);
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            const response = await authFetch(`${API_URL}/api/admin/prompt-insights`);
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.detail || 'ไม่สามารถโหลดข้อมูล Prompt Insights ได้');
+            }
+            const data = await response.json();
+            setInsightsData(data);
+        } catch (err: any) {
+            console.error("Prompt Insights Error:", err);
+            setError(err.message || 'ไม่สามารถโหลดข้อมูล Prompt Insights ได้');
+        } finally {
+            setInsightsLoading(false);
+        }
+    }, [authFetch]);
+
     const handleApproveTemplate = async (templateId: number, action: 'approve' | 'reject') => {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -397,8 +421,10 @@ function AdminPageContent() {
             fetchAnalytics();
         } else if (activeTab === 'pending') {
             fetchPendingTemplates();
+        } else if (activeTab === 'insights') {
+            fetchInsights();
         }
-    }, [isLoggedIn, user, authLoading, router, openLoginModal, activeTab, fetchUsers, fetchOrgSettings, fetchAuditLogs, fetchPromptVars, fetchAdminTemplates, fetchAnalytics, fetchPendingTemplates]);
+    }, [isLoggedIn, user, authLoading, router, openLoginModal, activeTab, fetchUsers, fetchOrgSettings, fetchAuditLogs, fetchPromptVars, fetchAdminTemplates, fetchAnalytics, fetchPendingTemplates, fetchInsights]);
 
     const retryCurrentTab = () => {
         switch (activeTab) {
@@ -409,6 +435,7 @@ function AdminPageContent() {
             case 'templates': fetchAdminTemplates(); break;
             case 'analytics': fetchAnalytics(); break;
             case 'pending': fetchPendingTemplates(); break;
+            case 'insights': fetchInsights(); break;
             default: fetchUsers();
         }
     };
@@ -894,6 +921,66 @@ function AdminPageContent() {
                                                     </BarChart>
                                                 </ResponsiveContainer>
                                             </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Prompt Insights Tab */}
+                        {!error && activeTab === 'insights' && (
+                            <div className="space-y-6 animate-slide-up">
+                                <div>
+                                    <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>🔍 Prompt Insights</h2>
+                                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
+                                        Prompt Doctor ที่ได้ Fit Score ต่ำสุดในองค์กร <strong className="text-indigo-600 dark:text-indigo-400">{user?.organization}</strong> — ใช้ดู pattern เพื่อปรับปรุง prompt ของระบบ
+                                    </p>
+                                </div>
+
+                                {insightsLoading || !insightsData ? (
+                                    <div className="flex justify-center items-center h-40">
+                                        <div className="dot-flashing"></div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-8">
+                                        {/* Category Breakdown */}
+                                        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                                            <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Fit Score เฉลี่ยตามหมวดหมู่</h3>
+                                            {insightsData.category_breakdown?.length === 0 ? (
+                                                <p className="text-slate-400 text-sm">ยังไม่มีข้อมูลเพียงพอ</p>
+                                            ) : (
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    {insightsData.category_breakdown?.map((c: any) => (
+                                                        <div key={c.category} className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl">
+                                                            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">{c.category}</div>
+                                                            <div className="text-2xl font-black text-slate-800 dark:text-white mt-1">{c.avg_score}<span className="text-sm text-slate-400">/100</span></div>
+                                                            <div className="text-xs text-slate-400 mt-1">{c.count} รายการ</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Lowest scoring prompts */}
+                                        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                                            <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Prompt ที่ได้คะแนนต่ำสุด (20 รายการล่าสุด)</h3>
+                                            {insightsData.low_score_prompts?.length === 0 ? (
+                                                <p className="text-slate-400 text-sm">ยังไม่มีข้อมูลเพียงพอ</p>
+                                            ) : (
+                                                <div className="space-y-3">
+                                                    {insightsData.low_score_prompts?.map((p: any) => (
+                                                        <div key={p.id} className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl">
+                                                            <div className="flex items-center justify-between mb-2">
+                                                                <span className="px-2.5 py-1 rounded-lg bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 font-bold text-xs">
+                                                                    Score: {p.score}/100
+                                                                </span>
+                                                                <span className="text-xs text-slate-400">{p.category}</span>
+                                                            </div>
+                                                            <div className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap line-clamp-3">{p.raw_prompt}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}

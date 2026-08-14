@@ -8,7 +8,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 
 interface AdminSidebarProps {
-    activePage?: 'dashboard' | 'users' | 'settings' | 'audit' | 'variables' | 'templates' | 'analytics' | 'pending';
+    activePage?: 'dashboard' | 'users' | 'settings' | 'audit' | 'variables' | 'templates' | 'analytics' | 'pending' | 'insights';
 }
 
 export default function AdminSidebar({ activePage }: AdminSidebarProps) {
@@ -45,6 +45,10 @@ export default function AdminSidebar({ activePage }: AdminSidebarProps) {
                 <Link href="/admin?tab=analytics" className={activePage === 'analytics' ? activeClass : inactiveClass}>
                     <span className="material-symbols-outlined">analytics</span>
                     <span className="text-[15px]">Analytics Report</span>
+                </Link>
+                <Link href="/admin?tab=insights" className={activePage === 'insights' ? activeClass : inactiveClass}>
+                    <span className="material-symbols-outlined">insights</span>
+                    <span className="text-[15px]">Prompt Insights</span>
                 </Link>
                 
                 <div className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-6 mb-4 px-2 uppercase tracking-wider">Organization</div>
