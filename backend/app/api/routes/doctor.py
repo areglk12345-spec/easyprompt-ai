@@ -40,19 +40,20 @@ def diagnose_prompt(request: Request, payload: DoctorRequest, current_user: Opti
 
         ai_result = generate_json_content(system_prompt_to_use, prompt_to_send, model_to_use)
 
-        if current_user:
-            try:
-                new_log = models.PromptActivityLog(
-                    user_id=current_user.id,
-                    action="generate_doctor",
-                    prompt_type="doctor",
-                    category="ทั่วไป",
-                    score=ai_result.get("prompt_fit_score")
-                )
-                db.add(new_log)
-                db.commit()
-            except Exception as log_err:
-                logger.error(f"Failed to log doctor activity: {log_err}")
+        try:
+            new_log = models.PromptActivityLog(
+                user_id=current_user.id if current_user else None,
+                action="generate_doctor",
+                prompt_type="doctor",
+                category="ทั่วไป",
+                score=ai_result.get("prompt_fit_score"),
+                raw_prompt=payload.prompt_text,
+                polished_prompt=ai_result.get("fitted_prompt")
+            )
+            db.add(new_log)
+            db.commit()
+        except Exception as log_err:
+            logger.error(f"Failed to log doctor activity: {log_err}")
 
         return ai_result
     except HTTPException as e:

@@ -90,6 +90,8 @@ class PromptActivityLog(Base):
     prompt_type = Column(String(50))  # e.g., 'chat', 'doctor'
     category = Column(String(50), default="ทั่วไป")
     score = Column(Integer, nullable=True)
+    raw_prompt = Column(Text, nullable=True)
+    polished_prompt = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User")
