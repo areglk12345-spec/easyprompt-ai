@@ -971,9 +971,16 @@ function AdminPageContent() {
                                                     {insightsData.low_score_prompts?.map((p: any) => (
                                                         <div key={p.id} className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl">
                                                             <div className="flex items-center justify-between mb-2">
-                                                                <span className="px-2.5 py-1 rounded-lg bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 font-bold text-xs">
-                                                                    Score: {p.score}/100
-                                                                </span>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="px-2.5 py-1 rounded-lg bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 font-bold text-xs">
+                                                                        Score: {p.score}/100
+                                                                    </span>
+                                                                    {p.is_guest && (
+                                                                        <span className="px-2.5 py-1 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold text-xs">
+                                                                            Guest
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                                 <span className="text-xs text-slate-400">{p.category}</span>
                                                             </div>
                                                             <div className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap line-clamp-3">{p.raw_prompt}</div>

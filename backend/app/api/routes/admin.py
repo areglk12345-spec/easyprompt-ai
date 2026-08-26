@@ -349,16 +349,19 @@ def get_analytics(current_admin: models.User = Depends(get_admin_user), db: Sess
 @router.get("/prompt-insights")
 def get_prompt_insights(current_admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     """สรุป pattern ของ Prompt Doctor ที่ได้ Fit Score ต่ำ เพื่อเอาไปปรับปรุง system prompt"""
-    from sqlalchemy import func
+    from sqlalchemy import func, or_
 
-    # Guest (non-logged-in) prompts aren't attached to any organization, so they're
-    # excluded here to avoid leaking cross-org guest content into a single org's view.
-    org_doctor_logs = db.query(models.PromptActivityLog).join(
+    # Guest (non-logged-in) prompts aren't attached to any organization, so every
+    # admin sees them alongside their own org's logs (guests are a shared pool).
+    org_doctor_logs = db.query(models.PromptActivityLog).outerjoin(
         models.User, models.PromptActivityLog.user_id == models.User.id
     ).filter(
         models.PromptActivityLog.prompt_type == "doctor",
         models.PromptActivityLog.score.isnot(None),
-        models.User.organization == current_admin.organization
+        or_(
+            models.User.organization == current_admin.organization,
+            models.PromptActivityLog.user_id.is_(None)
+        )
     )
 
     # Average score by category
@@ -385,7 +388,8 @@ def get_prompt_insights(current_admin: models.User = Depends(get_admin_user), db
             "category": log.category,
             "raw_prompt": log.raw_prompt,
             "polished_prompt": log.polished_prompt,
-            "created_at": log.created_at
+            "created_at": log.created_at,
+            "is_guest": log.user_id is None
         }
         for log in lowest_scoring
     ]
