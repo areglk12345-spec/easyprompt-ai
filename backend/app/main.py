@@ -108,5 +108,13 @@ app.add_middleware(
 def health_check():
     return {"status": "ok", "version": "2.0.0"}
 
+@app.get("/health/db")
+def health_check_db():
+    """Touches the DB so a periodic ping keeps Supabase's free-tier project from auto-pausing."""
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        conn.execute(text("SELECT 1"))
+    return {"status": "ok", "db": "reachable"}
+
 # Include API Router
 app.include_router(api_router, prefix="/api")
