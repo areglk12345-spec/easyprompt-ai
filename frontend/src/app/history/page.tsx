@@ -122,7 +122,7 @@ export default function HistoryPage() {
 
                 <main className="flex-1 flex flex-col bg-slate-50/50 dark:bg-slate-900 overflow-y-auto h-screen relative custom-scrollbar transition-colors duration-300">
                     {/* Top AppBar */}
-                    <header className="h-20 flex items-center justify-between px-6 md:px-12 sticky top-0 z-20 bg-white/70 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-700/30 shrink-0">
+                    <header className="h-20 flex items-center justify-between pl-16 pr-6 md:px-12 sticky top-0 z-20 bg-white/70 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-700/30 shrink-0">
                         <div className="flex items-center gap-8 w-full max-w-2xl">
                             <span className="font-headline-md text-xl md:text-2xl font-bold text-primary dark:text-indigo-400 flex items-center gap-2">
                                 <span className="material-symbols-outlined text-primary dark:text-indigo-400 text-3xl">history</span>

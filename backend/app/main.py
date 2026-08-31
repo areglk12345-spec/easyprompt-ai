@@ -61,6 +61,10 @@ async def lifespan(app: FastAPI):
                 conn.execute(text("ALTER TABLE app_users ADD COLUMN is_premium BOOLEAN DEFAULT FALSE;"))
             except Exception:
                 pass
+            try:
+                conn.execute(text("ALTER TABLE prompt_templates ADD COLUMN status VARCHAR(20) DEFAULT 'approved';"))
+            except Exception:
+                pass
                 
     except Exception as e:
         logger.warning(f"Cannot connect to Database: {e}")
@@ -77,17 +81,6 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"Global Exception on {request.url}: {exc}", exc_info=True)
-    detail_msg = "เกิดข้อผิดพลาดภายในระบบ กรุณาลองใหม่อีกครั้งในภายหลัง"
-    if os.getenv("TESTING") == "true":
-        detail_msg += f" ({str(exc)})"
-    return JSONResponse(
-        status_code=500,
-        content={"detail": detail_msg}
-    )
-
 raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001")
 ALLOWED_ORIGINS = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 
@@ -95,6 +88,26 @@ ALLOWED_ORIGINS = [origin.strip() for origin in raw_origins.split(",") if origin
 for domain in ["https://easyprompt.piravat.space", "https://ezprompt.piravat.space", "https://verbaqo.piravat.space", "https://verbaqo.com", "https://www.verbaqo.com"]:
     if domain not in ALLOWED_ORIGINS:
         ALLOWED_ORIGINS.append(domain)
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Global Exception on {request.url}: {exc}", exc_info=True)
+    detail_msg = "เกิดข้อผิดพลาดภายในระบบ กรุณาลองใหม่อีกครั้งในภายหลัง"
+    if os.getenv("TESTING") == "true":
+        detail_msg += f" ({str(exc)})"
+    response = JSONResponse(
+        status_code=500,
+        content={"detail": detail_msg}
+    )
+    # ServerErrorMiddleware (which dispatches this handler) sits outside CORSMiddleware,
+    # so responses from here skip it entirely unless we add the headers ourselves --
+    # otherwise the browser reports a CORS error instead of the real 500.
+    origin = request.headers.get("origin")
+    if origin in ALLOWED_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Vary"] = "Origin"
+    return response
 
 app.add_middleware(
     CORSMiddleware,

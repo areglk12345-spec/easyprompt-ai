@@ -144,8 +144,8 @@ export default function TemplatesPage() {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
             const url = activeCategory === 'ทั้งหมด'
-                ? `${API_URL}/api/templates`
-                : `${API_URL}/api/templates?category=${encodeURIComponent(activeCategory)}`;
+                ? `${API_URL}/api/templates/`
+                : `${API_URL}/api/templates/?category=${encodeURIComponent(activeCategory)}`;
             const response = await authFetch(url);
             if (!response.ok) throw new Error('Failed to fetch');
             const data = await response.json();
@@ -369,7 +369,7 @@ export default function TemplatesPage() {
                                     role="tab"
                                     aria-selected={activeCategory === cat}
                                     onClick={() => setActiveCategory(cat)}
-                                    className={`px-4 py-2 rounded-full text-sm font-bold border transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary ${
+                                    className={`px-4 py-2 rounded-full text-sm font-bold border transition-all cursor-pointer whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary ${
                                         activeCategory === cat
                                             ? 'bg-gradient-to-r from-primary to-tertiary text-white border-none shadow-md shadow-primary/20 scale-105'
                                             : 'bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-white/95 dark:hover:bg-slate-700/60 hover:border-primary/45'
