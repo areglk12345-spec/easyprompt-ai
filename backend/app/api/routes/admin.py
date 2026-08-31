@@ -346,14 +346,11 @@ def get_analytics(current_admin: models.User = Depends(get_admin_user), db: Sess
     }
 
 
-@router.get("/prompt-insights")
-def get_prompt_insights(current_admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
-    """สรุป pattern ของ Prompt Doctor ที่ได้ Fit Score ต่ำ เพื่อเอาไปปรับปรุง system prompt"""
-    from sqlalchemy import func, or_
-
-    # Guest (non-logged-in) prompts aren't attached to any organization, so every
-    # admin sees them alongside their own org's logs (guests are a shared pool).
-    org_doctor_logs = db.query(models.PromptActivityLog).outerjoin(
+def _visible_doctor_logs_query(db: Session, current_admin: models.User):
+    """Doctor logs an admin may see: their own org's, plus every guest log (guests
+    have no organization, so they're treated as a shared pool visible to all admins)."""
+    from sqlalchemy import or_
+    return db.query(models.PromptActivityLog).outerjoin(
         models.User, models.PromptActivityLog.user_id == models.User.id
     ).filter(
         models.PromptActivityLog.prompt_type == "doctor",
@@ -363,6 +360,14 @@ def get_prompt_insights(current_admin: models.User = Depends(get_admin_user), db
             models.PromptActivityLog.user_id.is_(None)
         )
     )
+
+
+@router.get("/prompt-insights")
+def get_prompt_insights(current_admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    """สรุป pattern ของ Prompt Doctor ที่ได้ Fit Score ต่ำ เพื่อเอาไปปรับปรุง system prompt"""
+    from sqlalchemy import func
+
+    org_doctor_logs = _visible_doctor_logs_query(db, current_admin)
 
     # Average score by category
     category_stats = org_doctor_logs.with_entities(
@@ -375,6 +380,15 @@ def get_prompt_insights(current_admin: models.User = Depends(get_admin_user), db
         {"category": cat or "ทั่วไป", "avg_score": round(avg, 1), "count": cnt}
         for cat, avg, cnt in category_stats
     ]
+
+    # User-supplied helpfulness feedback (thumbs up/down), separate from the AI's own Fit Score
+    feedback_stats = org_doctor_logs.with_entities(
+        models.PromptActivityLog.feedback,
+        func.count(models.PromptActivityLog.id).label("count")
+    ).group_by(models.PromptActivityLog.feedback).all()
+    feedback_summary = {"up": 0, "down": 0, "none": 0}
+    for fb, cnt in feedback_stats:
+        feedback_summary[fb if fb in ("up", "down") else "none"] += cnt
 
     # Lowest-scoring prompts (worth reviewing for system prompt improvements)
     lowest_scoring = org_doctor_logs.filter(
@@ -389,15 +403,51 @@ def get_prompt_insights(current_admin: models.User = Depends(get_admin_user), db
             "raw_prompt": log.raw_prompt,
             "polished_prompt": log.polished_prompt,
             "created_at": log.created_at,
-            "is_guest": log.user_id is None
+            "is_guest": log.user_id is None,
+            "feedback": log.feedback
         }
         for log in lowest_scoring
     ]
 
     return {
         "category_breakdown": category_breakdown,
+        "feedback_summary": feedback_summary,
         "low_score_prompts": low_score_prompts
     }
+
+
+@router.get("/prompt-insights/export")
+def export_prompt_insights(current_admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    """Export ข้อมูล Prompt Doctor (รวม guest) เป็น CSV เพื่อเอาไปวิเคราะห์ปรับปรุง system prompt"""
+    import csv
+    import io
+    from fastapi.responses import StreamingResponse
+
+    logs = _visible_doctor_logs_query(db, current_admin).order_by(
+        models.PromptActivityLog.created_at.desc()
+    ).all()
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(["id", "created_at", "is_guest", "category", "score", "feedback", "raw_prompt", "polished_prompt"])
+    for log in logs:
+        writer.writerow([
+            log.id,
+            log.created_at.isoformat() if log.created_at else "",
+            log.user_id is None,
+            log.category,
+            log.score,
+            log.feedback or "",
+            log.raw_prompt or "",
+            log.polished_prompt or ""
+        ])
+    buffer.seek(0)
+
+    return StreamingResponse(
+        iter([buffer.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=prompt_insights_export.csv"}
+    )
 
 
 @router.get("/pending-templates", response_model=List[schemas.TemplateResponse])

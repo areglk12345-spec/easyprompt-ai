@@ -184,6 +184,10 @@ class DoctorResponse(BaseModel):
     weaknesses: List[str]
     suggestions: List[str]
     fitted_prompt: str
+    log_id: Optional[int] = None
+
+class DoctorFeedbackRequest(BaseModel):
+    feedback: str  # 'up' or 'down'
 
 class TopicTrend(BaseModel):
     topic: str

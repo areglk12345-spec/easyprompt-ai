@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, auth
-from app.schemas import DoctorRequest, DoctorResponse
+from app.schemas import DoctorRequest, DoctorResponse, DoctorFeedbackRequest
 from app.core.config import DOCTOR_SYSTEM_PROMPT, IMAGE_DOCTOR_SYSTEM_PROMPT, MODEL_NAME
 from app.services.ai_service import generate_json_content, get_org_model
 from slowapi import Limiter
@@ -52,6 +52,8 @@ def diagnose_prompt(request: Request, payload: DoctorRequest, current_user: Opti
             )
             db.add(new_log)
             db.commit()
+            db.refresh(new_log)
+            ai_result["log_id"] = new_log.id
         except Exception as log_err:
             logger.error(f"Failed to log doctor activity: {log_err}")
 
@@ -60,3 +62,18 @@ def diagnose_prompt(request: Request, payload: DoctorRequest, current_user: Opti
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI Doctor: {str(e)}")
+
+
+@router.post("/feedback/{log_id}")
+@limiter.limit("20/minute")
+def submit_doctor_feedback(request: Request, log_id: int, payload: DoctorFeedbackRequest, db: Session = Depends(get_db)):
+    if payload.feedback not in ("up", "down"):
+        raise HTTPException(status_code=400, detail="feedback ต้องเป็น 'up' หรือ 'down' เท่านั้น")
+
+    log = db.query(models.PromptActivityLog).filter(models.PromptActivityLog.id == log_id).first()
+    if not log:
+        raise HTTPException(status_code=404, detail="ไม่พบ log นี้")
+
+    log.feedback = payload.feedback
+    db.commit()
+    return {"detail": "บันทึก feedback เรียบร้อยแล้ว"}

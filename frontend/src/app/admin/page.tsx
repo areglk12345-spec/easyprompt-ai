@@ -377,6 +377,30 @@ function AdminPageContent() {
         }
     }, [authFetch]);
 
+    const [exportingInsights, setExportingInsights] = useState(false);
+    const handleExportInsights = async () => {
+        setExportingInsights(true);
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            const response = await authFetch(`${API_URL}/api/admin/prompt-insights/export`);
+            if (!response.ok) throw new Error('ไม่สามารถ export ข้อมูลได้');
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'prompt_insights_export.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err: any) {
+            console.error("Export Insights Error:", err);
+            setError(err.message || 'ไม่สามารถ export ข้อมูลได้');
+        } finally {
+            setExportingInsights(false);
+        }
+    };
+
     const handleApproveTemplate = async (templateId: number, action: 'approve' | 'reject') => {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -930,11 +954,22 @@ function AdminPageContent() {
                         {/* Prompt Insights Tab */}
                         {!error && activeTab === 'insights' && (
                             <div className="space-y-6 animate-slide-up">
-                                <div>
-                                    <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>🔍 Prompt Insights</h2>
-                                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
-                                        Prompt Doctor ที่ได้ Fit Score ต่ำสุดในองค์กร <strong className="text-indigo-600 dark:text-indigo-400">{user?.organization}</strong> — ใช้ดู pattern เพื่อปรับปรุง prompt ของระบบ
-                                    </p>
+                                <div className="flex items-start justify-between gap-4 flex-wrap">
+                                    <div>
+                                        <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>🔍 Prompt Insights</h2>
+                                        <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
+                                            Prompt Doctor ที่ได้ Fit Score ต่ำสุดในองค์กร <strong className="text-indigo-600 dark:text-indigo-400">{user?.organization}</strong> รวมถึง Guest — ใช้ดู pattern เพื่อปรับปรุง prompt ของระบบ
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleExportInsights}
+                                        disabled={exportingInsights}
+                                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm flex items-center gap-2 disabled:opacity-50"
+                                    >
+                                        <span className="material-symbols-outlined text-base">download</span>
+                                        <span>{exportingInsights ? 'กำลัง Export...' : 'Export CSV'}</span>
+                                    </button>
                                 </div>
 
                                 {insightsLoading || !insightsData ? (
@@ -943,6 +978,27 @@ function AdminPageContent() {
                                     </div>
                                 ) : (
                                     <div className="space-y-8">
+                                        {/* Feedback Summary */}
+                                        {insightsData.feedback_summary && (
+                                            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                                                <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Feedback จากผู้ใช้ (👍/👎)</h3>
+                                                <div className="grid grid-cols-3 gap-4">
+                                                    <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl text-center">
+                                                        <div className="text-2xl font-black text-emerald-600">{insightsData.feedback_summary.up}</div>
+                                                        <div className="text-xs text-slate-400 mt-1">👍 ช่วยได้</div>
+                                                    </div>
+                                                    <div className="p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl text-center">
+                                                        <div className="text-2xl font-black text-rose-600">{insightsData.feedback_summary.down}</div>
+                                                        <div className="text-xs text-slate-400 mt-1">👎 ไม่ช่วย</div>
+                                                    </div>
+                                                    <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl text-center">
+                                                        <div className="text-2xl font-black text-slate-400">{insightsData.feedback_summary.none}</div>
+                                                        <div className="text-xs text-slate-400 mt-1">ยังไม่ให้ feedback</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {/* Category Breakdown */}
                                         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
                                             <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Fit Score เฉลี่ยตามหมวดหมู่</h3>
@@ -980,6 +1036,8 @@ function AdminPageContent() {
                                                                             Guest
                                                                         </span>
                                                                     )}
+                                                                    {p.feedback === 'up' && <span className="text-sm">👍</span>}
+                                                                    {p.feedback === 'down' && <span className="text-sm">👎</span>}
                                                                 </div>
                                                                 <span className="text-xs text-slate-400">{p.category}</span>
                                                             </div>

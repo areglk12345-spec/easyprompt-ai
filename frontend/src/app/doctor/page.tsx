@@ -21,6 +21,7 @@ type DiagnosticResult = {
     weaknesses: string[];
     suggestions: string[];
     fitted_prompt: string;
+    log_id?: number;
 };
 
 export default function DoctorPage() {
@@ -36,6 +37,7 @@ export default function DoctorPage() {
     const [result, setResult] = useState<DiagnosticResult | null>(null);
     const [easyLanguage, setEasyLanguage] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [feedbackGiven, setFeedbackGiven] = useState<'up' | 'down' | null>(null);
 
     // Doctor Mode & Image Presets
     const [doctorMode, setDoctorMode] = useState<'text' | 'image'>('text');
@@ -67,6 +69,7 @@ export default function DoctorPage() {
         setIsLoading(true);
         setError(null);
         setResult(null);
+        setFeedbackGiven(null);
 
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -103,6 +106,21 @@ export default function DoctorPage() {
             setError(err.message || t('doctor.error'));
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleFeedback = async (value: 'up' | 'down') => {
+        if (!result?.log_id || feedbackGiven) return;
+        setFeedbackGiven(value);
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+            await authFetch(`${API_URL}/api/doctor/feedback/${result.log_id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ feedback: value }),
+            });
+        } catch (err) {
+            console.error('Feedback submit error:', err);
         }
     };
 
@@ -397,6 +415,30 @@ export default function DoctorPage() {
                                         <div className="p-4 bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 font-mono text-sm leading-relaxed whitespace-pre-wrap shadow-inner max-h-64 overflow-y-auto custom-scrollbar relative">
                                             {result.fitted_prompt}
                                         </div>
+
+                                        {/* Helpfulness Feedback */}
+                                        {result.log_id && (
+                                            <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                                                <span>ผลลัพธ์นี้ช่วยได้ไหม?</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleFeedback('up')}
+                                                    disabled={!!feedbackGiven}
+                                                    className={`p-1.5 rounded-lg border transition-all ${feedbackGiven === 'up' ? 'bg-emerald-100 dark:bg-emerald-900/40 border-emerald-400 text-emerald-600' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'} ${feedbackGiven && feedbackGiven !== 'up' ? 'opacity-40' : ''}`}
+                                                >
+                                                    <span className="material-symbols-outlined text-base leading-none">thumb_up</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleFeedback('down')}
+                                                    disabled={!!feedbackGiven}
+                                                    className={`p-1.5 rounded-lg border transition-all ${feedbackGiven === 'down' ? 'bg-rose-100 dark:bg-rose-900/40 border-rose-400 text-rose-600' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'} ${feedbackGiven && feedbackGiven !== 'down' ? 'opacity-40' : ''}`}
+                                                >
+                                                    <span className="material-symbols-outlined text-base leading-none">thumb_down</span>
+                                                </button>
+                                                {feedbackGiven && <span className="text-emerald-500">ขอบคุณสำหรับ feedback!</span>}
+                                            </div>
+                                        )}
 
                                         {/* Action Bar (Main Actions) */}
                                         <div className="space-y-3">

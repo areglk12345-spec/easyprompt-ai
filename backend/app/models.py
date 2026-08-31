@@ -92,6 +92,7 @@ class PromptActivityLog(Base):
     score = Column(Integer, nullable=True)
     raw_prompt = Column(Text, nullable=True)
     polished_prompt = Column(Text, nullable=True)
+    feedback = Column(String(10), nullable=True)  # 'up' or 'down', user-supplied helpfulness signal
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User")
