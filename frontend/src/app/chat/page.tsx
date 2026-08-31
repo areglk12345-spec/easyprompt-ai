@@ -998,7 +998,7 @@ function ChatContent() {
                                 disabled={isLoading || (!inputText.trim() && attachedFiles.length === 0)}
                                 className={`bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold shadow-md shadow-indigo-100 dark:shadow-indigo-900/30 disabled:opacity-50 !border-none hover-spring mb-0.5 ${isLarge ? 'w-14 h-14 px-4' : 'w-11 h-11 md:w-10 md:h-10 px-2'}`}
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 mx-auto">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 shrink-0">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
                                 </svg>
                             </Button>
