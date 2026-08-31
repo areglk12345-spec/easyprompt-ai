@@ -158,57 +158,57 @@ def social_login(payload: SocialLoginRequest, request: Request, db: Session = De
     try:
         # Verify the Firebase ID token
         decoded_token = firebase_auth.verify_id_token(payload.id_token)
-        uid = decoded_token.get("uid")
-        email = decoded_token.get("email")
-        name = decoded_token.get("name")
-        phone_number = decoded_token.get("phone_number")
-        
-        # Determine username or identifier
-        identifier = email or phone_number or uid
-        if not identifier:
-            raise HTTPException(status_code=400, detail="ไม่พบข้อมูล Email หรือ Phone number จาก Firebase")
-        
-        # Check if user exists
-        user = db.query(models.User).filter(
-            (models.User.email == email) | (models.User.username == identifier)
-        ).first()
-
-        if not user:
-            # Auto-register new user from social login with unguessable random password hash
-            random_password = os.urandom(32).hex()
-            user = models.User(
-                username=identifier,
-                email=email,
-                full_name=name or "Social User",
-                password_hash=auth.hash_password(random_password),
-                role="user",
-                organization="ทั่วไป",
-                is_2fa_enabled=False,
-                credits=100,
-                is_premium=False
-            )
-            db.add(user)
-            db.commit()
-            db.refresh(user)
-        
-        # Generate our own system JWT access token
-        token = auth.create_access_token({"sub": user.username})
-
-        # Audit log for social login
-        try:
-            from app.api.routes.audit import create_audit_log
-            create_audit_log(db, user.id, "social_login",
-                             ip_address=request.client.host if request.client else None)
-        except Exception:
-            pass
-
-        return {
-            "access_token": token,
-            "token_type": "bearer",
-            "user": UserProfile.model_validate(user)
-        }
-
     except Exception as e:
         import logging
         logging.error(f"Firebase token verification failed: {e}")
         raise HTTPException(status_code=401, detail="การยืนยันตัวตนผ่าน Social Login ล้มเหลว")
+
+    uid = decoded_token.get("uid")
+    email = decoded_token.get("email")
+    name = decoded_token.get("name")
+    phone_number = decoded_token.get("phone_number")
+
+    # Determine username or identifier
+    identifier = email or phone_number or uid
+    if not identifier:
+        raise HTTPException(status_code=400, detail="ไม่พบข้อมูล Email หรือ Phone number จาก Firebase")
+
+    # Check if user exists
+    user = db.query(models.User).filter(
+        (models.User.email == email) | (models.User.username == identifier)
+    ).first()
+
+    if not user:
+        # Auto-register new user from social login with unguessable random password hash
+        random_password = os.urandom(32).hex()
+        user = models.User(
+            username=identifier,
+            email=email,
+            full_name=name or "Social User",
+            password_hash=auth.hash_password(random_password),
+            role="user",
+            organization="ทั่วไป",
+            is_2fa_enabled=False,
+            credits=100,
+            is_premium=False
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    # Generate our own system JWT access token
+    token = auth.create_access_token({"sub": user.username})
+
+    # Audit log for social login
+    try:
+        from app.api.routes.audit import create_audit_log
+        create_audit_log(db, user.id, "social_login",
+                         ip_address=request.client.host if request.client else None)
+    except Exception:
+        pass
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": UserProfile.model_validate(user)
+    }
