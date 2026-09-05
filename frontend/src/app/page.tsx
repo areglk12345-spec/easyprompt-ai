@@ -18,8 +18,8 @@ const heroSubtitles = [
 
 const faqsData = [
     {
-        question: "Verbaqo แตกต่างจาก AI ตัวอื่น (เช่น ChatGPT, Gemini) อย่างไร?",
-        answer: "Verbaqo ไม่ใช่แค่บอทแชททั่วไป แต่เป็นระบบเกลาคำสั่ง (Prompt Doctor & Optimizer) ภาษาไทยโดยเฉพาะ คุณไม่จำเป็นต้องลองผิดลองถูกหรือเรียนรู้การเขียนคำสั่งยาวๆ เอง เพียงพิมพ์สั้นๆ ระบบจะช่วยวิเคราะห์ ขยายความ ใส่บริบท (Role, Context, Goal) และแปลงเป็น Prompt ระดับมืออาชีพที่นำไปสั่งงาน AI ได้ตรงใจ 100% พร้อมคลังเทมเพลตที่จัดหมวดหมู่พร้อมใช้สำหรับคนไทย"
+        question: "IZPrompt แตกต่างจาก AI ตัวอื่น (เช่น ChatGPT, Gemini) อย่างไร?",
+        answer: "IZPrompt ไม่ใช่แค่บอทแชททั่วไป แต่เป็นระบบเกลาคำสั่ง (Prompt Doctor & Optimizer) ภาษาไทยโดยเฉพาะ คุณไม่จำเป็นต้องลองผิดลองถูกหรือเรียนรู้การเขียนคำสั่งยาวๆ เอง เพียงพิมพ์สั้นๆ ระบบจะช่วยวิเคราะห์ ขยายความ ใส่บริบท (Role, Context, Goal) และแปลงเป็น Prompt ระดับมืออาชีพที่นำไปสั่งงาน AI ได้ตรงใจ 100% พร้อมคลังเทมเพลตที่จัดหมวดหมู่พร้อมใช้สำหรับคนไทย"
     },
     {
         question: "ทดลองใช้งานฟรีมีเงื่อนไขอย่างไรบ้าง?",
@@ -31,7 +31,7 @@ const faqsData = [
     },
     {
         question: "สามารถนำ Prompt ไปใช้วางบน ChatGPT, Claude หรือ Gemini ได้ไหม?",
-        answer: "ใช้ได้ครับ! คำสั่งที่สร้างจาก Verbaqo เป็นข้อความมาตรฐานที่ออกแบบมาให้รองรับกับ AI ชั้นนำทุกแบรนด์ ทั้ง ChatGPT, Claude, Gemini, Copilot และอื่นๆ โดยมีปุ่มคลิกเดียวเพื่อคัดลอกและเปิดเว็บไซต์เหล่านั้นทันที"
+        answer: "ใช้ได้ครับ! คำสั่งที่สร้างจาก IZPrompt เป็นข้อความมาตรฐานที่ออกแบบมาให้รองรับกับ AI ชั้นนำทุกแบรนด์ ทั้ง ChatGPT, Claude, Gemini, Copilot และอื่นๆ โดยมีปุ่มคลิกเดียวเพื่อคัดลอกและเปิดเว็บไซต์เหล่านั้นทันที"
     },
     {
         question: "แพ็กเกจ Business สำหรับองค์กร รองรับกี่คน และมีใบเสร็จหรือไม่?",
@@ -125,11 +125,11 @@ export default function Home() {
                         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.15] animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                             สั่งงาน AI ให้ได้ดั่งใจด้วย <br className="hidden md:block" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-500 dark:from-indigo-400 dark:to-purple-400">
-                                Verbaqo
+                                IZPrompt
                             </span>
                         </h1>
 
-                        {/* Animated Rotating Subtitle under Verbaqo */}
+                        {/* Animated Rotating Subtitle under IZPrompt */}
                         <div className="min-h-[70px] md:min-h-[60px] flex flex-col items-center justify-center max-w-2xl mx-auto px-4 relative my-1">
                             <AnimatePresence mode="wait">
                                 <motion.p
@@ -172,7 +172,7 @@ export default function Home() {
                     <div id="video-demo" className="relative z-10 w-full max-w-4xl mx-auto mt-8 md:mt-10 animate-fade-in-up space-y-3" style={{ animationDelay: '0.5s' }}>
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-200/60 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-300/40 dark:border-slate-700/40">
                             <span className="material-symbols-outlined text-sm text-indigo-500">play_circle</span>
-                            <span>วิดีโอแนะนำการใช้งาน Verbaqo</span>
+                            <span>วิดีโอแนะนำการใช้งาน IZPrompt</span>
                         </div>
                         <div className="rounded-3xl overflow-hidden shadow-2xl shadow-indigo-500/10 border border-slate-200/80 dark:border-slate-800 bg-black">
                             <video
@@ -188,7 +188,7 @@ export default function Home() {
                     </div>
                 </section>
 
-                {/* Why Verbaqo Section */}
+                {/* Why IZPrompt Section */}
                 <section id="features" className="py-12 md:py-16 bg-slate-50 dark:bg-[#0b0f19] px-6 border-t border-slate-200/50 dark:border-slate-800/50 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 dark:bg-purple-500/5 blur-[100px] rounded-full pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/5 blur-[100px] rounded-full pointer-events-none" />
@@ -197,7 +197,7 @@ export default function Home() {
                         <div className="text-center space-y-3 mb-10">
                             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-sm font-bold tracking-wide">
                                 <span className="material-symbols-outlined text-[18px]">psychology_alt</span>
-                                ทำไมต้อง Verbaqo?
+                                ทำไมต้อง IZPrompt?
                             </div>
                             <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-800 dark:text-white">
                                 ยกระดับการทำงานด้วย AI ให้ง่ายกว่าที่เคย
@@ -472,11 +472,11 @@ export default function Home() {
                         <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                             <span className="material-symbols-outlined !font-bold text-lg">bolt</span>
                         </div>
-                        <span className="font-bold text-lg text-slate-800 dark:text-white">Verbaqo</span>
+                        <span className="font-bold text-lg text-slate-800 dark:text-white">IZPrompt</span>
                     </div>
 
                     <div className="text-slate-500 dark:text-slate-400 text-sm">
-                        &copy; {new Date().getFullYear()} Verbaqo. All rights reserved.
+                        &copy; {new Date().getFullYear()} IZPrompt. All rights reserved.
                     </div>
                     
                     <div className="flex gap-6 text-sm font-medium">

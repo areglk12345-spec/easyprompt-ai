@@ -81,7 +81,7 @@ export default function PricingPage() {
                 <div className="text-center space-y-4">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider">
                         <Sparkles className="w-3.5 h-3.5" />
-                        Verbaqo Credits & Pricing
+                        IZPrompt Credits & Pricing
                     </div>
                     <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                         อัตราค่าบริการและเติมเครดิต AI

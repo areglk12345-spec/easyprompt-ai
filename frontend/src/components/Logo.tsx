@@ -29,21 +29,23 @@ export default function Logo({ variant = 'full', size = 'md', className = '' }: 
                     {/* Ambient Soft Glow */}
                     <div className="absolute -top-3 -right-3 w-8 h-8 bg-cyan-400/40 rounded-full blur-md"></div>
 
-                    {/* "V" Wordmark Emblem — checkmark-style dual stroke, brand gradient */}
+                    {/* "IZ" Wordmark Emblem — geometric monogram with brand gradient */}
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-4/5 h-4/5 drop-shadow-sm">
                         <defs>
-                            <linearGradient id="verbaqo-v-left" x1="4" y1="4" x2="12" y2="18" gradientUnits="userSpaceOnUse">
-                                <stop offset="0%" stopColor="#6366f1" />
-                                <stop offset="100%" stopColor="#4338ca" />
+                            <linearGradient id="izprompt-grad-i" x1="6" y1="6" x2="6" y2="18" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stopColor="#38bdf8" />
+                                <stop offset="100%" stopColor="#6366f1" />
                             </linearGradient>
-                            <linearGradient id="verbaqo-v-right" x1="12" y1="18" x2="20" y2="3" gradientUnits="userSpaceOnUse">
+                            <linearGradient id="izprompt-grad-z" x1="11" y1="6" x2="19" y2="18" gradientUnits="userSpaceOnUse">
                                 <stop offset="0%" stopColor="#818cf8" />
-                                <stop offset="55%" stopColor="#a855f7" />
+                                <stop offset="50%" stopColor="#a855f7" />
                                 <stop offset="100%" stopColor="#38bdf8" />
                             </linearGradient>
                         </defs>
-                        <line x1="4.5" y1="4.5" x2="11.5" y2="17.5" stroke="url(#verbaqo-v-left)" strokeWidth="4.2" strokeLinecap="round" />
-                        <line x1="11.5" y1="17.5" x2="19.5" y2="3" stroke="url(#verbaqo-v-right)" strokeWidth="4.2" strokeLinecap="round" />
+                        {/* Letter 'I' */}
+                        <line x1="6" y1="6" x2="6" y2="18" stroke="url(#izprompt-grad-i)" strokeWidth="3.4" strokeLinecap="round" />
+                        {/* Letter 'Z' */}
+                        <path d="M 11.5 6.5 H 18.5 L 11.5 17.5 H 18.5" stroke="url(#izprompt-grad-z)" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </div>
             </div>
@@ -52,7 +54,7 @@ export default function Logo({ variant = 'full', size = 'md', className = '' }: 
             {variant !== 'icon' && (
                 <div className="flex items-center gap-1.5 font-black tracking-tight">
                     <span className={`${currentSize.text} bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-800 dark:from-white dark:via-indigo-100 dark:to-slate-200 bg-clip-text text-transparent font-extrabold`}>
-                        Verbaqo
+                        IZPrompt
                     </span>
                     <span className={`${currentSize.badge} rounded-full bg-indigo-600 text-white font-extrabold uppercase tracking-wider shadow-xs`}>
                         AI

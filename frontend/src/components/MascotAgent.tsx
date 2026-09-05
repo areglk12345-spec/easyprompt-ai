@@ -14,7 +14,7 @@ interface MascotAgentProps {
 }
 
 const DEFAULT_TIPS_TH = [
-  "สวัสดีครับ! ผม V-Bot พร้อมช่วยเปลี่ยนความคิดเป็น Prompt สุดเจ๋งครับ ✨",
+  "สวัสดีครับ! ผม IZ-Bot พร้อมช่วยเปลี่ยนความคิดเป็น Prompt สุดเจ๋งครับ ✨",
   "ลองเปิด 'โหมดภาษาง่าย' ดูสิครับ อ่านสบายตา ไม่ซับซ้อนเลย 😊",
   "อยากเช็คคุณภาพ Prompt? ส่งมาให้ผมตรวจใน Prompt Doctor ได้เลย! 🩺",
   "พิมพ์คำพูดประจำวันธรรมดาๆ มาได้เลย เดี๋ยวผมเกลาเป็น Prompt มืออาชีพให้ครับ 🚀",
@@ -22,7 +22,7 @@ const DEFAULT_TIPS_TH = [
 ];
 
 const DEFAULT_TIPS_EN = [
-  "Hi! I'm V-Bot, ready to transform your ideas into perfect Prompts! ✨",
+  "Hi! I'm IZ-Bot, ready to transform your ideas into perfect Prompts! ✨",
   "Try 'Easy Language Mode' for simplified, friendly explanations! 😊",
   "Want to check prompt quality? Let's analyze it with Prompt Doctor! 🩺",
   "Just type everyday thoughts, and I'll tailor a professional prompt for you! 🚀",
@@ -90,7 +90,7 @@ export default function MascotAgent({
         <button
           onClick={() => setIsMinimized(false)}
           className="group relative flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 hover:scale-110 active:scale-95 transition-all duration-300 border-2 border-white/40 dark:border-slate-700/60"
-          title="เปิด V-Bot มาสคอตผู้ช่วย"
+          title="เปิด IZ-Bot มาสคอตผู้ช่วย"
         >
           <span className="material-symbols-outlined text-2xl animate-pulse">smart_toy</span>
           <span className="absolute -top-1 -right-1 flex h-3 w-3">
@@ -110,7 +110,7 @@ export default function MascotAgent({
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1">
               <span className="material-symbols-outlined text-sm">auto_awesome</span>
-              <span>V-Bot AI</span>
+              <span>IZ-Bot AI</span>
               {activeMood === 'doctor' && (
                 <span className="bg-emerald-500/10 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded-full font-semibold">Prompt Doctor</span>
               )}
@@ -154,7 +154,7 @@ export default function MascotAgent({
         className={`cursor-pointer relative group transition-transform duration-300 ${
           activeMood === 'happy' ? 'mascot-happy-anim' : 'mascot-float-anim'
         }`}
-        title="คลิกทักทาย V-Bot"
+        title="คลิกทักทาย IZ-Bot"
       >
         {/* Outer Aura Glow */}
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500/30 via-purple-500/30 to-cyan-500/30 blur-xl mascot-aura"></div>
@@ -166,35 +166,35 @@ export default function MascotAgent({
           className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 relative drop-shadow-2xl hover:scale-105 transition-transform duration-300"
         >
           <defs>
-            {/* Robot Head & Body Gradients — white-bodied V-Bot */}
-            <linearGradient id="vbot-head-grad" x1="10" y1="20" x2="90" y2="80" gradientUnits="userSpaceOnUse">
+            {/* Robot Head & Body Gradients — white-bodied IZ-Bot */}
+            <linearGradient id="izbot-head-grad" x1="10" y1="20" x2="90" y2="80" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#ffffff" />
               <stop offset="60%" stopColor="#f1f5f9" />
               <stop offset="100%" stopColor="#e0e7ff" />
             </linearGradient>
 
-            <linearGradient id="vbot-visor-grad" x1="20" y1="30" x2="80" y2="60" gradientUnits="userSpaceOnUse">
+            <linearGradient id="izbot-visor-grad" x1="20" y1="30" x2="80" y2="60" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#0f172a" />
               <stop offset="100%" stopColor="#1e1b4b" />
             </linearGradient>
 
-            <linearGradient id="vbot-body-grad" x1="20" y1="60" x2="80" y2="95" gradientUnits="userSpaceOnUse">
+            <linearGradient id="izbot-body-grad" x1="20" y1="60" x2="80" y2="95" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#ffffff" />
               <stop offset="100%" stopColor="#e0e7ff" />
             </linearGradient>
 
-            <linearGradient id="vbot-gem-grad" x1="45" y1="5" x2="55" y2="15" gradientUnits="userSpaceOnUse">
+            <linearGradient id="izbot-gem-grad" x1="45" y1="5" x2="55" y2="15" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#6366f1" />
               <stop offset="100%" stopColor="#38bdf8" />
             </linearGradient>
 
-            <linearGradient id="vbot-badge-left" x1="42" y1="68" x2="50" y2="80" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#6366f1" />
-              <stop offset="100%" stopColor="#4338ca" />
+            <linearGradient id="izbot-badge-left" x1="43" y1="68" x2="47" y2="78" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#38bdf8" />
+              <stop offset="100%" stopColor="#6366f1" />
             </linearGradient>
-            <linearGradient id="vbot-badge-right" x1="50" y1="80" x2="58" y2="66" gradientUnits="userSpaceOnUse">
+            <linearGradient id="izbot-badge-right" x1="48" y1="68" x2="56" y2="78" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#818cf8" />
-              <stop offset="55%" stopColor="#a855f7" />
+              <stop offset="50%" stopColor="#a855f7" />
               <stop offset="100%" stopColor="#38bdf8" />
             </linearGradient>
 
@@ -211,7 +211,7 @@ export default function MascotAgent({
             rx="32"
             ry="8"
             fill="none"
-            stroke="url(#vbot-gem-grad)"
+            stroke="url(#izbot-gem-grad)"
             strokeWidth="2"
             strokeDasharray="6 4"
             className="ring-rotate opacity-75"
@@ -219,27 +219,27 @@ export default function MascotAgent({
 
           {/* Antenna */}
           <line x1="50" y1="22" x2="50" y2="12" stroke="#a5b4fc" strokeWidth="3" strokeLinecap="round" />
-          <circle cx="50" cy="10" r="5" fill="url(#vbot-gem-grad)" className="antenna-light" filter="url(#glow-light)" />
+          <circle cx="50" cy="10" r="5" fill="url(#izbot-gem-grad)" className="antenna-light" filter="url(#glow-light)" />
 
           {/* Floating Robot Body */}
-          <rect x="30" y="60" width="40" height="26" rx="13" fill="url(#vbot-body-grad)" stroke="#c7d2fe" strokeWidth="1.5" />
-          {/* Chest Badge — brand "V" mark */}
-          <line x1="43" y1="68" x2="50" y2="80" stroke="url(#vbot-badge-left)" strokeWidth="3" strokeLinecap="round" />
-          <line x1="50" y1="80" x2="57" y2="67" stroke="url(#vbot-badge-right)" strokeWidth="3" strokeLinecap="round" />
+          <rect x="30" y="60" width="40" height="26" rx="13" fill="url(#izbot-body-grad)" stroke="#c7d2fe" strokeWidth="1.5" />
+          {/* Chest Badge — brand "IZ" mark */}
+          <line x1="44.5" y1="68.5" x2="44.5" y2="77.5" stroke="url(#izbot-badge-left)" strokeWidth="2.4" strokeLinecap="round" />
+          <path d="M 48.5 68.5 H 55 L 48.5 77.5 H 55" stroke="url(#izbot-badge-right)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
 
           {/* Floating Robotic Arms */}
           <rect x="18" y="64" width="8" height="14" rx="4" fill="#6366f1" className={activeMood === 'happy' ? 'animate-bounce' : ''} />
           <rect x="74" y="64" width="8" height="14" rx="4" fill="#6366f1" />
 
           {/* Head Capsule */}
-          <rect x="18" y="22" width="64" height="42" rx="21" fill="url(#vbot-head-grad)" stroke="#c7d2fe" strokeWidth="1.5" />
+          <rect x="18" y="22" width="64" height="42" rx="21" fill="url(#izbot-head-grad)" stroke="#c7d2fe" strokeWidth="1.5" />
 
           {/* Head Ear Pads */}
           <rect x="13" y="32" width="6" height="20" rx="3" fill="#4338ca" />
           <rect x="81" y="32" width="6" height="20" rx="3" fill="#4338ca" />
 
           {/* Glass Visor Screen */}
-          <rect x="24" y="28" width="52" height="30" rx="14" fill="url(#vbot-visor-grad)" stroke="#312e81" strokeWidth="1" />
+          <rect x="24" y="28" width="52" height="30" rx="14" fill="url(#izbot-visor-grad)" stroke="#312e81" strokeWidth="1" />
 
           {/* Eye & Facial Expressions based on Active Mood */}
           {activeMood === 'idle' && (

@@ -27,7 +27,7 @@ export default function UserMenu() {
 
     useEffect(() => {
         if (activeWorkspace) {
-            document.title = `Verbaqo - Workspace: ${activeWorkspace}`;
+            document.title = `IZPrompt - Workspace: ${activeWorkspace}`;
         }
     }, [activeWorkspace]);
 

@@ -18,7 +18,7 @@ limiter = Limiter(key_func=get_remote_address, enabled=os.getenv("TESTING") != "
 router = APIRouter()
 
 import logging
-logger = logging.getLogger("verbaqo.chat")
+logger = logging.getLogger("izprompt.chat")
 
 
 def _session_owned_by(session_id: str, current_user: Optional[models.User]):
@@ -201,12 +201,12 @@ def stream_chat_with_agent(request: Request, payload: UserMessage, current_user:
 
         if getattr(payload, 'is_direct_run', False):
             stream_system_prompt = (
-                "คุณคือผู้ช่วย AI อัจฉริยะ (Verbaqo Assistant)\n"
+                "คุณคือผู้ช่วย AI อัจฉริยะ (IZPrompt Assistant)\n"
                 "โปรดตอบคำถามหรือทำตามคำสั่งของผู้ใช้อย่างดีที่สุด ให้ข้อมูลที่ครบถ้วนและมีประโยชน์ เป็นธรรมชาติและเป็นกันเอง"
             )
         else:
             stream_system_prompt = (
-                "คุณคือ AI ผู้ช่วยอัจฉริยะ (Verbaqo Agent) ช่วยผู้ใช้เขียนหรือปรับแต่ง Prompt/ข้อความให้ดีที่สุด\n"
+                "คุณคือ AI ผู้ช่วยอัจฉริยะ (IZPrompt Agent) ช่วยผู้ใช้เขียนหรือปรับแต่ง Prompt/ข้อความให้ดีที่สุด\n"
                 "กฎสำคัญ:\n"
                 "1. วิเคราะห์ว่าผู้ใช้บอกข้อมูลครบ 4 มิติหรือไม่ (เป้าหมาย, กลุ่มเป้าหมาย, โทนภาษา, รายละเอียด)\n"
                 "2. หากข้อมูลยังไม่ครบ ให้คุณถามกลับ 'เพียงแค่ 1 คำถามเท่านั้น' เพื่อขอข้อมูลที่ยังขาดหายไป ห้ามร่างข้อความให้เด็ดขาด\n"

@@ -5,8 +5,19 @@
       <stop offset="55%" stop-color="#7c3aed" />
       <stop offset="100%" stop-color="#22d3ee" />
     </linearGradient>
+    <linearGradient id="izprompt-grad-i" x1="21" y1="16" x2="21" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#e0f2fe" />
+      <stop offset="100%" stop-color="#ffffff" />
+    </linearGradient>
+    <linearGradient id="izprompt-grad-z" x1="30" y1="16" x2="50" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="50%" stop-color="#f0f5ff" />
+      <stop offset="100%" stop-color="#e0f2fe" />
+    </linearGradient>
   </defs>
   <rect width="64" height="64" rx="16" fill="url(#bg)" />
-  <line x1="14" y1="14" x2="30" y2="46" stroke="#ffffff" stroke-width="8" stroke-linecap="round" />
-  <line x1="30" y1="46" x2="50" y2="10" stroke="#ffffff" stroke-width="8" stroke-linecap="round" />
+  <!-- Letter 'I' -->
+  <line x1="21" y1="16" x2="21" y2="48" stroke="url(#izprompt-grad-i)" stroke-width="8" stroke-linecap="round" />
+  <!-- Letter 'Z' -->
+  <path d="M 31 17.5 H 48 L 31 46.5 H 48" stroke="url(#izprompt-grad-z)" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
 </svg>

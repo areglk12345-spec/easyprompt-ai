@@ -1,4 +1,4 @@
-name: Verbaqo CI
+name: IZPrompt CI
 
 on:
   push:

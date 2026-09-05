@@ -20,7 +20,7 @@ load_dotenv()
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logger = logging.getLogger("verbaqo")
+logger = logging.getLogger("izprompt")
 
 # Initialize Firebase Admin
 try:
@@ -72,7 +72,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="Verbaqo Backend (Powered by Gemini)",
+    title="IZPrompt Backend (Powered by Gemini)",
     description="API สำหรับ AI Accessibility Agent / Prompt Fitter Agent",
     version="2.0.0",
     lifespan=lifespan
@@ -85,7 +85,7 @@ raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localho
 ALLOWED_ORIGINS = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 
 # Hardcode the custom domains to guarantee it works regardless of Railway env vars
-for domain in ["https://easyprompt.piravat.space", "https://ezprompt.piravat.space", "https://verbaqo.piravat.space", "https://verbaqo.com", "https://www.verbaqo.com"]:
+for domain in ["https://easyprompt.piravat.space", "https://ezprompt.piravat.space", "https://verbaqo.piravat.space", "https://verbaqo.com", "https://www.verbaqo.com", "https://izprompt.com", "https://www.izprompt.com", "https://izprompt.piravat.space"]:
     if domain not in ALLOWED_ORIGINS:
         ALLOWED_ORIGINS.append(domain)
 

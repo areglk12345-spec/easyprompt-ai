@@ -12,7 +12,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 import os
-logger = logging.getLogger("verbaqo.doctor")
+logger = logging.getLogger("izprompt.doctor")
 limiter = Limiter(key_func=get_remote_address, enabled=os.getenv("TESTING") != "true")
 router = APIRouter()
 

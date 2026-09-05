@@ -31,7 +31,7 @@ def setup_2fa(
     totp = pyotp.TOTP(secret)
     provisioning_uri = totp.provisioning_uri(
         name=current_user.username,
-        issuer_name="Verbaqo"
+        issuer_name="IZPrompt"
     )
 
     # Generate QR code as base64 image

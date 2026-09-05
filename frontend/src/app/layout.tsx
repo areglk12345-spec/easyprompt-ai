@@ -13,27 +13,27 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://verbaqo.com'),
-  title: 'Verbaqo | เครื่องมือสร้าง Prompt ฉบับเข้าใจง่าย',
+  title: 'IZPrompt | เครื่องมือสร้าง Prompt ฉบับเข้าใจง่าย',
   description: 'AI Accessibility Agent ที่ช่วยให้ทุกคนและผู้สูงอายุเข้าถึง AI ได้ง่ายขึ้น เปลี่ยนคำพูดธรรมดาให้เป็น Prompt ที่สมบูรณ์แบบ',
   openGraph: {
-    title: 'Verbaqo | เครื่องมือสร้าง Prompt ฉบับเข้าใจง่าย',
+    title: 'IZPrompt | เครื่องมือสร้าง Prompt ฉบับเข้าใจง่าย',
     description: 'AI Accessibility Agent ที่ช่วยให้ทุกคนและผู้สูงอายุเข้าถึง AI ได้ง่ายขึ้น เปลี่ยนคำพูดธรรมดาให้เป็น Prompt ที่สมบูรณ์แบบ',
     type: 'website',
     locale: 'th_TH',
     url: 'https://verbaqo.com',
-    siteName: 'Verbaqo',
+    siteName: 'IZPrompt',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Verbaqo Preview',
+        alt: 'IZPrompt Preview',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Verbaqo',
+    title: 'IZPrompt',
     description: 'AI Accessibility Agent ที่ช่วยให้ทุกคนและผู้สูงอายุเข้าถึง AI ได้ง่ายขึ้น',
     images: ['/og-image.png'],
   }
