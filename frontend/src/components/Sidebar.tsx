@@ -197,12 +197,12 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                 className="flex-1 truncate pr-5 font-medium block hover:text-slate-900 dark:hover:text-white"
                 title={chat.title}
             >
-                {showPin && <span className="mr-1 text-amber-500">📌</span>}
+                {showPin && <Pin className="w-3 h-3 inline mr-1.5 text-amber-500 fill-amber-400 shrink-0" />}
                 {chat.title}
             </Link>
             <button 
                 onClick={(e) => handleDeleteChat(e, chat.id)}
-                className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-md transition-all shrink-0"
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-md transition-all shrink-0"
                 title={t('sidebar.delete_chat')}
             >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -417,7 +417,7 @@ export default function Sidebar({ activePage, onNewChat }: SidebarProps) {
                                 onClick={() => handleTogglePin(contextMenu.chatId, contextMenu.isPinned)}
                                 className="w-full px-4 py-2 text-left text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
                             >
-                                <span>📌</span>
+                                <Pin className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
                                 <span>{contextMenu.isPinned ? t('sidebar.unpin') : t('sidebar.pin_top')}</span>
                             </button>
                             {folders.length > 0 && (

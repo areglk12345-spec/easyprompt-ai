@@ -61,7 +61,6 @@ export default function SettingsPage() {
 
     // TTS Voice State
     const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-    const [selectedVoiceURI, setSelectedVoiceURI] = useState('');
 
     // Preferences loading state
     const [prefsLoaded, setPrefsLoaded] = useState(false);
@@ -86,9 +85,6 @@ export default function SettingsPage() {
             const availableVoices = window.speechSynthesis.getVoices();
             const filteredVoices = availableVoices.filter(v => v.lang.includes('th') || v.lang.includes('en'));
             setVoices(filteredVoices);
-            
-            const savedVoice = localStorage.getItem('preferred_voice');
-            if (savedVoice) setSelectedVoiceURI(savedVoice);
         };
 
         loadVoices();
@@ -161,7 +157,7 @@ export default function SettingsPage() {
             
             await refreshUser();
             setHasUnsavedChanges(false);
-            alert('💾 บันทึกการตั้งค่าระบบและโปรไฟล์เรียบร้อยแล้ว!');
+            alert('บันทึกการตั้งค่าระบบและโปรไฟล์เรียบร้อยแล้ว');
         } catch (error) {
             alert('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
         }
@@ -196,7 +192,7 @@ export default function SettingsPage() {
             if (!res.ok) {
                 alert(data.detail || 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน');
             } else {
-                alert('🔑 เปลี่ยนรหัสผ่านเรียบร้อยแล้ว');
+                alert('เปลี่ยนรหัสผ่านเรียบร้อยแล้ว');
                 setCurrentPassword('');
                 setNewPassword('');
                 setConfirmPassword('');
@@ -253,7 +249,7 @@ export default function SettingsPage() {
             setIs2FAEnabled(true);
             setShow2FASetup(false);
             setVerifyCode('');
-            setTwoFAMessage('✅ เปิดใช้งาน 2FA สำเร็จ!');
+            setTwoFAMessage('เปิดใช้งาน 2FA สำเร็จเรียบร้อยแล้ว');
             await refreshUser();
         } catch (e) {
             setTwoFAError('เกิดข้อผิดพลาด');
@@ -333,16 +329,9 @@ export default function SettingsPage() {
                             <div className="glass-panel-heavy p-8 rounded-3xl space-y-8 shadow-sm">
                                 <div className="flex flex-col md:flex-row items-center gap-8">
                                     <div className="relative group shrink-0">
-                                        <Image 
-                                            alt="Profile Large"
-                                            className="w-32 h-32 rounded-3xl object-cover shadow-xl group-hover:opacity-85 transition-opacity"
-                                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrW-GAMoz4mQlSKchVGH5TICEz0Fr5EVg3oNcqHNbWMTx00u4j9vOLIirm76JdmtVavy3sz23fRj24IRuk926F2BPlBVzYWcDW0GvsOdf0GRarwfefXUf_8VZ-zJ2M5AxDzcvahET7adTE-6s8LduRglPC9SPxVzKLtszdXBxPpXih1qD_pd-udlcF8gyZxt6OUggtTSUxPM4U88hA3blUN1FCLi2J-4Iq0Sl3G5LjyzWtWwl1D1JdVXgHClMEiCvKvWaL-82M48g"
-                                            width={128}
-                                            height={128}
-                                        />
-                                        <button className="absolute -bottom-2 -right-2 bg-primary text-white p-2 rounded-xl shadow-lg hover:scale-110 transition-transform">
-                                            <span className="material-symbols-outlined text-sm">edit</span>
-                                        </button>
+                                        <div className="w-32 h-32 rounded-3xl shadow-xl bg-gradient-to-tr from-indigo-600 via-purple-500 to-cyan-400 flex items-center justify-center text-white text-4xl font-black select-none">
+                                            {(fullName || user?.username || '?').trim().charAt(0).toUpperCase()}
+                                        </div>
                                     </div>
                                     <div className="flex-1 w-full space-y-4">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -537,7 +526,7 @@ export default function SettingsPage() {
                                                     onChange={(e) => setPreferredVoiceURI(e.target.value)}
                                                     className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
                                                 >
-                                                    <optgroup label="✨ Neural AI Voices (พากย์ธรรมชาติระดับมนุษย์)">
+                                                    <optgroup label="Neural AI Voices (พากย์ธรรมชาติระดับมนุษย์)">
                                                         <option value="th-TH-PremwadeeNeural">👧 เสียงผู้หญิงไทยนุ่มนวล (Premwadee Neural AI)</option>
                                                         <option value="th-TH-NiwatNeural">👨 เสียงผู้ชายไทยสุภาพ (Niwat Neural AI)</option>
                                                         <option value="en-US-AvaNeural">👩 English Neural Female (Ava AI)</option>
@@ -806,7 +795,10 @@ export default function SettingsPage() {
                                         <div>
                                             <p className="font-bold text-slate-800 dark:text-white">Biometric Authentication</p>
                                             <p className="text-slate-500 dark:text-slate-400 text-sm">ใช้งาน TouchID หรือ FaceID สำหรับเข้าสู่ระบบด่วน</p>
-                                            <p className="text-amber-500 text-xs font-semibold mt-0.5">⚠️ ต้องใช้ HTTPS — จะเปิดใช้เมื่อ Deploy ระบบจริง</p>
+                                            <p className="text-amber-500 text-xs font-semibold mt-0.5 flex items-center gap-1">
+                                                <span className="material-symbols-outlined text-xs">info</span>
+                                                <span>ต้องใช้ HTTPS — จะเปิดใช้เมื่อ Deploy ระบบจริง</span>
+                                            </p>
                                         </div>
                                     </div>
                                     <button

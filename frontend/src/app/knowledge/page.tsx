@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useFontSize } from '../../context/FontSizeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { Button } from '../../components/ui/Button';
+import { Database } from 'lucide-react';
 
 type Document = {
     id: number;
@@ -128,8 +129,9 @@ export default function KnowledgePage() {
                         <div className="max-w-4xl mx-auto space-y-8">
                             <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
                                 <div>
-                                    <h1 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-4xl' : 'text-2xl'} mb-2`}>
-                                        📚 ฐานข้อมูลส่วนตัว
+                                    <h1 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-4xl' : 'text-2xl'} mb-2 flex items-center gap-2.5`}>
+                                        <Database className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
+                                        <span>ฐานข้อมูลส่วนตัว</span>
                                     </h1>
                                     <p className="text-slate-500 dark:text-slate-400 font-medium">
                                         อัปโหลดเอกสาร กฎระเบียบ หรือนโยบายบริษัท เพื่อให้ AI ใช้อ้างอิงและแต่ง Prompt ได้ตรงกับบริบทของคุณมากที่สุด
@@ -202,7 +204,7 @@ export default function KnowledgePage() {
                                                     <td className="px-6 py-4 text-center">
                                                         <button 
                                                             onClick={() => handleDelete(doc.id)}
-                                                            className="text-slate-400 hover:text-rose-500 p-2 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-colors opacity-0 group-hover:opacity-100"
+                                                            className="text-slate-400 hover:text-rose-500 p-2 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
                                                             title="ลบเอกสาร"
                                                         >
                                                             <span className="material-symbols-outlined">delete</span>

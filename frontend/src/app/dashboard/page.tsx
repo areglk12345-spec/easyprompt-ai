@@ -9,7 +9,7 @@ import HelpTooltip from '../../components/HelpTooltip';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFontSize } from '../../context/FontSizeContext';
-import { BarChart3, TrendingUp, AlertCircle, Lightbulb, Users, MessageSquare, Files, CreditCard, Crown } from 'lucide-react';
+import { BarChart3, TrendingUp, AlertCircle, Lightbulb, Users, MessageSquare, Files, CreditCard, Crown, Sparkles } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
@@ -81,7 +81,7 @@ export default function DashboardPage() {
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-2xl"></div>
                                     <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
                                         <div className="space-y-4 max-w-xl">
-                                            <h2 className="text-3xl font-extrabold tracking-tight">ยินดีต้อนรับสู่ IZPrompt! 👋</h2>
+                                            <h2 className="text-3xl font-extrabold tracking-tight">ยินดีต้อนรับสู่ IZPrompt!</h2>
                                             <p className="text-indigo-100 text-lg leading-relaxed">เริ่มต้นสร้างสรรค์ผลงานของคุณได้ง่ายๆ ใน 3 ขั้นตอน เพื่อให้คุณทำงานร่วมกับ AI ได้อย่างมืออาชีพ</p>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full md:w-auto">
@@ -171,7 +171,10 @@ export default function DashboardPage() {
                                                     Total Credits in System
                                                     <HelpTooltip text="จำนวนเครดิตโดยรวมทั้งหมดในระบบที่แจกจ่ายให้ผู้ใช้" />
                                                 </div>
-                                                <div className="text-3xl font-black text-slate-800 dark:text-white">{stats?.total_credits?.toLocaleString() || 0} 💎</div>
+                                                <div className="text-3xl font-black text-slate-800 dark:text-white flex items-center gap-1.5">
+                                                    <span>{stats?.total_credits?.toLocaleString() || 0}</span>
+                                                    <Sparkles className="w-5 h-5 text-amber-500 fill-amber-400/20" />
+                                                </div>
                                             </div>
                                         </div>
                                         <div className={statCardStyle}>
@@ -192,7 +195,10 @@ export default function DashboardPage() {
                                 {/* Daily Usage Line Chart */}
                                 {stats?.line_chart && stats.line_chart.length > 0 && (
                                     <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-                                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6">📈 การใช้งานรายวัน (7 วันล่าสุด)</h3>
+                                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+                                            <TrendingUp className="w-5 h-5 text-indigo-500" />
+                                            <span>การใช้งานรายวัน (7 วันล่าสุด)</span>
+                                        </h3>
                                         <div className="h-64 w-full">
                                             <ResponsiveContainer width="100%" height="100%">
                                                 <AreaChart data={stats.line_chart} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>

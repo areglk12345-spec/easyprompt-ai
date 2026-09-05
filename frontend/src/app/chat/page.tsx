@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { AudioLines } from 'lucide-react';
+import { AudioLines, Sparkles } from 'lucide-react';
 import UserMenu from '../../components/UserMenu';
 import Sidebar from '../../components/Sidebar';
 import HelpTooltip from '../../components/HelpTooltip';
@@ -157,7 +157,7 @@ function ChatContent() {
         setMessages([
             { 
                 role: 'agent', 
-                text: 'สวัสดีครับ! ผมคือ IZ-Bot มาสคอตผู้ช่วยของคุณ วันนี้มีอะไรให้ผมช่วยร่างหรือสร้าง Prompt ไหมครับ? เช่น อยากให้ช่วยเขียนอีเมล, สรุปบทความ, หรือวางแผนเที่ยว บอกผมได้เลยครับ 🤖',
+                text: 'สวัสดีครับ! ผมคือ IZ-Bot มาสคอตผู้ช่วยของคุณ วันนี้มีอะไรให้ผมช่วยร่างหรือสร้าง Prompt ไหมครับ? เช่น อยากให้ช่วยเขียนอีเมล, สรุปบทความ, หรือวางแผนเที่ยว บอกผมได้เลยครับ',
                 suggestedOptions: ['เขียนจดหมาย/อีเมล', 'สรุปบทความ', 'แปลภาษา', 'วางแผนท่องเที่ยว']
             }
         ]);
@@ -195,7 +195,7 @@ function ChatContent() {
     const [messages, setMessages] = useState<Message[]>([
         { 
             role: 'agent', 
-            text: 'สวัสดีครับ! ผมคือ IZ-Bot มาสคอตผู้ช่วยของคุณ วันนี้มีอะไรให้ผมช่วยร่างหรือสร้าง Prompt ไหมครับ? เช่น อยากให้ช่วยเขียนอีเมล, สรุปบทความ, หรือวางแผนเที่ยว บอกผมได้เลยครับ 🤖',
+            text: 'สวัสดีครับ! ผมคือ IZ-Bot มาสคอตผู้ช่วยของคุณ วันนี้มีอะไรให้ผมช่วยร่างหรือสร้าง Prompt ไหมครับ? เช่น อยากให้ช่วยเขียนอีเมล, สรุปบทความ, หรือวางแผนเที่ยว บอกผมได้เลยครับ',
             suggestedOptions: ['เขียนจดหมาย/อีเมล', 'สรุปบทความ', 'แปลภาษา', 'วางแผนท่องเที่ยว']
         }
     ]);
@@ -1139,7 +1139,10 @@ function ChatContent() {
                         </div>
                         
                         <div className="space-y-2">
-                            <h3 className="text-2xl font-black text-slate-800 dark:text-white">ทดลองสร้าง Prompt ฟรีครบ 3 ครั้งแล้ว 🎉</h3>
+                            <h3 className="text-2xl font-black text-slate-800 dark:text-white flex items-center justify-center gap-2">
+                                <span>ทดลองสร้าง Prompt ฟรีครบ 3 ครั้งแล้ว</span>
+                                <Sparkles className="w-6 h-6 text-amber-500 shrink-0" />
+                            </h3>
                             <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
                                 สมัครสมาชิกหรือเข้าสู่ระบบฟรี เพื่อรับเพิ่มอีก 100 เครดิต ใช้งานสร้างและเกลา Prompt ได้แบบไม่จำกัด พร้อมบันทึกประวัติการใช้งานของคุณ!
                             </p>

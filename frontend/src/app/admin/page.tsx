@@ -8,6 +8,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFontSize } from '../../context/FontSizeContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+import { 
+    Lock, Shield, Trash2, Settings, Tag, Edit2, ClipboardList, 
+    BarChart3, TrendingUp, Sparkles, Inbox, Key, AlertTriangle, 
+    RefreshCw, Star, Heart, FileText, Search, ThumbsUp, ThumbsDown 
+} from 'lucide-react';
 
 type UserProfile = {
     id: number;
@@ -155,7 +160,7 @@ function AdminPageContent() {
             setUsers(data);
         } catch (err: any) {
             console.error("Fetch Users Error:", err);
-            setError(err.message || "ไม่สามารถโหลดข้อมูลผู้ใช้ได้ในขณะนี้ 😢");
+            setError(err.message || "ไม่สามารถโหลดข้อมูลผู้ใช้ได้ในขณะนี้");
         } finally {
             setIsLoading(false);
         }
@@ -225,16 +230,59 @@ function AdminPageContent() {
         }
     }, [authFetch]);
 
-    const getAuditActionText = (action: string) => {
+    const getAuditActionBadge = (action: string) => {
         switch (action) {
-            case 'login': return '🔐 เข้าสู่ระบบ';
-            case 'role_change': return '🛡️ เปลี่ยนสิทธิ์';
-            case 'user_delete': return '🗑️ ลบผู้ใช้';
-            case 'org_settings_change': return '⚙️ เปลี่ยนการตั้งค่า';
-            case 'prompt_var_create': return '🏷️ สร้างตัวแปร';
-            case 'prompt_var_update': return '✏️ แก้ไขตัวแปร';
-            case 'prompt_var_delete': return '🗑️ ลบตัวแปร';
-            default: return action;
+            case 'login':
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                        <Lock className="w-3.5 h-3.5 text-blue-500" />
+                        เข้าสู่ระบบ
+                    </span>
+                );
+            case 'role_change':
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                        <Shield className="w-3.5 h-3.5 text-purple-500" />
+                        เปลี่ยนสิทธิ์
+                    </span>
+                );
+            case 'user_delete':
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                        <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                        ลบผู้ใช้
+                    </span>
+                );
+            case 'org_settings_change':
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                        <Settings className="w-3.5 h-3.5 text-amber-500" />
+                        เปลี่ยนการตั้งค่า
+                    </span>
+                );
+            case 'prompt_var_create':
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                        <Tag className="w-3.5 h-3.5 text-emerald-500" />
+                        สร้างตัวแปร
+                    </span>
+                );
+            case 'prompt_var_update':
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                        <Edit2 className="w-3.5 h-3.5 text-indigo-500" />
+                        แก้ไขตัวแปร
+                    </span>
+                );
+            case 'prompt_var_delete':
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                        <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                        ลบตัวแปร
+                    </span>
+                );
+            default:
+                return <span className="text-xs text-slate-500 font-medium">{action}</span>;
         }
     };
 
@@ -507,7 +555,9 @@ function AdminPageContent() {
         return (
             <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
                 <div className="text-center space-y-3">
-                    <div className="text-4xl animate-bounce">🛡️</div>
+                    <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto shadow-sm">
+                        <Shield className="w-8 h-8 animate-pulse" />
+                    </div>
                     <div className="font-semibold text-slate-500 dark:text-slate-400 animate-pulse">กำลังโหลดข้อมูลแอดมิน...</div>
                 </div>
             </div>
@@ -537,11 +587,14 @@ function AdminPageContent() {
                         {/* Inline error banner — stays scoped to the current tab so the sidebar/nav remain usable */}
                         {error && (
                             <div className="glass-panel max-w-2xl w-full p-6 rounded-3xl text-center space-y-3 border border-rose-200 dark:border-rose-900 shadow-sm bg-white/70 dark:bg-slate-800/70 mx-auto animate-slide-up">
-                                <div className="text-3xl">⚠️</div>
+                                <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-900/30 text-rose-500 flex items-center justify-center mx-auto">
+                                    <AlertTriangle className="w-6 h-6" />
+                                </div>
                                 <h2 className="text-lg font-bold text-slate-800 dark:text-white">เกิดข้อผิดพลาด</h2>
                                 <p className="text-rose-600 dark:text-rose-400 font-medium text-sm">{error}</p>
-                                <button onClick={retryCurrentTab} className="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-6 py-2.5 rounded-xl transition-all shadow-sm text-sm">
-                                    🔄 ลองใหม่อีกครั้ง
+                                <button onClick={retryCurrentTab} className="inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-6 py-2.5 rounded-xl transition-all shadow-sm text-sm">
+                                    <RefreshCw className="w-4 h-4" />
+                                    <span>ลองใหม่อีกครั้ง</span>
                                 </button>
                             </div>
                         )}
@@ -568,7 +621,12 @@ function AdminPageContent() {
                                                     <th className="pb-3 px-4">ชื่อผู้ใช้งาน</th>
                                                     <th className="pb-3 px-4">ชื่อ-สกุล</th>
                                                     <th className="pb-3 px-4">บทบาท</th>
-                                                    <th className="pb-3 px-4 text-center">เครดิต 💎</th>
+                                                    <th className="pb-3 px-4 text-center">
+                                                        <span className="inline-flex items-center justify-center gap-1">
+                                                            <span>เครดิต</span>
+                                                            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                                                        </span>
+                                                    </th>
                                                     <th className="pb-3 px-4 text-right">การจัดการ</th>
                                                 </tr>
                                             </thead>
@@ -673,7 +731,8 @@ function AdminPageContent() {
                                 {apiPoolStatus && (
                                     <div className="mt-8 p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200/50 dark:border-emerald-700/30">
                                         <h3 className="font-bold text-emerald-800 dark:text-emerald-300 mb-3 flex items-center gap-2">
-                                            <span className="text-lg">🔑</span> API Key Pool Status
+                                            <Key className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                            <span>API Key Pool Status</span>
                                         </h3>
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                             <div className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-3 text-center">
@@ -704,11 +763,15 @@ function AdminPageContent() {
                             <div className="space-y-6 animate-slide-up">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>📋 Audit Logs</h2>
+                                        <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'} flex items-center gap-2.5`}>
+                                            <ClipboardList className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                                            <span>Audit Logs</span>
+                                        </h2>
                                         <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">บันทึกกิจกรรมทั้งหมดในองค์กร <strong className="text-indigo-600 dark:text-indigo-400">{user?.organization}</strong></p>
                                     </div>
-                                    <button onClick={fetchAuditLogs} className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl font-bold text-sm text-slate-600 dark:text-slate-400 transition-colors">
-                                        🔄 Refresh
+                                    <button onClick={fetchAuditLogs} className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl font-bold text-sm text-slate-600 dark:text-slate-400 transition-colors">
+                                        <RefreshCw className="w-4 h-4" />
+                                        <span>Refresh</span>
                                     </button>
                                 </div>
                                 
@@ -742,7 +805,7 @@ function AdminPageContent() {
                                                                     {new Date(log.created_at).toLocaleDateString('th-TH', { month: 'short', day: 'numeric' })} {new Date(log.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
                                                                 </td>
                                                                 <td className="py-3 px-4 font-bold text-indigo-600 dark:text-indigo-400">{log.username || '-'}</td>
-                                                                <td className="py-3 px-4">{getAuditActionText(log.action)}</td>
+                                                                <td className="py-3 px-4">{getAuditActionBadge(log.action)}</td>
                                                                 <td className="py-3 px-4 text-slate-500 dark:text-slate-400">{log.target_username || '-'}</td>
                                                                 <td className="py-3 px-4 text-xs text-slate-400 max-w-[200px] truncate" title={detailStr}>{detailStr || '-'}</td>
                                                                 <td className="py-3 px-4 text-xs text-slate-400 font-mono">{log.ip_address || '-'}</td>
@@ -761,7 +824,10 @@ function AdminPageContent() {
                         {!error && activeTab === 'variables' && (
                             <div className="space-y-6 animate-slide-up">
                                 <div>
-                                    <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>🏷️ ตัวแปร Prompt ขององค์กร</h2>
+                                    <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'} flex items-center gap-2.5`}>
+                                        <Tag className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                                        <span>ตัวแปร Prompt ขององค์กร</span>
+                                    </h2>
                                     <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
                                         ตั้งค่าตัวแปรที่ระบบจะแทนที่อัตโนมัติเมื่อ AI สร้าง prompt — ใช้ <code className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-indigo-600 dark:text-indigo-400 text-xs font-mono">{`{{var_key}}`}</code> ใน prompt ของคุณ
                                     </p>
@@ -808,7 +874,9 @@ function AdminPageContent() {
                                         <div className="text-center py-10 text-slate-400 animate-pulse font-semibold">กำลังโหลดตัวแปร...</div>
                                     ) : promptVars.length === 0 ? (
                                         <div className="text-center py-10 text-slate-400 dark:text-slate-500">
-                                            <div className="text-3xl mb-2">🏷️</div>
+                                            <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 flex items-center justify-center mx-auto mb-3">
+                                                <Tag className="w-6 h-6" />
+                                            </div>
                                             <div className="font-semibold">ยังไม่มีตัวแปร — เริ่มเพิ่มได้เลย!</div>
                                         </div>
                                     ) : (
@@ -848,7 +916,9 @@ function AdminPageContent() {
                                     <div className="text-center py-10 text-slate-400 animate-pulse">กำลังโหลด...</div>
                                 ) : adminTemplates.length === 0 ? (
                                     <div className="text-center py-10 text-slate-400 dark:text-slate-500">
-                                        <div className="text-3xl mb-2">📄</div>
+                                        <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                                            <FileText className="w-6 h-6" />
+                                        </div>
                                         <div className="font-semibold">ยังไม่มี Template ในองค์กรนี้</div>
                                     </div>
                                 ) : (
@@ -857,7 +927,7 @@ function AdminPageContent() {
                                             <div key={tpl.id} className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${tpl.is_recommended ? 'bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/50' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
                                                 <div className="flex-1 min-w-0 pr-4">
                                                     <div className="flex items-center gap-2">
-                                                        {tpl.is_recommended && <span className="text-amber-500">⭐</span>}
+                                                        {tpl.is_recommended && <Star className="w-4 h-4 text-amber-500 fill-amber-400" />}
                                                         <span className="font-bold text-slate-800 dark:text-white truncate">{tpl.title}</span>
                                                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">{tpl.category}</span>
                                                         {tpl.is_public && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">Public</span>}
@@ -865,12 +935,22 @@ function AdminPageContent() {
                                                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">{tpl.prompt_text}</p>
                                                 </div>
                                                 <div className="flex items-center gap-3 shrink-0">
-                                                    <span className="text-xs text-slate-400">❤️ {tpl.likes_count}</span>
+                                                    <span className="text-xs text-slate-400 flex items-center gap-1">
+                                                        <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500/20" />
+                                                        <span>{tpl.likes_count}</span>
+                                                    </span>
                                                     <button
                                                         onClick={() => handleToggleRecommend(tpl.id)}
                                                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${tpl.is_recommended ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-300'}`}
                                                     >
-                                                        {tpl.is_recommended ? '⭐ แนะนำอยู่' : 'ตั้งเป็นแนะนำ'}
+                                                        {tpl.is_recommended ? (
+                                                            <span className="flex items-center gap-1">
+                                                                <Star className="w-3.5 h-3.5 fill-current" />
+                                                                <span>แนะนำอยู่</span>
+                                                            </span>
+                                                        ) : (
+                                                            <span>ตั้งเป็นแนะนำ</span>
+                                                        )}
                                                     </button>
                                                 </div>
                                             </div>
@@ -884,7 +964,10 @@ function AdminPageContent() {
                         {!error && activeTab === 'analytics' && (
                             <div className="space-y-6 animate-slide-up">
                                 <div>
-                                    <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>📊 Analytics Report</h2>
+                                    <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'} flex items-center gap-2.5`}>
+                                        <BarChart3 className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                                        <span>Analytics Report</span>
+                                    </h2>
                                     <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">สถิติการใช้งาน AI ในองค์กร <strong className="text-indigo-600 dark:text-indigo-400">{user?.organization}</strong> (7 วันล่าสุด)</p>
                                 </div>
                                 
@@ -927,7 +1010,10 @@ function AdminPageContent() {
 
                                         {/* Bar Chart */}
                                         <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-                                            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6">📈 การสร้าง Prompt รายวัน (7 วันล่าสุด)</h3>
+                                            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+                                                <TrendingUp className="w-5 h-5 text-indigo-500" />
+                                                <span>การสร้าง Prompt รายวัน (7 วันล่าสุด)</span>
+                                            </h3>
                                             <div className="h-72 w-full">
                                                 <ResponsiveContainer width="100%" height="100%">
                                                     <BarChart
@@ -956,7 +1042,10 @@ function AdminPageContent() {
                             <div className="space-y-6 animate-slide-up">
                                 <div className="flex items-start justify-between gap-4 flex-wrap">
                                     <div>
-                                        <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>🔍 Prompt Insights</h2>
+                                        <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'} flex items-center gap-2.5`}>
+                                            <Search className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                                            <span>Prompt Insights</span>
+                                        </h2>
                                         <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
                                             Prompt Doctor ที่ได้ Fit Score ต่ำสุดในองค์กร <strong className="text-indigo-600 dark:text-indigo-400">{user?.organization}</strong> รวมถึง Guest — ใช้ดู pattern เพื่อปรับปรุง prompt ของระบบ
                                         </p>
@@ -981,15 +1070,24 @@ function AdminPageContent() {
                                         {/* Feedback Summary */}
                                         {insightsData.feedback_summary && (
                                             <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-                                                <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Feedback จากผู้ใช้ (👍/👎)</h3>
+                                                <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                                                    <ThumbsUp className="w-5 h-5 text-indigo-500" />
+                                                    <span>Feedback จากผู้ใช้</span>
+                                                </h3>
                                                 <div className="grid grid-cols-3 gap-4">
                                                     <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl text-center">
                                                         <div className="text-2xl font-black text-emerald-600">{insightsData.feedback_summary.up}</div>
-                                                        <div className="text-xs text-slate-400 mt-1">👍 ช่วยได้</div>
+                                                        <div className="text-xs text-emerald-600 dark:text-emerald-400 font-bold mt-1 flex items-center justify-center gap-1">
+                                                            <ThumbsUp className="w-3.5 h-3.5" />
+                                                            <span>ช่วยได้</span>
+                                                        </div>
                                                     </div>
                                                     <div className="p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl text-center">
                                                         <div className="text-2xl font-black text-rose-600">{insightsData.feedback_summary.down}</div>
-                                                        <div className="text-xs text-slate-400 mt-1">👎 ไม่ช่วย</div>
+                                                        <div className="text-xs text-rose-600 dark:text-rose-400 font-bold mt-1 flex items-center justify-center gap-1">
+                                                            <ThumbsDown className="w-3.5 h-3.5" />
+                                                            <span>ไม่ช่วย</span>
+                                                        </div>
                                                     </div>
                                                     <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl text-center">
                                                         <div className="text-2xl font-black text-slate-400">{insightsData.feedback_summary.none}</div>
@@ -1036,8 +1134,8 @@ function AdminPageContent() {
                                                                             Guest
                                                                         </span>
                                                                     )}
-                                                                    {p.feedback === 'up' && <span className="text-sm">👍</span>}
-                                                                    {p.feedback === 'down' && <span className="text-sm">👎</span>}
+                                                                    {p.feedback === 'up' && <ThumbsUp className="w-3.5 h-3.5 text-emerald-500" />}
+                                                                    {p.feedback === 'down' && <ThumbsDown className="w-3.5 h-3.5 text-rose-500" />}
                                                                 </div>
                                                                 <span className="text-xs text-slate-400">{p.category}</span>
                                                             </div>
@@ -1056,7 +1154,10 @@ function AdminPageContent() {
                         {!error && activeTab === 'pending' && (
                             <div className="space-y-6 animate-slide-up">
                                 <div>
-                                    <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'}`}>📬 คิวรออนุมัติเทมเพลตสาธารณะ</h2>
+                                    <h2 className={`font-bold text-slate-800 dark:text-white ${isLarge ? 'text-3xl' : 'text-xl'} flex items-center gap-2.5`}>
+                                        <Inbox className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                                        <span>คิวรออนุมัติเทมเพลตสาธารณะ</span>
+                                    </h2>
                                     <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">รายการ Prompt ที่ผู้ใช้ส่งเข้ามาเพื่อขอเผยแพร่สู่คลังสาธารณะ</p>
                                 </div>
 
@@ -1064,7 +1165,9 @@ function AdminPageContent() {
                                     <div className="text-center py-12 text-slate-400">กำลังโหลดรายการรออนุมัติ...</div>
                                 ) : pendingTemplates.length === 0 ? (
                                     <div className="glass-panel text-center py-16 rounded-3xl bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-                                        <div className="text-4xl mb-2">🎉</div>
+                                        <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 flex items-center justify-center mx-auto mb-3">
+                                            <Sparkles className="w-7 h-7" />
+                                        </div>
                                         <h3 className="font-bold text-slate-700 dark:text-slate-200 text-lg">ไม่มีเทมเพลตที่รอการอนุมัติในขณะนี้</h3>
                                         <p className="text-slate-400 text-xs mt-1">รายการใหม่จะแสดงขึ้นมาเมื่อมีผู้ใช้กด &quot;ส่งคลังสาธารณะ&quot;</p>
                                     </div>
@@ -1112,7 +1215,10 @@ function AdminPageContent() {
                     {creditModal && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setCreditModal(null)}>
                             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 space-y-4 border border-slate-200 dark:border-slate-700" onClick={e => e.stopPropagation()}>
-                                <h3 className="text-xl font-bold text-slate-800 dark:text-white">💎 ปรับเครดิต: {creditModal.username}</h3>
+                                <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                    <Sparkles className="w-5 h-5 text-amber-500" />
+                                    <span>ปรับเครดิต: {creditModal.username}</span>
+                                </h3>
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">จำนวน (+ เพิ่ม / - ลด)</label>
                                     <input type="number" value={creditAmount} onChange={e => setCreditAmount(Number(e.target.value))} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white font-bold text-lg outline-none focus:border-indigo-500" />

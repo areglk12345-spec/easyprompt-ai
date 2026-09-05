@@ -228,7 +228,7 @@ export default function DoctorPage() {
                                             }`}
                                         >
                                             <span className="material-symbols-outlined text-base">description</span>
-                                            <span>📝 Text Prompt (ข้อความ)</span>
+                                            <span>Text Prompt (ข้อความ)</span>
                                         </button>
                                         <button
                                             type="button"
@@ -240,7 +240,7 @@ export default function DoctorPage() {
                                             }`}
                                         >
                                             <span className="material-symbols-outlined text-base">palette</span>
-                                            <span>🎨 Image Prompt (AI วาดภาพ)</span>
+                                            <span>Image Prompt (AI วาดภาพ)</span>
                                         </button>
                                     </div>
 
@@ -248,7 +248,10 @@ export default function DoctorPage() {
                                     {doctorMode === 'image' && (
                                         <div className="p-4 rounded-2xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/30 space-y-3 text-xs">
                                             <div>
-                                                <label className="font-bold text-purple-900 dark:text-purple-300 block mb-1.5">🎯 เลือก AI Target</label>
+                                                <label className="font-bold text-purple-900 dark:text-purple-300 flex items-center gap-1 mb-1.5">
+                                                    <span className="material-symbols-outlined text-sm">track_changes</span>
+                                                    เลือก AI Target
+                                                </label>
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {['Midjourney v6', 'DALL-E 3', 'Stable Diffusion XL'].map(ai => (
                                                         <button
@@ -268,7 +271,10 @@ export default function DoctorPage() {
                                             </div>
 
                                             <div>
-                                                <label className="font-bold text-purple-900 dark:text-purple-300 block mb-1.5">🎨 เลือกสไตล์ภาพ (Art Style)</label>
+                                                <label className="font-bold text-purple-900 dark:text-purple-300 flex items-center gap-1.5 mb-1.5">
+                                                    <span className="material-symbols-outlined text-sm">palette</span>
+                                                    <span>เลือกสไตล์ภาพ (Art Style)</span>
+                                                </label>
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {['Realistic Photo', 'Anime/Manga', 'Cinematic', '3D Pixar', 'Oil Painting', 'Cyberpunk'].map(st => (
                                                         <button
@@ -288,7 +294,10 @@ export default function DoctorPage() {
                                             </div>
 
                                             <div>
-                                                <label className="font-bold text-purple-900 dark:text-purple-300 block mb-1.5">📐 อัตราส่วนภาพ (Aspect Ratio)</label>
+                                                <label className="font-bold text-purple-900 dark:text-purple-300 flex items-center gap-1.5 mb-1.5">
+                                                    <span className="material-symbols-outlined text-sm">aspect_ratio</span>
+                                                    <span>อัตราส่วนภาพ (Aspect Ratio)</span>
+                                                </label>
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {['16:9', '1:1', '9:16', '4:3'].map(ar => (
                                                         <button
@@ -538,7 +547,10 @@ export default function DoctorPage() {
                         </div>
                         
                         <div className="space-y-2">
-                            <h3 className="text-2xl font-black text-slate-800 dark:text-white">ทดลองสร้าง Prompt ฟรีครบ 3 ครั้งแล้ว 🎉</h3>
+                            <h3 className="text-2xl font-black text-slate-800 dark:text-white flex items-center justify-center gap-2">
+                                <span>ทดลองสร้าง Prompt ฟรีครบ 3 ครั้งแล้ว</span>
+                                <Sparkles className="w-6 h-6 text-amber-500 shrink-0" />
+                            </h3>
                             <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
                                 สมัครสมาชิกหรือเข้าสู่ระบบฟรี เพื่อรับเพิ่มอีก 100 เครดิต ใช้งานวิเคราะห์และเกลา Prompt ใน Prompt Doctor ได้แบบไม่จำกัด!
                             </p>
